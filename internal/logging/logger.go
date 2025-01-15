@@ -2,11 +2,12 @@ package logging
 
 import (
 	"context"
+	"github.com/mcoot/crosswordgame-go/internal/utils"
 	"go.uber.org/zap"
 )
 
 const (
-	loggerKey = "logger"
+	loggerKey = utils.ContextKey("logger")
 )
 
 func NewLogger(debug bool) (*zap.SugaredLogger, error) {

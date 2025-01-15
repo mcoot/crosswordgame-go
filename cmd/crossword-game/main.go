@@ -5,6 +5,7 @@ import (
 	"github.com/getkin/kin-openapi/openapi3"
 	internalapi "github.com/mcoot/crosswordgame-go/internal/api"
 	"github.com/mcoot/crosswordgame-go/internal/logging"
+	"github.com/mcoot/crosswordgame-go/internal/utils"
 	"log"
 	"net/http"
 	"slices"
@@ -13,10 +14,10 @@ import (
 )
 
 func main() {
-	ctx := context.Background()
+	ctx := utils.RootContext()
 	ctx, err := logging.AddLoggerToContext(ctx, true)
 	if err != nil {
-		log.Fatalf("error adding logger to context: %v", err)
+		log.Fatalf("error adding logger to utils: %v", err)
 	}
 	logger := logging.GetLogger(ctx, "main")
 
