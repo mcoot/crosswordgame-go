@@ -3,10 +3,15 @@ info:
   title: Crossword Game
   description: Crossword Game
   version: 1.0.0
-servers:
-  - url: '/api/v1'
 paths:
-  /game:
+  /health:
+    get:
+      summary: Health check
+      operationId: healthCheck
+      responses:
+        '200':
+          description: OK
+  /api/v1/game:
     post:
       summary: Create a new game
       operationId: createGame
@@ -19,7 +24,7 @@ paths:
               schema:
                 type: string
                 format: uri
-  /game/{game_id}:
+  /api/v1/game/{game_id}:
     get:
       summary: Get game state
       operationId: getGameState
@@ -39,7 +44,7 @@ paths:
                 $ref: '#/components/schemas/GameState'
         '404':
           description: Not Found
-  /game/{game_id}/players/{player_id}:
+  /api/v1/game/{game_id}/players/{player_id}:
     get:
       summary: Get player state
       operationId: getPlayerState
@@ -65,10 +70,10 @@ paths:
                 $ref: '#/components/schemas/PlayerState'
         '404':
           description: Not Found
-  /game/{game_id}/players/{player_id}/announce:
+  /api/v1/game/{game_id}/players/{player_id}/announce:
     post:
       summary: Announce a letter
-      operationId: announceLetter
+      operationId: submitAnnouncement
       parameters:
         - name: game_id
           in: path
@@ -93,10 +98,10 @@ paths:
           description: Announced
         '400':
           description: Bad Request
-  /game/{game_id}/players/{player_id}/place:
+  /api/v1/game/{game_id}/players/{player_id}/place:
     post:
       summary: Place a letter
-      operationId: placeLetter
+      operationId: submitPlacement
       parameters:
         - name: game_id
           in: path
@@ -121,7 +126,7 @@ paths:
           description: Placed
         '400':
           description: Bad Request
-  /game/{game_id}/players/{player_id}/score:
+  /api/v1/game/{game_id}/players/{player_id}/score:
     get:
       summary: Get player score
       operationId: getPlayerScore
