@@ -5,6 +5,7 @@ go 1.23.4
 require (
 	github.com/getkin/kin-openapi v0.128.0
 	github.com/golangci/golangci-lint v1.63.4
+	github.com/hashicorp/go-uuid v1.0.3
 	github.com/oapi-codegen/nethttp-middleware v1.0.2
 	go.uber.org/zap v1.27.0
 )

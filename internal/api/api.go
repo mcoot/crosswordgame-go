@@ -1,8 +1,22 @@
 package api
 
-import "net/http"
+import (
+	"encoding/json"
+	"github.com/mcoot/crosswordgame-go/internal/game"
+	"github.com/mcoot/crosswordgame-go/internal/game/types"
+	"github.com/mcoot/crosswordgame-go/internal/logging"
+	"go.uber.org/zap"
+	"net/http"
+	"strconv"
+)
 
-type CrosswordGameAPI struct{}
+type CrosswordGameAPI struct {
+	gameManager *game.Manager
+}
+
+func NewCrosswordGameAPI(gameManager *game.Manager) *CrosswordGameAPI {
+	return &CrosswordGameAPI{gameManager: gameManager}
+}
 
 func (c *CrosswordGameAPI) AttachToMux(h *http.ServeMux) {
 	h.Handle("GET /health", http.HandlerFunc(c.Healthcheck))
@@ -19,15 +33,77 @@ func (c *CrosswordGameAPI) Healthcheck(w http.ResponseWriter, r *http.Request) {
 }
 
 func (c *CrosswordGameAPI) CreateGame(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(500)
+	logger := c.getLogger(r)
+
+	var req CreateGameRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		c.sendError(logger, w, 400, err)
+		return
+	}
+
+	gameId, err := c.gameManager.NewGame(req.PlayerCount)
+	if err != nil {
+		c.sendError(logger, w, 500, err)
+		return
+	}
+
+	w.WriteHeader(201)
+	if err := json.NewEncoder(w).Encode(CreateGameResponse{GameId: gameId}); err != nil {
+		logger.Errorw("error encoding response", "error", err)
+		return
+	}
 }
 
 func (c *CrosswordGameAPI) GetGameState(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(500)
+	logger := c.getLogger(r)
+	gameId := getGameId(r)
+
+	gameState, err := c.gameManager.GetGameState(gameId)
+	if err != nil {
+		// TODO: Appropriate error codes
+		c.sendError(logger, w, 400, err)
+		return
+	}
+
+	resp := GetGameStateResponse{
+		Status:                  gameState.Status,
+		SquaresFilled:           gameState.SquaresFilled,
+		CurrentAnnouncingPlayer: gameState.CurrentAnnouncingPlayer,
+		PlayerCount:             gameState.PlayerCount,
+	}
+
+	w.WriteHeader(200)
+	if err := json.NewEncoder(w).Encode(resp); err != nil {
+		logger.Errorw("error encoding response", "error", err)
+		return
+	}
 }
 
 func (c *CrosswordGameAPI) GetPlayerState(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(500)
+	logger := c.getLogger(r)
+	gameId := getGameId(r)
+	playerId, err := getPlayerId(r)
+	if err != nil {
+		c.sendError(logger, w, 400, err)
+		return
+	}
+
+	playerState, err := c.gameManager.GetPlayerState(gameId, playerId)
+	if err != nil {
+		// TODO: Appropriate error codes
+		c.sendError(logger, w, 400, err)
+		return
+	}
+
+	resp := GetPlayerStateResponse{
+		Board: playerState.Board.Data,
+	}
+
+	w.WriteHeader(200)
+	if err := json.NewEncoder(w).Encode(resp); err != nil {
+		logger.Errorw("error encoding response", "error", err)
+		return
+	}
 }
 
 func (c *CrosswordGameAPI) SubmitAnnouncement(w http.ResponseWriter, r *http.Request) {
@@ -39,5 +115,52 @@ func (c *CrosswordGameAPI) SubmitPlacement(w http.ResponseWriter, r *http.Reques
 }
 
 func (c *CrosswordGameAPI) GetPlayerScore(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(500)
+	logger := c.getLogger(r)
+	gameId := getGameId(r)
+	playerId, err := getPlayerId(r)
+	if err != nil {
+		c.sendError(logger, w, 400, err)
+		return
+	}
+
+	playerScore, err := c.gameManager.GetPlayerScore(gameId, playerId)
+	if err != nil {
+		// TODO: Appropriate error codes
+		c.sendError(logger, w, 400, err)
+		return
+	}
+
+	resp := GetPlayerScoreResponse{
+		Score: playerScore,
+	}
+
+	w.WriteHeader(200)
+	if err := json.NewEncoder(w).Encode(resp); err != nil {
+		logger.Errorw("error encoding response", "error", err)
+		return
+	}
+}
+
+func (c *CrosswordGameAPI) sendError(logger *zap.SugaredLogger, w http.ResponseWriter, code int, err error) {
+	logger.Warnw(
+		"error handling request",
+		"error", err,
+		"code", code,
+	)
+
+	http.Error(w, err.Error(), code)
+}
+
+func (c *CrosswordGameAPI) getLogger(r *http.Request) *zap.SugaredLogger {
+	return logging.GetLogger(r.Context(), "api").
+		With("path", r.URL.Path)
+}
+
+func getGameId(r *http.Request) types.GameId {
+	return types.GameId(r.PathValue("gameId"))
+}
+
+func getPlayerId(r *http.Request) (int, error) {
+	playerIdStr := r.PathValue("playerId")
+	return strconv.Atoi(playerIdStr)
 }

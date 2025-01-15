@@ -4,6 +4,8 @@ import (
 	"context"
 	"github.com/getkin/kin-openapi/openapi3"
 	internalapi "github.com/mcoot/crosswordgame-go/internal/api"
+	"github.com/mcoot/crosswordgame-go/internal/game"
+	"github.com/mcoot/crosswordgame-go/internal/game/store"
 	"github.com/mcoot/crosswordgame-go/internal/logging"
 	"github.com/mcoot/crosswordgame-go/internal/utils"
 	"log"
@@ -22,7 +24,10 @@ func main() {
 	logger := logging.GetLogger(ctx, "main")
 
 	mux := http.NewServeMux()
-	api := &internalapi.CrosswordGameAPI{}
+
+	gameStore := store.NewInMemoryStore()
+	gameManager := game.NewGameManager(gameStore)
+	api := internalapi.NewCrosswordGameAPI(gameManager)
 	api.AttachToMux(mux)
 
 	h, err := setupMiddleware(ctx, mux)

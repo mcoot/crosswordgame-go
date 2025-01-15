@@ -15,6 +15,12 @@ paths:
     post:
       summary: Create a new game
       operationId: createGame
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateGameRequest'
       responses:
         '201':
           description: Created
@@ -24,6 +30,10 @@ paths:
               schema:
                 type: string
                 format: uri
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateGameResponse'
   /api/v1/game/{game_id}:
     get:
       summary: Get game state
@@ -44,7 +54,7 @@ paths:
                 $ref: '#/components/schemas/GameState'
         '404':
           description: Not Found
-  /api/v1/game/{game_id}/players/{player_id}:
+  /api/v1/game/{game_id}/player/{player_id}:
     get:
       summary: Get player state
       operationId: getPlayerState
@@ -70,7 +80,7 @@ paths:
                 $ref: '#/components/schemas/PlayerState'
         '404':
           description: Not Found
-  /api/v1/game/{game_id}/players/{player_id}/announce:
+  /api/v1/game/{game_id}/player/{player_id}/announce:
     post:
       summary: Announce a letter
       operationId: submitAnnouncement
@@ -98,7 +108,7 @@ paths:
           description: Announced
         '400':
           description: Bad Request
-  /api/v1/game/{game_id}/players/{player_id}/place:
+  /api/v1/game/{game_id}/player/{player_id}/place:
     post:
       summary: Place a letter
       operationId: submitPlacement
@@ -126,7 +136,7 @@ paths:
           description: Placed
         '400':
           description: Bad Request
-  /api/v1/game/{game_id}/players/{player_id}/score:
+  /api/v1/game/{game_id}/player/{player_id}/score:
     get:
       summary: Get player score
       operationId: getPlayerScore
@@ -155,17 +165,33 @@ paths:
 
 components:
   schemas:
+    CreateGameRequest:
+      type: object
+      properties:
+        player_count:
+          type: integer
+          minimum: 1
+          maximum: 4
+      required:
+        - player_count
+    CreateGameResponse:
+      type: object
+      properties:
+        game_id:
+          $ref: '#/components/schemas/GameId'
+      required:
+        - game_id
     GameState:
       type: object
       properties:
         game_id:
           $ref: '#/components/schemas/GameId'
-        state:
+        status:
           type: string
           enum:
             - awaiting_announcement
             - awaiting_placement
-            - game_over
+            - finished
         player_count:
           type: integer
           minimum: 1
@@ -174,31 +200,38 @@ components:
           minimum: 0
         current_announcing_player_id:
           $ref: '#/components/schemas/PlayerId'
+      required:
+        - game_id
+        - status
+        - player_count
+        - squares_filled
+        - current_announcing_player_id
     PlayerState:
       type: object
       properties:
-        player_id:
-          type: integer
-          minimum: 0
-        grid:
+        board:
           type: array
           items:
             type: array
             items:
               $ref: '#/components/schemas/Letter'
+      required:
+        - board
     PlayerScore:
       type: object
       properties:
-        player_id:
-          $ref: '#/components/schemas/PlayerId'
         score:
           type: integer
           minimum: 0
+      required:
+        - score
     AnnounceRequest:
       type: object
       properties:
         letter:
           $ref: '#/components/schemas/Letter'
+      required:
+        - letter
     PlaceRequest:
       type: object
       properties:
@@ -210,6 +243,10 @@ components:
           minimum: 0
         letter:
           $ref: '#/components/schemas/Letter'
+      required:
+        - row
+        - column
+        - letter
     GameId:
       description: ID of a game
       type: string
