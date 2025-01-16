@@ -51,13 +51,13 @@ func (c *CrosswordGameAPI) CreateGame(w http.ResponseWriter, r *http.Request) {
 
 	var req apitypes.CreateGameRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		c.sendError(logger, w, 400, err)
+		c.sendError(logger, w, err)
 		return
 	}
 
 	gameId, err := c.gameManager.NewGame(req.PlayerCount)
 	if err != nil {
-		c.sendError(logger, w, 500, err)
+		c.sendError(logger, w, err)
 		return
 	}
 
@@ -74,8 +74,7 @@ func (c *CrosswordGameAPI) GetGameState(w http.ResponseWriter, r *http.Request) 
 
 	gameState, err := c.gameManager.GetGameState(gameId)
 	if err != nil {
-		// TODO: Appropriate error codes
-		c.sendError(logger, w, 400, err)
+		c.sendError(logger, w, err)
 		return
 	}
 
@@ -98,14 +97,13 @@ func (c *CrosswordGameAPI) GetPlayerState(w http.ResponseWriter, r *http.Request
 	gameId := getGameId(r)
 	playerId, err := getPlayerId(r)
 	if err != nil {
-		c.sendError(logger, w, 400, err)
+		c.sendError(logger, w, err)
 		return
 	}
 
 	playerState, err := c.gameManager.GetPlayerState(gameId, playerId)
 	if err != nil {
-		// TODO: Appropriate error codes
-		c.sendError(logger, w, 400, err)
+		c.sendError(logger, w, err)
 		return
 	}
 
@@ -125,20 +123,20 @@ func (c *CrosswordGameAPI) SubmitAnnouncement(w http.ResponseWriter, r *http.Req
 	gameId := getGameId(r)
 	playerId, err := getPlayerId(r)
 	if err != nil {
-		c.sendError(logger, w, 400, err)
+		c.sendError(logger, w, err)
 		return
 	}
 
 	var req apitypes.SubmitAnnouncementRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		c.sendError(logger, w, 400, err)
+		c.sendError(logger, w, err)
 		return
 	}
 
 	err = c.gameManager.SubmitAnnouncement(gameId, playerId, req.Letter)
 	if err != nil {
 		// TODO: Appropriate error codes
-		c.sendError(logger, w, 400, err)
+		c.sendError(logger, w, err)
 		return
 	}
 
@@ -154,20 +152,19 @@ func (c *CrosswordGameAPI) SubmitPlacement(w http.ResponseWriter, r *http.Reques
 	gameId := getGameId(r)
 	playerId, err := getPlayerId(r)
 	if err != nil {
-		c.sendError(logger, w, 400, err)
+		c.sendError(logger, w, err)
 		return
 	}
 
 	var req apitypes.SubmitPlacementRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		c.sendError(logger, w, 400, err)
+		c.sendError(logger, w, err)
 		return
 	}
 
 	err = c.gameManager.SubmitPlacement(gameId, playerId, req.Row, req.Column)
 	if err != nil {
-		// TODO: Appropriate error codes
-		c.sendError(logger, w, 400, err)
+		c.sendError(logger, w, err)
 		return
 	}
 
@@ -183,14 +180,13 @@ func (c *CrosswordGameAPI) GetPlayerScore(w http.ResponseWriter, r *http.Request
 	gameId := getGameId(r)
 	playerId, err := getPlayerId(r)
 	if err != nil {
-		c.sendError(logger, w, 400, err)
+		c.sendError(logger, w, err)
 		return
 	}
 
 	playerScore, err := c.gameManager.GetPlayerScore(gameId, playerId)
 	if err != nil {
-		// TODO: Appropriate error codes
-		c.sendError(logger, w, 400, err)
+		c.sendError(logger, w, err)
 		return
 	}
 
@@ -205,14 +201,45 @@ func (c *CrosswordGameAPI) GetPlayerScore(w http.ResponseWriter, r *http.Request
 	}
 }
 
-func (c *CrosswordGameAPI) sendError(logger *zap.SugaredLogger, w http.ResponseWriter, code int, err error) {
+func (c *CrosswordGameAPI) sendError(logger *zap.SugaredLogger, w http.ResponseWriter, err error) {
+	var resp apitypes.ErrorResponse
+	gameErr, ok := types.AsGameError(err)
+	if ok {
+		resp = apitypes.ErrorResponse{
+			Kind:     string(gameErr.Kind()),
+			Message:  gameErr.Message(),
+			HTTPCode: c.determineHttpErrorCode(gameErr),
+		}
+	} else {
+		resp = apitypes.ErrorResponse{
+			Kind:     "internal_error",
+			Message:  err.Error(),
+			HTTPCode: 500,
+		}
+	}
+
 	logger.Warnw(
 		"error handling request",
-		"error", err,
-		"code", code,
+		"message", resp.Message,
+		"http_code", resp.HTTPCode,
+		"kind", resp.Kind,
 	)
+	w.WriteHeader(resp.HTTPCode)
+	if err := json.NewEncoder(w).Encode(resp); err != nil {
+		logger.Errorw("error encoding response", "error", err)
+		return
+	}
+}
 
-	http.Error(w, err.Error(), code)
+func (c *CrosswordGameAPI) determineHttpErrorCode(gameErr types.GameError) int {
+	switch gameErr.Kind() {
+	case types.GameErrorInvalidInput:
+		return 400
+	case types.GameErrorNotFound:
+		return 404
+	default:
+		return 500
+	}
 }
 
 func (c *CrosswordGameAPI) getLogger(r *http.Request) *zap.SugaredLogger {

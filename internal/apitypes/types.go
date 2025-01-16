@@ -1,6 +1,19 @@
 package apitypes
 
-import "github.com/mcoot/crosswordgame-go/internal/game/types"
+import (
+	"fmt"
+	"github.com/mcoot/crosswordgame-go/internal/game/types"
+)
+
+type ErrorResponse struct {
+	HTTPCode int    `json:"http_code"`
+	Kind     string `json:"kind"`
+	Message  string `json:"message"`
+}
+
+func (e ErrorResponse) Error() string {
+	return fmt.Errorf("%d (%s): %s", e.HTTPCode, e.Kind, e.Message).Error()
+}
 
 type HealthcheckResponse struct {
 	StartTime string `json:"start_time"`

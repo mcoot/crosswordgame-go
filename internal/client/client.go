@@ -37,6 +37,10 @@ func (c *Client) Health() (*apitypes.HealthcheckResponse, error) {
 	}
 	defer resp.Body.Close()
 
+	if resp.StatusCode != 200 {
+		return nil, c.parseError(resp)
+	}
+
 	var health apitypes.HealthcheckResponse
 	if err := json.NewDecoder(resp.Body).Decode(&health); err != nil {
 		return nil, err
@@ -60,6 +64,10 @@ func (c *Client) CreateGame(playerCount int) (*apitypes.CreateGameResponse, erro
 	}
 	defer resp.Body.Close()
 
+	if resp.StatusCode != 201 {
+		return nil, c.parseError(resp)
+	}
+
 	var createGameResponse apitypes.CreateGameResponse
 	if err := json.NewDecoder(resp.Body).Decode(&createGameResponse); err != nil {
 		return nil, err
@@ -73,6 +81,10 @@ func (c *Client) GetGameState(gameId types.GameId) (*apitypes.GetGameStateRespon
 		return nil, err
 	}
 	defer resp.Body.Close()
+
+	if resp.StatusCode != 200 {
+		return nil, c.parseError(resp)
+	}
 
 	var gameState apitypes.GetGameStateResponse
 	if err := json.NewDecoder(resp.Body).Decode(&gameState); err != nil {
@@ -88,6 +100,10 @@ func (c *Client) GetPlayerState(gameId types.GameId, playerId int) (*apitypes.Ge
 	}
 	defer resp.Body.Close()
 
+	if resp.StatusCode != 200 {
+		return nil, c.parseError(resp)
+	}
+
 	var playerState apitypes.GetPlayerStateResponse
 	if err := json.NewDecoder(resp.Body).Decode(&playerState); err != nil {
 		return nil, err
@@ -101,6 +117,10 @@ func (c *Client) GetPlayerScore(gameId types.GameId, playerId int) (*apitypes.Ge
 		return nil, err
 	}
 	defer resp.Body.Close()
+
+	if resp.StatusCode != 200 {
+		return nil, c.parseError(resp)
+	}
 
 	var playerScore apitypes.GetPlayerScoreResponse
 	if err := json.NewDecoder(resp.Body).Decode(&playerScore); err != nil {
@@ -128,6 +148,10 @@ func (c *Client) SubmitAnnouncement(
 		return nil, err
 	}
 	defer resp.Body.Close()
+
+	if resp.StatusCode != 200 {
+		return nil, c.parseError(resp)
+	}
 
 	var ret apitypes.SubmitAnnouncementResponse
 	if err := json.NewDecoder(resp.Body).Decode(&ret); err != nil {
@@ -159,12 +183,24 @@ func (c *Client) SubmitPlacement(
 	}
 	defer resp.Body.Close()
 
+	if resp.StatusCode != 200 {
+		return nil, c.parseError(resp)
+	}
+
 	var ret apitypes.SubmitPlacementResponse
 	if err := json.NewDecoder(resp.Body).Decode(&ret); err != nil {
 		return nil, err
 	}
 
 	return &ret, nil
+}
+
+func (c *Client) parseError(resp *http.Response) error {
+	var apiErr apitypes.ErrorResponse
+	if err := json.NewDecoder(resp.Body).Decode(&apiErr); err != nil {
+		return fmt.Errorf("unexpected status code %d", resp.StatusCode)
+	}
+	return &apiErr
 }
 
 func (c *Client) url(path string) string {

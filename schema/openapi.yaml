@@ -15,6 +15,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/HealthcheckResponse'
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
   /api/v1/game:
     post:
       summary: Create a new game
@@ -38,6 +44,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CreateGameResponse'
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                  $ref: '#/components/schemas/ErrorResponse'
   /api/v1/game/{game_id}:
     get:
       summary: Get game state
@@ -56,8 +68,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/GameState'
-        '404':
-          description: Not Found
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
   /api/v1/game/{game_id}/player/{player_id}:
     get:
       summary: Get player state
@@ -82,8 +98,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/PlayerState'
-        '404':
-          description: Not Found
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
   /api/v1/game/{game_id}/player/{player_id}/announce:
     post:
       summary: Announce a letter
@@ -114,8 +134,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/AnnounceResponse'
-        '400':
-          description: Bad Request
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
   /api/v1/game/{game_id}/player/{player_id}/place:
     post:
       summary: Place a letter
@@ -146,8 +170,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/PlaceResponse'
-        '400':
-          description: Bad Request
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
   /api/v1/game/{game_id}/player/{player_id}/score:
     get:
       summary: Get player score
@@ -172,11 +200,24 @@ paths:
               application/json:
                 schema:
                   $ref: '#/components/schemas/PlayerScore'
-          '404':
-            description: Not Found
+          default:
+            description: Error
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/ErrorResponse'
 
 components:
   schemas:
+    ErrorResponse:
+      type: object
+      properties:
+        http_code:
+          type: integer
+        kind:
+          type: string
+        message:
+          type: string
     HealthcheckResponse:
       type: object
       properties:
