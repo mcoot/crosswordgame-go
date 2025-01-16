@@ -121,11 +121,61 @@ func (c *CrosswordGameAPI) GetPlayerState(w http.ResponseWriter, r *http.Request
 }
 
 func (c *CrosswordGameAPI) SubmitAnnouncement(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(500)
+	logger := c.getLogger(r)
+	gameId := getGameId(r)
+	playerId, err := getPlayerId(r)
+	if err != nil {
+		c.sendError(logger, w, 400, err)
+		return
+	}
+
+	var req apitypes.SubmitAnnouncementRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		c.sendError(logger, w, 400, err)
+		return
+	}
+
+	err = c.gameManager.SubmitAnnouncement(gameId, playerId, req.Letter)
+	if err != nil {
+		// TODO: Appropriate error codes
+		c.sendError(logger, w, 400, err)
+		return
+	}
+
+	w.WriteHeader(200)
+	if err := json.NewEncoder(w).Encode(&apitypes.SubmitAnnouncementResponse{}); err != nil {
+		logger.Errorw("error encoding response", "error", err)
+		return
+	}
 }
 
 func (c *CrosswordGameAPI) SubmitPlacement(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(500)
+	logger := c.getLogger(r)
+	gameId := getGameId(r)
+	playerId, err := getPlayerId(r)
+	if err != nil {
+		c.sendError(logger, w, 400, err)
+		return
+	}
+
+	var req apitypes.SubmitPlacementRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		c.sendError(logger, w, 400, err)
+		return
+	}
+
+	err = c.gameManager.SubmitPlacement(gameId, playerId, req.Row, req.Column, req.Letter)
+	if err != nil {
+		// TODO: Appropriate error codes
+		c.sendError(logger, w, 400, err)
+		return
+	}
+
+	w.WriteHeader(200)
+	if err := json.NewEncoder(w).Encode(&apitypes.SubmitPlacementResponse{}); err != nil {
+		logger.Errorw("error encoding response", "error", err)
+		return
+	}
 }
 
 func (c *CrosswordGameAPI) GetPlayerScore(w http.ResponseWriter, r *http.Request) {

@@ -28,3 +28,17 @@ type GetPlayerStateResponse struct {
 type GetPlayerScoreResponse struct {
 	Score int `json:"score"`
 }
+
+type SubmitAnnouncementRequest struct {
+	Letter string `json:"letter"`
+}
+
+type SubmitAnnouncementResponse struct{}
+
+type SubmitPlacementRequest struct {
+	Row    int    `json:"row"`
+	Column int    `json:"column"`
+	Letter string `json:"letter"`
+}
+
+type SubmitPlacementResponse struct{}

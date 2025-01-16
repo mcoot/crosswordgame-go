@@ -1,6 +1,7 @@
 package game
 
 import (
+	"errors"
 	"fmt"
 	"github.com/hashicorp/go-uuid"
 	"github.com/mcoot/crosswordgame-go/internal/game/store"
@@ -60,6 +61,14 @@ func (m *Manager) GetPlayerScore(gameId types.GameId, playerId int) (int, error)
 	}
 
 	return determineScore(player), nil
+}
+
+func (m *Manager) SubmitAnnouncement(gameId types.GameId, playerId int, announcedLetter string) error {
+	return errors.New("not implemented")
+}
+
+func (m *Manager) SubmitPlacement(gameId types.GameId, playerId int, row, column int, placedLetter string) error {
+	return errors.New("not implemented")
 }
 
 func getPlayer(game *types.Game, playerId int) (*types.Player, error) {

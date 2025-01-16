@@ -110,6 +110,10 @@ paths:
       responses:
         '200':
           description: Announced
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AnnounceResponse'
         '400':
           description: Bad Request
   /api/v1/game/{game_id}/player/{player_id}/place:
@@ -138,6 +142,10 @@ paths:
       responses:
         '200':
           description: Placed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlaceResponse'
         '400':
           description: Bad Request
   /api/v1/game/{game_id}/player/{player_id}/score:
@@ -244,6 +252,8 @@ components:
           $ref: '#/components/schemas/Letter'
       required:
         - letter
+    AnnounceResponse:
+      type: object
     PlaceRequest:
       type: object
       properties:
@@ -259,6 +269,8 @@ components:
         - row
         - column
         - letter
+    PlaceResponse:
+      type: object
     GameId:
       description: ID of a game
       type: string
