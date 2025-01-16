@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"context"
+	"github.com/mcoot/crosswordgame-go/cmd/cli/cmd/game"
 	"github.com/mcoot/crosswordgame-go/internal/cli"
 	"github.com/mcoot/crosswordgame-go/internal/client"
 	"github.com/mcoot/crosswordgame-go/internal/logging"
@@ -10,9 +11,6 @@ import (
 )
 
 var (
-	BaseUrl    string
-	OutputMode cli.OutputMode
-
 	rootCmd = &cobra.Command{
 		Use:   "crosswordgame",
 		Short: "Crossword Game CLI",
@@ -25,7 +23,7 @@ var (
 				return err
 			}
 
-			cwgClient := initClient(BaseUrl)
+			cwgClient := initClient(cli.FlagServer)
 			ctx = client.AddClientToContext(ctx, cwgClient)
 			cmd.SetContext(ctx)
 
@@ -35,12 +33,11 @@ var (
 )
 
 func init() {
-	rootCmd.PersistentFlags().
-		StringVarP(&BaseUrl, "server", "s", "http://localhost:8080", "Server URL")
-	rootCmd.PersistentFlags().
-		VarP(&OutputMode, "output", "o", "Output mode (default: text, allowed: text, json, yaml)")
+	cli.GlobalFlagServer(rootCmd.PersistentFlags())
+	cli.GlobalFlagOutputMode(rootCmd.PersistentFlags())
 
-	rootCmd.AddCommand(healthCmd)
+	(&HealthCommand{}).Mount(rootCmd)
+	(&game.GameCommand{}).Mount(rootCmd)
 }
 
 func initClient(baseUrl string) *client.Client {

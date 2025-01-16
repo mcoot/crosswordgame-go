@@ -32,9 +32,8 @@ func (o *OutputMode) Type() string {
 	return "outputMode"
 }
 
-func (o *OutputMode) WriteOutput(v interface{}) error {
-	switch *o {
-
+func WriteOutput(v interface{}) error {
+	switch FlagOutputMode {
 	case OutputModeJson:
 		return writeJsonOutput(v)
 	case OutputModeYaml:
