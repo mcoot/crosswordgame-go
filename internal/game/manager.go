@@ -67,7 +67,7 @@ func (m *Manager) SubmitAnnouncement(gameId types.GameId, playerId int, announce
 	return errors.New("not implemented")
 }
 
-func (m *Manager) SubmitPlacement(gameId types.GameId, playerId int, row, column int, placedLetter string) error {
+func (m *Manager) SubmitPlacement(gameId types.GameId, playerId int, row, column int) error {
 	return errors.New("not implemented")
 }
 

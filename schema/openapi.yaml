@@ -263,12 +263,9 @@ components:
         column:
           type: integer
           minimum: 0
-        letter:
-          $ref: '#/components/schemas/Letter'
       required:
         - row
         - column
-        - letter
     PlaceResponse:
       type: object
     GameId:

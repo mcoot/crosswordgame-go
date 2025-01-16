@@ -30,6 +30,12 @@ func apiPrettyPrint(v interface{}) bool {
 	case *apitypes.GetPlayerScoreResponse:
 		printGetPlayerScoreResponse(v)
 		return true
+	case *apitypes.SubmitAnnouncementResponse:
+		printSubmitAnnouncementResponse(v)
+		return true
+	case *apitypes.SubmitPlacementResponse:
+		printSubmitPlacementResponse(v)
+		return true
 	case []interface{}:
 		spew.Dump(v)
 		return true
@@ -63,6 +69,14 @@ func printGetPlayerStateResponse(v *apitypes.GetPlayerStateResponse) {
   Board:
 `)
 	printPlayerBoard(v.Board, 4)
+}
+
+func printSubmitAnnouncementResponse(v *apitypes.SubmitAnnouncementResponse) {
+	fmt.Printf("Letter announced")
+}
+
+func printSubmitPlacementResponse(v *apitypes.SubmitPlacementResponse) {
+	fmt.Printf("Letter placed")
 }
 
 func printPlayerBoard(board [][]string, indent int) {

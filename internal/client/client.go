@@ -10,10 +10,12 @@ import (
 )
 
 const (
-	createGamePath     = "/api/v1/game"
-	getGameStatePath   = "/api/v1/game/%s"
-	getPlayerStatePath = "/api/v1/game/%s/player/%d"
-	getPlayerScorePath = "/api/v1/game/%s/player/%d/score"
+	createGamePath         = "/api/v1/game"
+	getGameStatePath       = "/api/v1/game/%s"
+	getPlayerStatePath     = "/api/v1/game/%s/player/%d"
+	getPlayerScorePath     = "/api/v1/game/%s/player/%d/score"
+	submitAnnouncementPath = "/api/v1/game/%s/player/%d/announce"
+	submitPlacementPath    = "/api/v1/game/%s/player/%d/place"
 )
 
 type Client struct {
@@ -105,6 +107,64 @@ func (c *Client) GetPlayerScore(gameId types.GameId, playerId int) (*apitypes.Ge
 		return nil, err
 	}
 	return &playerScore, nil
+}
+
+func (c *Client) SubmitAnnouncement(
+	gameId types.GameId,
+	playerId int,
+	letter string,
+) (*apitypes.SubmitAnnouncementResponse, error) {
+	body := apitypes.SubmitAnnouncementRequest{
+		Letter: letter,
+	}
+	bodyJson, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+
+	resp, err := c.client.
+		Post(c.url(fmt.Sprintf(submitAnnouncementPath, gameId, playerId)), "application/json", bytes.NewReader(bodyJson))
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	var ret apitypes.SubmitAnnouncementResponse
+	if err := json.NewDecoder(resp.Body).Decode(&ret); err != nil {
+		return nil, err
+	}
+
+	return &ret, nil
+}
+
+func (c *Client) SubmitPlacement(
+	gameId types.GameId,
+	playerId int,
+	row int,
+	column int,
+) (*apitypes.SubmitPlacementResponse, error) {
+	body := apitypes.SubmitPlacementRequest{
+		Row:    row,
+		Column: column,
+	}
+	bodyJson, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+
+	resp, err := c.client.
+		Post(c.url(fmt.Sprintf(submitPlacementPath, gameId, playerId)), "application/json", bytes.NewReader(bodyJson))
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	var ret apitypes.SubmitPlacementResponse
+	if err := json.NewDecoder(resp.Body).Decode(&ret); err != nil {
+		return nil, err
+	}
+
+	return &ret, nil
 }
 
 func (c *Client) url(path string) string {

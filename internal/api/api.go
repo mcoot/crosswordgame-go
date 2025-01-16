@@ -164,7 +164,7 @@ func (c *CrosswordGameAPI) SubmitPlacement(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	err = c.gameManager.SubmitPlacement(gameId, playerId, req.Row, req.Column, req.Letter)
+	err = c.gameManager.SubmitPlacement(gameId, playerId, req.Row, req.Column)
 	if err != nil {
 		// TODO: Appropriate error codes
 		c.sendError(logger, w, 400, err)

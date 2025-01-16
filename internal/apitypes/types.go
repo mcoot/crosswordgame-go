@@ -36,9 +36,8 @@ type SubmitAnnouncementRequest struct {
 type SubmitAnnouncementResponse struct{}
 
 type SubmitPlacementRequest struct {
-	Row    int    `json:"row"`
-	Column int    `json:"column"`
-	Letter string `json:"letter"`
+	Row    int `json:"row"`
+	Column int `json:"column"`
 }
 
 type SubmitPlacementResponse struct{}

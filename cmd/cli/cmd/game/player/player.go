@@ -13,6 +13,8 @@ func (c *PlayerCommand) Mount(parent *cobra.Command) {
 
 	(&GetPlayerStateCommand{}).Mount(playerCmd)
 	(&GetPlayerScoreCommand{}).Mount(playerCmd)
+	(&PlayerAnnounceCommand{}).Mount(playerCmd)
+	(&PlayerPlaceCommand{}).Mount(playerCmd)
 
 	parent.AddCommand(playerCmd)
 }

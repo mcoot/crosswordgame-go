@@ -32,6 +32,7 @@ func (c *CreateGameCommand) Mount(parent *cobra.Command) {
 
 	createGameCmd.Flags().
 		IntVarP(&c.PlayerCount, "players", "p", 2, "Number of players")
+	_ = createGameCmd.MarkFlagRequired("players")
 
 	parent.AddCommand(createGameCmd)
 }
