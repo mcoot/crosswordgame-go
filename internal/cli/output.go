@@ -47,7 +47,7 @@ func (o *OutputMode) WriteOutput(v interface{}) error {
 }
 
 func writeTextOutput(v interface{}) error {
-	fmt.Print(PrettyPrint(v))
+	PrettyPrint(v)
 	return nil
 }
 

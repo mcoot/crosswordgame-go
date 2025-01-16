@@ -3,10 +3,13 @@ module github.com/mcoot/crosswordgame-go
 go 1.23.4
 
 require (
+	github.com/davecgh/go-spew v1.1.1
 	github.com/getkin/kin-openapi v0.128.0
+	github.com/goccy/go-yaml v1.15.13
 	github.com/golangci/golangci-lint v1.63.4
 	github.com/hashicorp/go-uuid v1.0.3
 	github.com/oapi-codegen/nethttp-middleware v1.0.2
+	github.com/spf13/cobra v1.8.1
 	go.uber.org/zap v1.27.0
 )
 
@@ -47,7 +50,6 @@ require (
 	github.com/ckaznocha/intrange v0.3.0 // indirect
 	github.com/curioswitch/go-reassign v0.3.0 // indirect
 	github.com/daixiang0/gci v0.13.5 // indirect
-	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/denis-tingaikin/go-header v0.5.0 // indirect
 	github.com/ettle/strcase v0.2.0 // indirect
 	github.com/fatih/color v1.18.0 // indirect
@@ -69,7 +71,6 @@ require (
 	github.com/go-viper/mapstructure/v2 v2.2.1 // indirect
 	github.com/go-xmlfmt/xmlfmt v1.1.3 // indirect
 	github.com/gobwas/glob v0.2.3 // indirect
-	github.com/goccy/go-yaml v1.15.13 // indirect
 	github.com/gofrs/flock v0.12.1 // indirect
 	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/golangci/dupl v0.0.0-20180902072040-3e9179ac440a // indirect
@@ -163,7 +164,6 @@ require (
 	github.com/sourcegraph/go-diff v0.7.0 // indirect
 	github.com/spf13/afero v1.11.0 // indirect
 	github.com/spf13/cast v1.5.0 // indirect
-	github.com/spf13/cobra v1.8.1 // indirect
 	github.com/spf13/jwalterweatherman v1.1.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/spf13/viper v1.12.0 // indirect
