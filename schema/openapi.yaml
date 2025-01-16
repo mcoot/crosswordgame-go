@@ -11,6 +11,10 @@ paths:
       responses:
         '200':
           description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthcheckResponse'
   /api/v1/game:
     post:
       summary: Create a new game
@@ -165,6 +169,14 @@ paths:
 
 components:
   schemas:
+    HealthcheckResponse:
+      type: object
+      properties:
+        start_time:
+          type: string
+          format: date-time
+      required:
+        - start_time
     CreateGameRequest:
       type: object
       properties:

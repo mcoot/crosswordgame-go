@@ -37,5 +37,5 @@ func GetLogger(ctx context.Context, loggerName string) *zap.SugaredLogger {
 	if !ok {
 		return zap.NewNop().Sugar()
 	}
-	return logger.With("logger_name", loggerName)
+	return logger.Named(loggerName)
 }

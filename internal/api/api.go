@@ -2,20 +2,26 @@ package api
 
 import (
 	"encoding/json"
+	"github.com/mcoot/crosswordgame-go/internal/apitypes"
 	"github.com/mcoot/crosswordgame-go/internal/game"
 	"github.com/mcoot/crosswordgame-go/internal/game/types"
 	"github.com/mcoot/crosswordgame-go/internal/logging"
 	"go.uber.org/zap"
 	"net/http"
 	"strconv"
+	"time"
 )
 
 type CrosswordGameAPI struct {
+	startTime   time.Time
 	gameManager *game.Manager
 }
 
 func NewCrosswordGameAPI(gameManager *game.Manager) *CrosswordGameAPI {
-	return &CrosswordGameAPI{gameManager: gameManager}
+	return &CrosswordGameAPI{
+		startTime:   time.Now(),
+		gameManager: gameManager,
+	}
 }
 
 func (c *CrosswordGameAPI) AttachToMux(h *http.ServeMux) {
@@ -29,13 +35,21 @@ func (c *CrosswordGameAPI) AttachToMux(h *http.ServeMux) {
 }
 
 func (c *CrosswordGameAPI) Healthcheck(w http.ResponseWriter, r *http.Request) {
-	_, _ = w.Write([]byte("OK"))
+	logger := c.getLogger(r)
+
+	w.WriteHeader(200)
+	if err := json.NewEncoder(w).Encode(apitypes.HealthcheckResponse{
+		StartTime: c.startTime.Format(time.RFC3339),
+	}); err != nil {
+		logger.Errorw("error encoding response", "error", err)
+		return
+	}
 }
 
 func (c *CrosswordGameAPI) CreateGame(w http.ResponseWriter, r *http.Request) {
 	logger := c.getLogger(r)
 
-	var req CreateGameRequest
+	var req apitypes.CreateGameRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		c.sendError(logger, w, 400, err)
 		return
@@ -48,7 +62,7 @@ func (c *CrosswordGameAPI) CreateGame(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(201)
-	if err := json.NewEncoder(w).Encode(CreateGameResponse{GameId: gameId}); err != nil {
+	if err := json.NewEncoder(w).Encode(apitypes.CreateGameResponse{GameId: gameId}); err != nil {
 		logger.Errorw("error encoding response", "error", err)
 		return
 	}
@@ -65,7 +79,7 @@ func (c *CrosswordGameAPI) GetGameState(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	resp := GetGameStateResponse{
+	resp := apitypes.GetGameStateResponse{
 		Status:                  gameState.Status,
 		SquaresFilled:           gameState.SquaresFilled,
 		CurrentAnnouncingPlayer: gameState.CurrentAnnouncingPlayer,
@@ -95,7 +109,7 @@ func (c *CrosswordGameAPI) GetPlayerState(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	resp := GetPlayerStateResponse{
+	resp := apitypes.GetPlayerStateResponse{
 		Board: playerState.Board.Data,
 	}
 
@@ -130,7 +144,7 @@ func (c *CrosswordGameAPI) GetPlayerScore(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	resp := GetPlayerScoreResponse{
+	resp := apitypes.GetPlayerScoreResponse{
 		Score: playerScore,
 	}
 

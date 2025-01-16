@@ -1,6 +1,10 @@
-package api
+package apitypes
 
 import "github.com/mcoot/crosswordgame-go/internal/game/types"
+
+type HealthcheckResponse struct {
+	StartTime string `json:"start_time"`
+}
 
 type CreateGameRequest struct {
 	PlayerCount int `json:"player_count"`
