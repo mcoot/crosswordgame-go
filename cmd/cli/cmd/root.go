@@ -33,8 +33,8 @@ var (
 )
 
 func init() {
-	cli.GlobalFlagServer(rootCmd.PersistentFlags())
-	cli.GlobalFlagOutputMode(rootCmd.PersistentFlags())
+	cli.GlobalFlagServer(rootCmd)
+	cli.GlobalFlagOutputMode(rootCmd)
 
 	(&HealthCommand{}).Mount(rootCmd)
 	(&game.GameCommand{}).Mount(rootCmd)

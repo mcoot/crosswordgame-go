@@ -2,6 +2,8 @@ package game
 
 import (
 	"github.com/mcoot/crosswordgame-go/internal/cli"
+	"github.com/mcoot/crosswordgame-go/internal/client"
+	"github.com/mcoot/crosswordgame-go/internal/game/types"
 	"github.com/spf13/cobra"
 )
 
@@ -10,7 +12,15 @@ type GetGameStateCommand struct {
 }
 
 func (c *GetGameStateCommand) Run(cmd *cobra.Command, args []string) error {
-	return nil
+	ctx := cmd.Context()
+	cwg := client.GetClient(ctx)
+
+	state, err := cwg.GetGameState(types.GameId(c.GameId))
+	if err != nil {
+		return err
+	}
+
+	return cli.WriteOutput(state)
 }
 
 func (c *GetGameStateCommand) Mount(parent *cobra.Command) {
@@ -21,7 +31,7 @@ func (c *GetGameStateCommand) Mount(parent *cobra.Command) {
 		RunE:  c.Run,
 	}
 
-	cli.GameIdFlag(getGameStateCmd.Flags(), &c.GameId)
+	cli.GameIdFlag(getGameStateCmd, &c.GameId)
 
 	parent.AddCommand(getGameStateCmd)
 }

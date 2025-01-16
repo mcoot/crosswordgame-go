@@ -2,6 +2,8 @@ package player
 
 import (
 	"github.com/mcoot/crosswordgame-go/internal/cli"
+	"github.com/mcoot/crosswordgame-go/internal/client"
+	"github.com/mcoot/crosswordgame-go/internal/game/types"
 	"github.com/spf13/cobra"
 )
 
@@ -11,7 +13,15 @@ type GetPlayerScoreCommand struct {
 }
 
 func (c *GetPlayerScoreCommand) Run(cmd *cobra.Command, args []string) error {
-	return nil
+	ctx := cmd.Context()
+	cwg := client.GetClient(ctx)
+
+	score, err := cwg.GetPlayerScore(types.GameId(c.GameId), c.PlayerId)
+	if err != nil {
+		return err
+	}
+
+	return cli.WriteOutput(score)
 }
 
 func (c *GetPlayerScoreCommand) Mount(parent *cobra.Command) {
@@ -22,8 +32,8 @@ func (c *GetPlayerScoreCommand) Mount(parent *cobra.Command) {
 		RunE:  c.Run,
 	}
 
-	cli.GameIdFlag(getPlayerScoreCmd.Flags(), &c.GameId)
-	cli.PlayerIdFlag(getPlayerScoreCmd.Flags(), &c.PlayerId)
+	cli.GameIdFlag(getPlayerScoreCmd, &c.GameId)
+	cli.PlayerIdFlag(getPlayerScoreCmd, &c.PlayerId)
 
 	parent.AddCommand(getPlayerScoreCmd)
 }
