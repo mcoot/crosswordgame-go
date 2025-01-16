@@ -2,7 +2,6 @@ package game
 
 import (
 	"errors"
-	"fmt"
 	"github.com/hashicorp/go-uuid"
 	"github.com/mcoot/crosswordgame-go/internal/game/store"
 	"github.com/mcoot/crosswordgame-go/internal/game/types"
@@ -73,7 +72,10 @@ func (m *Manager) SubmitPlacement(gameId types.GameId, playerId int, row, column
 
 func getPlayer(game *types.Game, playerId int) (*types.Player, error) {
 	if playerId < 0 || playerId >= len(game.Players) {
-		return nil, fmt.Errorf("invalid player id %d", playerId)
+		return nil, &types.NotFoundError{
+			ObjectKind: "player",
+			ObjectID:   playerId,
+		}
 	}
 
 	return game.Players[playerId], nil

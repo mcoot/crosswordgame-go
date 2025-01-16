@@ -1,7 +1,6 @@
 package store
 
 import (
-	"errors"
 	"github.com/mcoot/crosswordgame-go/internal/game/types"
 )
 
@@ -23,7 +22,10 @@ func (s *InMemoryStore) StoreGame(gameId types.GameId, game *types.Game) error {
 func (s *InMemoryStore) RetrieveGame(gameId types.GameId) (*types.Game, error) {
 	game, ok := s.games[gameId]
 	if !ok {
-		return nil, errors.New("game not found")
+		return nil, &types.NotFoundError{
+			ObjectKind: "game",
+			ObjectID:   gameId,
+		}
 	}
 	return game, nil
 }
