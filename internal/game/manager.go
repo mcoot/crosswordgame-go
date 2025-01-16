@@ -1,6 +1,7 @@
 package game
 
 import (
+	"fmt"
 	"github.com/hashicorp/go-uuid"
 	"github.com/mcoot/crosswordgame-go/internal/game/store"
 	"github.com/mcoot/crosswordgame-go/internal/game/types"
@@ -43,10 +44,28 @@ func (m *Manager) GetPlayerState(gameId types.GameId, playerId int) (*types.Play
 	if err != nil {
 		return nil, err
 	}
-	return game.Players[playerId], nil
+
+	return getPlayer(game, playerId)
 }
 
 func (m *Manager) GetPlayerScore(gameId types.GameId, playerId int) (int, error) {
-	// TODO: Implement scoring
-	return 0, nil
+	game, err := m.store.RetrieveGame(gameId)
+	if err != nil {
+		return 0, err
+	}
+
+	player, err := getPlayer(game, playerId)
+	if err != nil {
+		return 0, err
+	}
+
+	return determineScore(player), nil
+}
+
+func getPlayer(game *types.Game, playerId int) (*types.Player, error) {
+	if playerId < 0 || playerId >= len(game.Players) {
+		return nil, fmt.Errorf("invalid player id %d", playerId)
+	}
+
+	return game.Players[playerId], nil
 }
