@@ -47,6 +47,9 @@ func (c *Client) CreateGame(playerCount int) (*apitypes.CreateGameResponse, erro
 		PlayerCount: playerCount,
 	}
 	bodyJson, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
 
 	resp, err := c.client.
 		Post(c.url(createGamePath), "application/json", bytes.NewReader(bodyJson))
