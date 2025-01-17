@@ -281,11 +281,40 @@ components:
     PlayerScore:
       type: object
       properties:
-        score:
-          type: integer
-          minimum: 0
+        total_score:
+          $ref: '#/components/schemas/ScoreValue'
+        words:
+          type: array
+          items:
+            $ref: '#/components/schemas/ScoredWord'
       required:
+        - total_score
+        - words
+    ScoredWord:
+      type: object
+      properties:
+        word:
+          type: string
+        direction:
+          type: string
+          enum:
+            - horizontal
+            - vertical
+        start_index:
+          type: integer
+        end_index:
+          type: integer
+        score:
+          $ref: '#/components/schemas/ScoreValue'
+      required:
+        - word
+        - direction
+        - start_index
+        - end_index
         - score
+    ScoreValue:
+      type: integer
+      minimum: 0
     AnnounceRequest:
       type: object
       properties:

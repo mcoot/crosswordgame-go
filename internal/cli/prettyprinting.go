@@ -102,6 +102,10 @@ func printPlayerBoard(board [][]string, indent int) {
 
 func printGetPlayerScoreResponse(v *apitypes.GetPlayerScoreResponse) {
 	fmt.Printf(`Score:
-  Player Score: %d
-`, v.Score)
+  Total Score: %d
+  Words:
+`, v.TotalScore)
+	for _, word := range v.Words {
+		fmt.Printf("    %s (%d)\n", word.Word, word.Score)
+	}
 }

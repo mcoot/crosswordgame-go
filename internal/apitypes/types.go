@@ -39,7 +39,8 @@ type GetPlayerStateResponse struct {
 }
 
 type GetPlayerScoreResponse struct {
-	Score int `json:"score"`
+	TotalScore int                 `json:"total_score"`
+	Words      []*types.ScoredWord `json:"words"`
 }
 
 type SubmitAnnouncementRequest struct {

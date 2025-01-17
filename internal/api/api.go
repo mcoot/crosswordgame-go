@@ -184,14 +184,15 @@ func (c *CrosswordGameAPI) GetPlayerScore(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	playerScore, err := c.gameManager.GetPlayerScore(gameId, playerId)
+	totalScore, words, err := c.gameManager.GetPlayerScore(gameId, playerId)
 	if err != nil {
 		c.sendError(logger, w, err)
 		return
 	}
 
 	resp := apitypes.GetPlayerScoreResponse{
-		Score: playerScore,
+		TotalScore: totalScore,
+		Words:      words,
 	}
 
 	w.WriteHeader(200)
