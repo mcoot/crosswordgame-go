@@ -8,12 +8,14 @@ import (
 )
 
 type Manager struct {
-	store store.GameStore
+	store  store.GameStore
+	scorer Scorer
 }
 
-func NewGameManager(store store.GameStore) *Manager {
+func NewGameManager(store store.GameStore, scorer Scorer) *Manager {
 	return &Manager{
-		store: store,
+		store:  store,
+		scorer: scorer,
 	}
 }
 
@@ -71,7 +73,7 @@ func (m *Manager) GetPlayerScore(gameId types.GameId, playerId int) (int, []*typ
 		}
 	}
 
-	total, words := determineScore(player)
+	total, words := m.scorer.Score(player)
 	return total, words, nil
 }
 

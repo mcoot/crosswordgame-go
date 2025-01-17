@@ -26,7 +26,12 @@ func main() {
 	mux := http.NewServeMux()
 
 	gameStore := store.NewInMemoryStore()
-	gameManager := game.NewGameManager(gameStore)
+	gameScorer := game.NewTxtDictScorer()
+	err = gameScorer.LoadDictionary("./data/words.txt")
+	if err != nil {
+		logger.Fatalf("error loading dictionary: %v", err)
+	}
+	gameManager := game.NewGameManager(gameStore, gameScorer)
 	api := internalapi.NewCrosswordGameAPI(gameManager)
 	api.AttachToMux(mux)
 
