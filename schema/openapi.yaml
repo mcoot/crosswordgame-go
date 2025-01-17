@@ -233,6 +233,11 @@ components:
           type: integer
           minimum: 1
           maximum: 4
+        board_dimension:
+          type: integer
+          minimum: 1
+          maximum: 10
+          default: 5
       required:
         - player_count
     CreateGameResponse:

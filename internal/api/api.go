@@ -55,7 +55,12 @@ func (c *CrosswordGameAPI) CreateGame(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	gameId, err := c.gameManager.NewGame(req.PlayerCount, 5)
+	boardDimension := 5
+	if req.BoardDimension != nil {
+		boardDimension = *req.BoardDimension
+	}
+
+	gameId, err := c.gameManager.NewGame(req.PlayerCount, boardDimension)
 	if err != nil {
 		c.sendError(logger, w, err)
 		return

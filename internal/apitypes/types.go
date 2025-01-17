@@ -20,7 +20,8 @@ type HealthcheckResponse struct {
 }
 
 type CreateGameRequest struct {
-	PlayerCount int `json:"player_count"`
+	PlayerCount    int  `json:"player_count"`
+	BoardDimension *int `json:"board_dimension,omitempty"`
 }
 
 type CreateGameResponse struct {

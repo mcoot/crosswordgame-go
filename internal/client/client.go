@@ -48,10 +48,14 @@ func (c *Client) Health() (*apitypes.HealthcheckResponse, error) {
 	return &health, nil
 }
 
-func (c *Client) CreateGame(playerCount int) (*apitypes.CreateGameResponse, error) {
+func (c *Client) CreateGame(playerCount int, boardDimension *int) (*apitypes.CreateGameResponse, error) {
 	body := apitypes.CreateGameRequest{
 		PlayerCount: playerCount,
 	}
+	if boardDimension != nil {
+		body.BoardDimension = boardDimension
+	}
+
 	bodyJson, err := json.Marshal(body)
 	if err != nil {
 		return nil, err
