@@ -8,8 +8,10 @@ import (
 type GameErrorKind string
 
 const (
-	GameErrorInvalidInput GameErrorKind = "invalid_input"
-	GameErrorNotFound     GameErrorKind = "not_found"
+	GameErrorInvalidInput        GameErrorKind = "invalid_input"
+	GameErrorNotFound            GameErrorKind = "not_found"
+	GameErrorInvalidAction       GameErrorKind = "invalid_action"
+	GameErrorUnexpectedGameLogic GameErrorKind = "unexpected_game_logic_error"
 )
 
 type GameError interface {
@@ -59,5 +61,39 @@ func (e *NotFoundError) Message() string {
 }
 
 func (e *NotFoundError) Error() string {
+	return e.Message()
+}
+
+type InvalidActionError struct {
+	PlayerId int
+	Action   string
+	Reason   string
+}
+
+func (e *InvalidActionError) Kind() GameErrorKind {
+	return GameErrorInvalidAction
+}
+
+func (e *InvalidActionError) Message() string {
+	return fmt.Sprintf("invalid action \"%s\" for player %d: %s", e.Action, e.PlayerId, e.Reason)
+}
+
+func (e *InvalidActionError) Error() string {
+	return e.Message()
+}
+
+type UnexpectedGameLogicError struct {
+	ErrMessage string
+}
+
+func (e *UnexpectedGameLogicError) Kind() GameErrorKind {
+	return GameErrorUnexpectedGameLogic
+}
+
+func (e *UnexpectedGameLogicError) Message() string {
+	return e.ErrMessage
+}
+
+func (e *UnexpectedGameLogicError) Error() string {
 	return e.Message()
 }

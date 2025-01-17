@@ -72,11 +72,11 @@ func printGetPlayerStateResponse(v *apitypes.GetPlayerStateResponse) {
 }
 
 func printSubmitAnnouncementResponse(v *apitypes.SubmitAnnouncementResponse) {
-	fmt.Printf("Letter announced")
+	fmt.Printf("Letter announced\n")
 }
 
 func printSubmitPlacementResponse(v *apitypes.SubmitPlacementResponse) {
-	fmt.Printf("Letter placed")
+	fmt.Printf("Letter placed\n")
 }
 
 func printPlayerBoard(board [][]string, indent int) {

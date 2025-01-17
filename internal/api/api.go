@@ -55,7 +55,7 @@ func (c *CrosswordGameAPI) CreateGame(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	gameId, err := c.gameManager.NewGame(req.PlayerCount)
+	gameId, err := c.gameManager.NewGame(req.PlayerCount, 5)
 	if err != nil {
 		c.sendError(logger, w, err)
 		return
@@ -237,6 +237,8 @@ func (c *CrosswordGameAPI) determineHttpErrorCode(gameErr types.GameError) int {
 		return 400
 	case types.GameErrorNotFound:
 		return 404
+	case types.GameErrorInvalidAction:
+		return 400
 	default:
 		return 500
 	}

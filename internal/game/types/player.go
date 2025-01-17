@@ -4,8 +4,8 @@ type Player struct {
 	Board *Board
 }
 
-func NewPlayer() *Player {
+func NewPlayer(boardDimension int) *Player {
 	return &Player{
-		Board: NewBoard(5),
+		Board: NewBoard(boardDimension),
 	}
 }

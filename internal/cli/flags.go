@@ -2,6 +2,7 @@ package cli
 
 import (
 	"fmt"
+	"github.com/mcoot/crosswordgame-go/internal/game/types"
 	"github.com/spf13/cobra"
 	"strings"
 )
@@ -43,11 +44,8 @@ type LetterValue string
 
 func (l *LetterValue) Set(value string) error {
 	*l = LetterValue(strings.ToUpper(value))
-	if len(*l) != 1 {
-		return fmt.Errorf("letter value must be single character, got: %s", value)
-	}
-	if (*l)[0] < 'A' || (*l)[0] > 'Z' {
-		return fmt.Errorf("letter value must be a letter, got: %s", value)
+	if !types.IsValidLetter(string(*l)) {
+		return fmt.Errorf("letter value must be a single letter, got: %s", value)
 	}
 	return nil
 }
