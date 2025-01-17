@@ -135,7 +135,6 @@ func (c *CrosswordGameAPI) SubmitAnnouncement(w http.ResponseWriter, r *http.Req
 
 	err = c.gameManager.SubmitAnnouncement(gameId, playerId, req.Letter)
 	if err != nil {
-		// TODO: Appropriate error codes
 		c.sendError(logger, w, err)
 		return
 	}
