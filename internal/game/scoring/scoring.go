@@ -74,6 +74,8 @@ type lineScoreInput struct {
 func (s *TxtDictScorer) scoreWordsForLine(
 	input lineScoreInput,
 ) []*types.ScoredWord {
+	// Ensure the line is uppercase since we store our dictionary that way
+	input.Line = strings.ToUpper(input.Line)
 	matchedWords := s.matcher.Match(input.Line)
 	matchedLineIndices := matchedWordsToLineIndices(input.Line, matchedWords)
 	bestScoringWords := getBestScoringWordCombination(input, matchedLineIndices)

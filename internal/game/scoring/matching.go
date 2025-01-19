@@ -36,8 +36,10 @@ func loadDictionary(preallocatedCapacity int, filename string) ([]string, error)
 
 	scanner := bufio.NewScanner(f)
 	for scanner.Scan() {
-		word := strings.TrimSpace(scanner.Text())
-		if word != "" {
+		// Trim space and convert all words to uppercase as that's how we store boards
+		word := strings.ToUpper(strings.TrimSpace(scanner.Text()))
+		// Skip empty lines and one-letter words, since they don't score
+		if len(word) > 1 {
 			wordList = append(wordList, word)
 		}
 	}

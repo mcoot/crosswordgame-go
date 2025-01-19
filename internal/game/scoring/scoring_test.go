@@ -5,6 +5,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 	"os"
+	"strings"
 	"testing"
 )
 
@@ -44,6 +45,17 @@ func (s *ScoringSuite) Test_scoreWordsForLine() {
 			line:      "",
 			direction: types.ScoringDirectionHorizontal,
 			expect:    expectExactly([]*types.ScoredWord{}),
+		},
+		{
+			name: "does not match single letter words",
+			dictionary: []string{
+				"a",
+				"b",
+				"c",
+			},
+			line:      "dabce",
+			direction: types.ScoringDirectionHorizontal,
+			expect:    expectWordsToBe([]string{}),
 		},
 		{
 			name: "partial match at end",
@@ -288,7 +300,7 @@ func expectWordsToBe(expectedWords []string) ScoredWordsExpectation {
 		t.Helper()
 		require.Len(t, sw, len(expectedWords))
 		for i, word := range expectedWords {
-			require.Equal(t, word, sw[i].Word)
+			require.Equal(t, strings.ToUpper(word), sw[i].Word)
 		}
 	}
 }
@@ -298,6 +310,7 @@ func expectExactly(expected []*types.ScoredWord) ScoredWordsExpectation {
 		t.Helper()
 		require.Len(t, sw, len(expected))
 		for i, word := range expected {
+			word.Word = strings.ToUpper(word.Word)
 			require.Equal(t, word, sw[i])
 		}
 	}
