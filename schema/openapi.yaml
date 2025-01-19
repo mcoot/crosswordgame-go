@@ -236,7 +236,7 @@ components:
         board_dimension:
           type: integer
           minimum: 1
-          maximum: 10
+          maximum: 7
           default: 5
       required:
         - player_count
@@ -300,15 +300,18 @@ components:
       properties:
         word:
           type: string
-        direction:
-          type: string
-          enum:
-            - horizontal
-            - vertical
-        start_index:
+        start_row:
           type: integer
-        end_index:
+          minimum: 0
+        end_row:
           type: integer
+          minimum: 0
+        start_column:
+          type: integer
+          minimum: 0
+        end_column:
+          type: integer
+          minimum: 0
         score:
           $ref: '#/components/schemas/ScoreValue'
       required:
