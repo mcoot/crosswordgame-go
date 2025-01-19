@@ -1,6 +1,7 @@
 package api
 
 import (
+	"context"
 	"encoding/json"
 	"github.com/mcoot/crosswordgame-go/internal/apitypes"
 	"github.com/mcoot/crosswordgame-go/internal/game"
@@ -24,14 +25,20 @@ func NewCrosswordGameAPI(gameManager *game.Manager) *CrosswordGameAPI {
 	}
 }
 
-func (c *CrosswordGameAPI) AttachToMux(h *http.ServeMux) {
-	h.Handle("GET /health", http.HandlerFunc(c.Healthcheck))
-	h.Handle("POST /api/v1/game", http.HandlerFunc(c.CreateGame))
-	h.Handle("GET /api/v1/game/{gameId}", http.HandlerFunc(c.GetGameState))
-	h.Handle("GET /api/v1/game/{gameId}/player/{playerId}", http.HandlerFunc(c.GetPlayerState))
-	h.Handle("POST /api/v1/game/{gameId}/player/{playerId}/announce", http.HandlerFunc(c.SubmitAnnouncement))
-	h.Handle("POST /api/v1/game/{gameId}/player/{playerId}/place", http.HandlerFunc(c.SubmitPlacement))
-	h.Handle("GET /api/v1/game/{gameId}/player/{playerId}/score", http.HandlerFunc(c.GetPlayerScore))
+func (c *CrosswordGameAPI) AttachToMux(ctx context.Context, mux *http.ServeMux) (http.Handler, error) {
+	mux.Handle("GET /health", http.HandlerFunc(c.Healthcheck))
+	mux.Handle("POST /api/v1/game", http.HandlerFunc(c.CreateGame))
+	mux.Handle("GET /api/v1/game/{gameId}", http.HandlerFunc(c.GetGameState))
+	mux.Handle("GET /api/v1/game/{gameId}/player/{playerId}", http.HandlerFunc(c.GetPlayerState))
+	mux.Handle("POST /api/v1/game/{gameId}/player/{playerId}/announce", http.HandlerFunc(c.SubmitAnnouncement))
+	mux.Handle("POST /api/v1/game/{gameId}/player/{playerId}/place", http.HandlerFunc(c.SubmitPlacement))
+	mux.Handle("GET /api/v1/game/{gameId}/player/{playerId}/score", http.HandlerFunc(c.GetPlayerScore))
+
+	h, err := setupMiddleware(ctx, mux)
+	if err != nil {
+		return nil, err
+	}
+	return h, nil
 }
 
 func (c *CrosswordGameAPI) Healthcheck(w http.ResponseWriter, r *http.Request) {
