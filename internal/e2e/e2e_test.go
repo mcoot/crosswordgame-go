@@ -8,6 +8,7 @@ import (
 	"github.com/mcoot/crosswordgame-go/internal/game/scoring"
 	"github.com/mcoot/crosswordgame-go/internal/game/store"
 	"github.com/mcoot/crosswordgame-go/internal/game/types"
+	"github.com/mcoot/crosswordgame-go/internal/lobby"
 	"github.com/stretchr/testify/suite"
 	"net/http"
 	"net/http/httptest"
@@ -31,7 +32,10 @@ func (s *CrosswordGameE2ESuite) SetupSuite() {
 		panic(err)
 	}
 	gameManager := game.NewGameManager(gameStore, gameScorer)
-	api := internalapi.NewCrosswordGameAPI(gameManager)
+
+	lobbyManager := lobby.NewLobbyManager()
+
+	api := internalapi.NewCrosswordGameAPI(gameManager, lobbyManager)
 
 	mux := http.NewServeMux()
 	h, err := api.AttachToMux(context.Background(), mux, "../../schema/openapi.yaml")

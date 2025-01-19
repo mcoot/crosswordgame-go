@@ -5,6 +5,7 @@ import (
 	"github.com/mcoot/crosswordgame-go/internal/game"
 	"github.com/mcoot/crosswordgame-go/internal/game/scoring"
 	"github.com/mcoot/crosswordgame-go/internal/game/store"
+	"github.com/mcoot/crosswordgame-go/internal/lobby"
 	"github.com/mcoot/crosswordgame-go/internal/logging"
 	"github.com/mcoot/crosswordgame-go/internal/utils"
 	"log"
@@ -27,7 +28,10 @@ func main() {
 		logger.Fatalf("error loading dictionary: %v", err)
 	}
 	gameManager := game.NewGameManager(gameStore, gameScorer)
-	api := internalapi.NewCrosswordGameAPI(gameManager)
+
+	lobbyManager := lobby.NewLobbyManager()
+
+	api := internalapi.NewCrosswordGameAPI(gameManager, lobbyManager)
 	h, err := api.AttachToMux(ctx, mux, "./schema/openapi.yaml")
 	if err != nil {
 		logger.Fatalf("error setting up API: %v", err)
