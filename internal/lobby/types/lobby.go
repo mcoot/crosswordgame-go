@@ -1,9 +1,11 @@
 package types
 
+import playertypes "github.com/mcoot/crosswordgame-go/internal/player/types"
+
 type LobbyId string
 
 type Lobby struct {
 	Name        string
-	Players     map[PlayerId]Player
+	Players     []playertypes.PlayerId
 	RunningGame *RunningGame
 }

@@ -3,5 +3,7 @@ package types
 type PlayerId string
 
 type Player struct {
-	Name string
+	ID         PlayerId
+	Name       string
+	Registered bool
 }

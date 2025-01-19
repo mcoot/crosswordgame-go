@@ -2,16 +2,18 @@ package lobby
 
 import (
 	"github.com/hashicorp/go-uuid"
+	"github.com/mcoot/crosswordgame-go/internal/game/store"
 	"github.com/mcoot/crosswordgame-go/internal/lobby/types"
+	playertypes "github.com/mcoot/crosswordgame-go/internal/player/types"
 )
 
 type Manager struct {
-	Lobbies map[types.LobbyId]types.Lobby
+	store store.LobbyStore
 }
 
-func NewLobbyManager() *Manager {
+func NewLobbyManager(store store.LobbyStore) *Manager {
 	return &Manager{
-		Lobbies: make(map[types.LobbyId]types.Lobby),
+		store: store,
 	}
 }
 
@@ -21,9 +23,30 @@ func (m *Manager) CreateLobby(name string) (types.LobbyId, error) {
 		return "", err
 	}
 	id := types.LobbyId(rawId)
-	m.Lobbies[id] = types.Lobby{
-		Name:    name,
-		Players: make(map[types.PlayerId]types.Player),
+	err = m.store.StoreLobby(id, &types.Lobby{
+		Name:        name,
+		Players:     make([]playertypes.PlayerId, 0),
+		RunningGame: nil,
+	})
+	if err != nil {
+		return "", err
 	}
 	return id, nil
+}
+
+func (m *Manager) GetLobbyState(id types.LobbyId) (*types.Lobby, error) {
+	lobby, err := m.store.RetrieveLobby(id)
+	if err != nil {
+		return nil, err
+	}
+	return lobby, nil
+}
+
+func (m *Manager) AddPlayerToLobby(lobbyId types.LobbyId, playerId playertypes.PlayerId) error {
+	lobby, err := m.store.RetrieveLobby(lobbyId)
+	if err != nil {
+		return err
+	}
+	lobby.Players = append(lobby.Players, playerId)
+	return m.store.StoreLobby(lobbyId, lobby)
 }

@@ -22,14 +22,14 @@ func main() {
 
 	mux := http.NewServeMux()
 
-	gameStore := store.NewInMemoryStore()
+	store := store.NewInMemoryStore()
 	gameScorer, err := scoring.NewTxtDictScorer("./data/words.txt")
 	if err != nil {
 		logger.Fatalf("error loading dictionary: %v", err)
 	}
-	gameManager := game.NewGameManager(gameStore, gameScorer)
+	gameManager := game.NewGameManager(store, gameScorer)
 
-	lobbyManager := lobby.NewLobbyManager()
+	lobbyManager := lobby.NewLobbyManager(store)
 
 	api := internalapi.NewCrosswordGameAPI(gameManager, lobbyManager)
 	h, err := api.AttachToMux(ctx, mux, "./schema/openapi.yaml")

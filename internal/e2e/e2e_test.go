@@ -26,14 +26,14 @@ func TestCrosswordGameE2ESuite(t *testing.T) {
 }
 
 func (s *CrosswordGameE2ESuite) SetupSuite() {
-	gameStore := store.NewInMemoryStore()
+	store := store.NewInMemoryStore()
 	gameScorer, err := scoring.NewTxtDictScorer("../../data/words.txt")
 	if err != nil {
 		panic(err)
 	}
-	gameManager := game.NewGameManager(gameStore, gameScorer)
+	gameManager := game.NewGameManager(store, gameScorer)
 
-	lobbyManager := lobby.NewLobbyManager()
+	lobbyManager := lobby.NewLobbyManager(store)
 
 	api := internalapi.NewCrosswordGameAPI(gameManager, lobbyManager)
 
