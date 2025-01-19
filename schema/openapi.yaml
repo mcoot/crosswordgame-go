@@ -300,16 +300,15 @@ components:
       properties:
         word:
           type: string
+        direction:
+          type: string
+          enum:
+            - horizontal
+            - vertical
         start_row:
           type: integer
           minimum: 0
-        end_row:
-          type: integer
-          minimum: 0
         start_column:
-          type: integer
-          minimum: 0
-        end_column:
           type: integer
           minimum: 0
         score:
@@ -317,8 +316,8 @@ components:
       required:
         - word
         - direction
-        - start_index
-        - end_index
+        - start_row
+        - start_column
         - score
     ScoreValue:
       type: integer

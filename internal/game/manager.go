@@ -3,16 +3,17 @@ package game
 import (
 	"fmt"
 	"github.com/hashicorp/go-uuid"
+	"github.com/mcoot/crosswordgame-go/internal/game/scoring"
 	"github.com/mcoot/crosswordgame-go/internal/game/store"
 	"github.com/mcoot/crosswordgame-go/internal/game/types"
 )
 
 type Manager struct {
 	store  store.GameStore
-	scorer Scorer
+	scorer scoring.Scorer
 }
 
-func NewGameManager(store store.GameStore, scorer Scorer) *Manager {
+func NewGameManager(store store.GameStore, scorer scoring.Scorer) *Manager {
 	return &Manager{
 		store:  store,
 		scorer: scorer,

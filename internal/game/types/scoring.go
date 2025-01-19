@@ -8,9 +8,9 @@ const (
 )
 
 type ScoredWord struct {
-	Word       string           `json:"word"`
-	Score      int              `json:"score"`
-	Direction  ScoringDirection `json:"direction"`
-	StartIndex int              `json:"start_index"`
-	EndIndex   int              `json:"end_index"`
+	Word        string           `json:"word"`
+	Score       int              `json:"score"`
+	Direction   ScoringDirection `json:"direction"`
+	StartRow    int              `json:"start_row"`
+	StartColumn int              `json:"start_column"`
 }

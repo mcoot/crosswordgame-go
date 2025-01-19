@@ -5,6 +5,7 @@ import (
 	"github.com/getkin/kin-openapi/openapi3"
 	internalapi "github.com/mcoot/crosswordgame-go/internal/api"
 	"github.com/mcoot/crosswordgame-go/internal/game"
+	"github.com/mcoot/crosswordgame-go/internal/game/scoring"
 	"github.com/mcoot/crosswordgame-go/internal/game/store"
 	"github.com/mcoot/crosswordgame-go/internal/logging"
 	"github.com/mcoot/crosswordgame-go/internal/utils"
@@ -26,8 +27,7 @@ func main() {
 	mux := http.NewServeMux()
 
 	gameStore := store.NewInMemoryStore()
-	gameScorer := game.NewTxtDictScorer()
-	err = gameScorer.LoadDictionary("./data/words.txt")
+	gameScorer, err := scoring.NewTxtDictScorer("./data/words.txt")
 	if err != nil {
 		logger.Fatalf("error loading dictionary: %v", err)
 	}
