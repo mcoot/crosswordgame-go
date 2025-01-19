@@ -6,6 +6,7 @@ import (
 	"github.com/mcoot/crosswordgame-go/internal/game/scoring"
 	"github.com/mcoot/crosswordgame-go/internal/game/store"
 	"github.com/mcoot/crosswordgame-go/internal/game/types"
+	"strings"
 )
 
 type Manager struct {
@@ -111,6 +112,10 @@ func (m *Manager) SubmitAnnouncement(gameId types.GameId, playerId int, announce
 			),
 		}
 	}
+
+	// Automatically upper-case the letter
+	announcedLetter = strings.ToUpper(announcedLetter)
+
 	if !types.IsValidLetter(announcedLetter) {
 		return &types.InvalidInputError{
 			ErrMessage: fmt.Sprintf("invalid letter: %s", announcedLetter),
