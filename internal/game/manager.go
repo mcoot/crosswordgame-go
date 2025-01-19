@@ -3,6 +3,7 @@ package game
 import (
 	"fmt"
 	"github.com/hashicorp/go-uuid"
+	"github.com/mcoot/crosswordgame-go/internal/errors"
 	"github.com/mcoot/crosswordgame-go/internal/game/scoring"
 	"github.com/mcoot/crosswordgame-go/internal/game/store"
 	"github.com/mcoot/crosswordgame-go/internal/game/types"
@@ -64,7 +65,7 @@ func (m *Manager) GetPlayerScore(gameId types.GameId, playerId int) (int, []*typ
 	}
 
 	if game.Status != types.StatusFinished {
-		return 0, nil, &types.InvalidActionError{
+		return 0, nil, &errors.InvalidActionError{
 			PlayerId: playerId,
 			Action:   "score",
 			Reason: fmt.Sprintf(
@@ -92,7 +93,7 @@ func (m *Manager) SubmitAnnouncement(gameId types.GameId, playerId int, announce
 	}
 
 	if game.Status != types.StatusAwaitingAnnouncement {
-		return &types.InvalidActionError{
+		return &errors.InvalidActionError{
 			PlayerId: playerId,
 			Action:   "announce",
 			Reason: fmt.Sprintf(
@@ -103,7 +104,7 @@ func (m *Manager) SubmitAnnouncement(gameId types.GameId, playerId int, announce
 		}
 	}
 	if game.CurrentAnnouncingPlayer != playerId {
-		return &types.InvalidActionError{
+		return &errors.InvalidActionError{
 			PlayerId: playerId,
 			Action:   "announce",
 			Reason: fmt.Sprintf(
@@ -117,7 +118,7 @@ func (m *Manager) SubmitAnnouncement(gameId types.GameId, playerId int, announce
 	announcedLetter = strings.ToUpper(announcedLetter)
 
 	if !types.IsValidLetter(announcedLetter) {
-		return &types.InvalidInputError{
+		return &errors.InvalidInputError{
 			ErrMessage: fmt.Sprintf("invalid letter: %s", announcedLetter),
 		}
 	}
@@ -141,7 +142,7 @@ func (m *Manager) SubmitPlacement(gameId types.GameId, playerId int, row, column
 	}
 
 	if game.Status != types.StatusAwaitingPlacement {
-		return &types.InvalidActionError{
+		return &errors.InvalidActionError{
 			PlayerId: playerId,
 			Action:   "place",
 			Reason: fmt.Sprintf(
@@ -177,7 +178,7 @@ func (m *Manager) fillPlayerSquare(
 	playerFilledSquares := board.FilledSquares()
 	if playerFilledSquares == game.SquaresFilled+1 {
 		// The player already filled a square this turn
-		return &types.InvalidActionError{
+		return &errors.InvalidActionError{
 			PlayerId: playerId,
 			Action:   "place",
 			Reason:   "player has already placed a letter this turn",
@@ -187,7 +188,7 @@ func (m *Manager) fillPlayerSquare(
 	if playerFilledSquares != game.SquaresFilled {
 		// Something went wrong in the game logic for them to not be on the correct # of squares
 		// TODO: abandon game in this case
-		return &types.UnexpectedGameLogicError{
+		return &errors.UnexpectedGameLogicError{
 			ErrMessage: fmt.Sprintf(
 				"expected player %d to have filled %d squares, but they have %d",
 				playerId,
@@ -198,13 +199,13 @@ func (m *Manager) fillPlayerSquare(
 	}
 
 	if row < 0 || row >= board.Size() || column < 0 || column >= board.Size() {
-		return &types.InvalidInputError{
+		return &errors.InvalidInputError{
 			ErrMessage: fmt.Sprintf("invalid row/column: %d/%d", row, column),
 		}
 	}
 
 	if board.Data[row][column] != "" {
-		return &types.InvalidInputError{
+		return &errors.InvalidInputError{
 			ErrMessage: fmt.Sprintf("square at row/column %d/%d is already filled", row, column),
 		}
 	}
@@ -241,7 +242,7 @@ func (m *Manager) checkAndProcessEndTurnOrGame(game *types.Game) error {
 
 func getPlayer(game *types.Game, playerId int) (*types.Player, error) {
 	if playerId < 0 || playerId >= len(game.Players) {
-		return nil, &types.NotFoundError{
+		return nil, &errors.NotFoundError{
 			ObjectKind: "player",
 			ObjectID:   playerId,
 		}

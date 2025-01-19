@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"github.com/mcoot/crosswordgame-go/internal/apitypes"
+	"github.com/mcoot/crosswordgame-go/internal/errors"
 	"github.com/mcoot/crosswordgame-go/internal/game"
 	"github.com/mcoot/crosswordgame-go/internal/game/types"
 	"github.com/mcoot/crosswordgame-go/internal/lobby"
@@ -219,7 +220,7 @@ func (c *CrosswordGameAPI) GetPlayerScore(w http.ResponseWriter, r *http.Request
 
 func (c *CrosswordGameAPI) sendError(logger *zap.SugaredLogger, w http.ResponseWriter, err error) {
 	var resp apitypes.ErrorResponse
-	gameErr, ok := types.AsGameError(err)
+	gameErr, ok := errors.AsGameError(err)
 	if ok {
 		resp = apitypes.ErrorResponse{
 			Kind:     string(gameErr.Kind()),
@@ -247,13 +248,13 @@ func (c *CrosswordGameAPI) sendError(logger *zap.SugaredLogger, w http.ResponseW
 	}
 }
 
-func (c *CrosswordGameAPI) determineHttpErrorCode(gameErr types.GameError) int {
+func (c *CrosswordGameAPI) determineHttpErrorCode(gameErr errors.GameError) int {
 	switch gameErr.Kind() {
-	case types.GameErrorInvalidInput:
+	case errors.GameErrorInvalidInput:
 		return 400
-	case types.GameErrorNotFound:
+	case errors.GameErrorNotFound:
 		return 404
-	case types.GameErrorInvalidAction:
+	case errors.GameErrorInvalidAction:
 		return 400
 	default:
 		return 500

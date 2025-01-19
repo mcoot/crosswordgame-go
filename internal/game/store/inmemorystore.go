@@ -1,6 +1,7 @@
 package store
 
 import (
+	"github.com/mcoot/crosswordgame-go/internal/errors"
 	gametypes "github.com/mcoot/crosswordgame-go/internal/game/types"
 	lobbytypes "github.com/mcoot/crosswordgame-go/internal/lobby/types"
 )
@@ -24,7 +25,7 @@ func (s *InMemoryStore) StoreGame(gameId gametypes.GameId, game *gametypes.Game)
 func (s *InMemoryStore) RetrieveGame(gameId gametypes.GameId) (*gametypes.Game, error) {
 	game, ok := s.games[gameId]
 	if !ok {
-		return nil, &gametypes.NotFoundError{
+		return nil, &errors.NotFoundError{
 			ObjectKind: "game",
 			ObjectID:   gameId,
 		}
@@ -40,7 +41,7 @@ func (s *InMemoryStore) StoreLobby(lobbyId lobbytypes.LobbyId, lobby *lobbytypes
 func (s *InMemoryStore) RetrieveLobby(lobbyId lobbytypes.LobbyId) (*lobbytypes.Lobby, error) {
 	lobby, ok := s.lobbies[lobbyId]
 	if !ok {
-		return nil, &gametypes.NotFoundError{
+		return nil, &errors.NotFoundError{
 			ObjectKind: "lobby",
 			ObjectID:   lobbyId,
 		}
