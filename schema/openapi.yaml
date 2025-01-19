@@ -221,6 +221,10 @@ components:
     HealthcheckResponse:
       type: object
       properties:
+        status:
+          type: string
+          enum:
+            - ok
         start_time:
           type: string
           format: date-time

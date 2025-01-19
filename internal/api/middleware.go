@@ -9,8 +9,8 @@ import (
 	"slices"
 )
 
-func setupMiddleware(ctx context.Context, h http.Handler) (http.Handler, error) {
-	openApiMiddleware, err := buildOpenApiMiddleware(ctx, "./schema/openapi.yaml")
+func setupMiddleware(ctx context.Context, h http.Handler, schemaPath string) (http.Handler, error) {
+	openApiMiddleware, err := buildOpenApiMiddleware(ctx, schemaPath)
 	if err != nil {
 		return nil, err
 	}

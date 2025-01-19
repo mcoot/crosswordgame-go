@@ -16,6 +16,7 @@ func (e ErrorResponse) Error() string {
 }
 
 type HealthcheckResponse struct {
+	Status    string `json:"status"`
 	StartTime string `json:"start_time"`
 }
 

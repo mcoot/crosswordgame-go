@@ -28,7 +28,7 @@ func main() {
 	}
 	gameManager := game.NewGameManager(gameStore, gameScorer)
 	api := internalapi.NewCrosswordGameAPI(gameManager)
-	h, err := api.AttachToMux(ctx, mux)
+	h, err := api.AttachToMux(ctx, mux, "./schema/openapi.yaml")
 	if err != nil {
 		logger.Fatalf("error setting up API: %v", err)
 	}
