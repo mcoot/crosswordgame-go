@@ -2,9 +2,9 @@ package lobby
 
 import (
 	"github.com/hashicorp/go-uuid"
-	"github.com/mcoot/crosswordgame-go/internal/game/store"
 	"github.com/mcoot/crosswordgame-go/internal/lobby/types"
 	playertypes "github.com/mcoot/crosswordgame-go/internal/player/types"
+	"github.com/mcoot/crosswordgame-go/internal/store"
 )
 
 type Manager struct {

@@ -5,9 +5,9 @@ import (
 	"github.com/hashicorp/go-uuid"
 	"github.com/mcoot/crosswordgame-go/internal/errors"
 	"github.com/mcoot/crosswordgame-go/internal/game/scoring"
-	"github.com/mcoot/crosswordgame-go/internal/game/store"
 	"github.com/mcoot/crosswordgame-go/internal/game/types"
 	playertypes "github.com/mcoot/crosswordgame-go/internal/player/types"
+	"github.com/mcoot/crosswordgame-go/internal/store"
 	"slices"
 	"strings"
 )
