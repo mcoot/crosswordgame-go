@@ -19,10 +19,11 @@ var (
 		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 			ctx := context.Background()
 
-			ctx, err := logging.AddLoggerToContext(ctx, true)
+			logger, err := logging.NewLogger(true)
 			if err != nil {
 				return err
 			}
+			ctx = logging.AddLoggerToContext(ctx, logger)
 
 			cwgClient := initClient(cli.FlagServer)
 			ctx = client.AddClientToContext(ctx, cwgClient)

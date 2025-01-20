@@ -24,18 +24,14 @@ func NewLogger(debug bool) (*zap.SugaredLogger, error) {
 	return logger.Sugar(), nil
 }
 
-func AddLoggerToContext(ctx context.Context, debug bool) (context.Context, error) {
-	logger, err := NewLogger(debug)
-	if err != nil {
-		return nil, err
-	}
-	return context.WithValue(ctx, loggerKey, logger), nil
+func AddLoggerToContext(ctx context.Context, logger *zap.SugaredLogger) context.Context {
+	return context.WithValue(ctx, loggerKey, logger)
 }
 
-func GetLogger(ctx context.Context, loggerName string) *zap.SugaredLogger {
+func GetLogger(ctx context.Context) *zap.SugaredLogger {
 	logger, ok := ctx.Value(loggerKey).(*zap.SugaredLogger)
 	if !ok {
 		return zap.NewNop().Sugar()
 	}
-	return logger.Named(loggerName)
+	return logger
 }

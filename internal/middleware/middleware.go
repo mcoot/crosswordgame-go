@@ -1,53 +1,56 @@
-package api
+package middleware
 
 import (
 	"context"
 	"github.com/getkin/kin-openapi/openapi3"
+	"github.com/gorilla/mux"
 	"github.com/mcoot/crosswordgame-go/internal/logging"
 	nethttpmiddleware "github.com/oapi-codegen/nethttp-middleware"
+	"go.uber.org/zap"
 	"net/http"
-	"slices"
 )
 
-func setupMiddleware(ctx context.Context, h http.Handler, schemaPath string) (http.Handler, error) {
-	openApiMiddleware, err := buildOpenApiMiddleware(ctx, schemaPath)
+func SetupMiddleware(router *mux.Router, baseLogger *zap.SugaredLogger) error {
+	openApiMiddleware, err := buildOpenApiMiddleware(
+		baseLogger.Named("openapi"),
+		"./schema/openapi.yaml",
+	)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	// Middleware list in first-to-last order
-	middlewares := []func(next http.Handler) http.Handler{
-		ctxMiddleware(ctx),
-		requestLoggerMiddleware,
-		openApiMiddleware,
-	}
+	router.Use(loggerInContextMiddleware(baseLogger))
+	router.Use(requestLoggerMiddleware)
+	router.Use(openApiMiddleware)
 
-	slices.Reverse(middlewares)
-	for _, m := range middlewares {
-		h = m(h)
-	}
-
-	return h, nil
+	return nil
 }
 
-func ctxMiddleware(ctx context.Context) func(next http.Handler) http.Handler {
+func loggerInContextMiddleware(baseLogger *zap.SugaredLogger) func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			r = r.WithContext(ctx)
+			logger := baseLogger.
+				Named("api").
+				With("path", r.URL.Path)
+			reqCtx := r.Context()
+
+			ctxWithLogger := logging.AddLoggerToContext(reqCtx, logger)
+
+			r = r.WithContext(ctxWithLogger)
 			next.ServeHTTP(w, r)
 		})
 	}
 }
 
-func buildOpenApiMiddleware(ctx context.Context, schemaPath string) (func(next http.Handler) http.Handler, error) {
+func buildOpenApiMiddleware(logger *zap.SugaredLogger, schemaPath string) (func(next http.Handler) http.Handler, error) {
 	loader := openapi3.Loader{
-		Context: ctx,
+		Context: context.Background(),
 	}
 	doc, err := loader.LoadFromFile(schemaPath)
 	if err != nil {
 		return nil, err
 	}
-	err = doc.Validate(ctx)
+	err = doc.Validate(context.Background())
 	if err != nil {
 		return nil, err
 	}
@@ -56,7 +59,6 @@ func buildOpenApiMiddleware(ctx context.Context, schemaPath string) (func(next h
 		doc,
 		&nethttpmiddleware.Options{
 			ErrorHandler: func(w http.ResponseWriter, message string, statusCode int) {
-				logger := logging.GetLogger(ctx, "openapi")
 				logger.Warnw(
 					"openapi validation error",
 					"message", message,
@@ -70,8 +72,8 @@ func buildOpenApiMiddleware(ctx context.Context, schemaPath string) (func(next h
 
 func requestLoggerMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		logger := logging.GetLogger(r.Context(), "request")
-		logger.Infow("request", "method", r.Method, "url", r.URL)
+		logger := logging.GetLogger(r.Context()).Named("access_log")
+		logger.Infow("access log", "method", r.Method, "url", r.URL)
 		next.ServeHTTP(w, r)
 	})
 }

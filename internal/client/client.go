@@ -12,6 +12,7 @@ import (
 )
 
 const (
+	healthcheckPath        = "/api/v1/health"
 	createGamePath         = "/api/v1/game"
 	getGameStatePath       = "/api/v1/game/%s"
 	getPlayerStatePath     = "/api/v1/game/%s/player/%s"
@@ -40,7 +41,7 @@ func NewClient(httpClient *http.Client, baseUrl string) *Client {
 }
 
 func (c *Client) Health() (*apitypes.HealthcheckResponse, error) {
-	resp, err := c.client.Get(c.url("/health"))
+	resp, err := c.client.Get(c.url(healthcheckPath))
 	if err != nil {
 		return nil, err
 	}

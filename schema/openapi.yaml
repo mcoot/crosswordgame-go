@@ -4,7 +4,7 @@ info:
   description: Crossword Game
   version: 1.0.0
 paths:
-  /health:
+  /api/v1/health:
     get:
       summary: Health check
       operationId: healthCheck

@@ -1,7 +1,7 @@
 package e2e
 
 import (
-	"context"
+	"github.com/gorilla/mux"
 	internalapi "github.com/mcoot/crosswordgame-go/internal/api"
 	"github.com/mcoot/crosswordgame-go/internal/client"
 	"github.com/mcoot/crosswordgame-go/internal/game"
@@ -38,14 +38,15 @@ func (s *CrosswordGameE2ESuite) SetupSuite() {
 
 	api := internalapi.NewCrosswordGameAPI(gameManager, lobbyManager)
 
-	mux := http.NewServeMux()
-	h, err := api.AttachToMux(context.Background(), mux, "../../schema/openapi.yaml")
+	router := mux.NewRouter()
+	apiRouter := router.PathPrefix("/api/v1").Subrouter()
+	err = api.AttachToRouter(apiRouter)
 	if err != nil {
 		panic(err)
 	}
 
 	// Run the API as an httptest server
-	s.server = httptest.NewServer(h)
+	s.server = httptest.NewServer(router)
 	s.client = client.NewClient(&http.Client{}, s.server.URL)
 }
 

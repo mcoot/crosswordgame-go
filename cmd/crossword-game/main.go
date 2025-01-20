@@ -1,44 +1,50 @@
 package main
 
 import (
+	"github.com/gorilla/mux"
 	internalapi "github.com/mcoot/crosswordgame-go/internal/api"
 	"github.com/mcoot/crosswordgame-go/internal/game"
 	"github.com/mcoot/crosswordgame-go/internal/game/scoring"
 	"github.com/mcoot/crosswordgame-go/internal/lobby"
 	"github.com/mcoot/crosswordgame-go/internal/logging"
+	"github.com/mcoot/crosswordgame-go/internal/middleware"
 	"github.com/mcoot/crosswordgame-go/internal/store"
-	"github.com/mcoot/crosswordgame-go/internal/utils"
 	"log"
 	"net/http"
 )
 
 func main() {
-	ctx := utils.RootContext()
-	ctx, err := logging.AddLoggerToContext(ctx, true)
+	logger, err := logging.NewLogger(true)
 	if err != nil {
-		log.Fatalf("error adding logger to utils: %v", err)
+		log.Fatalf("error creating logger: %v", err)
 	}
-	logger := logging.GetLogger(ctx, "main")
 
-	mux := http.NewServeMux()
+	router := mux.NewRouter()
 
-	store := store.NewInMemoryStore()
+	err = middleware.SetupMiddleware(router, logger)
+	if err != nil {
+		logger.Fatalf("error setting up middleware: %v", err)
+	}
+
+	apiRouter := router.PathPrefix("/api/v1").Subrouter()
+
+	db := store.NewInMemoryStore()
 	gameScorer, err := scoring.NewTxtDictScorer("./data/words.txt")
 	if err != nil {
 		logger.Fatalf("error loading dictionary: %v", err)
 	}
-	gameManager := game.NewGameManager(store, gameScorer)
+	gameManager := game.NewGameManager(db, gameScorer)
 
-	lobbyManager := lobby.NewLobbyManager(store)
+	lobbyManager := lobby.NewLobbyManager(db)
 
 	api := internalapi.NewCrosswordGameAPI(gameManager, lobbyManager)
-	h, err := api.AttachToMux(ctx, mux, "./schema/openapi.yaml")
+	err = api.AttachToRouter(apiRouter)
 	if err != nil {
 		logger.Fatalf("error setting up API: %v", err)
 	}
 
 	logger.Infow("starting server", "port", 8080)
-	if err := http.ListenAndServe(":8080", h); err != nil {
+	if err := http.ListenAndServe(":8080", router); err != nil {
 		logger.Fatalf("error serving: %v", err)
 	}
 }
