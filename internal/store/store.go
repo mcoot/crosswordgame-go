@@ -20,3 +20,9 @@ type PlayerStore interface {
 	StorePlayer(playerId playertypes.PlayerId, player *playertypes.Player) error
 	RetrievePlayer(playerId playertypes.PlayerId) (*playertypes.Player, error)
 }
+
+type Store interface {
+	GameStore
+	LobbyStore
+	PlayerStore
+}

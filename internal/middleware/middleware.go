@@ -10,10 +10,10 @@ import (
 	"net/http"
 )
 
-func SetupMiddleware(router *mux.Router, baseLogger *zap.SugaredLogger) error {
+func SetupMiddleware(router *mux.Router, baseLogger *zap.SugaredLogger, schemaPath string) error {
 	openApiMiddleware, err := buildOpenApiMiddleware(
 		baseLogger.Named("openapi"),
-		"./schema/openapi.yaml",
+		schemaPath,
 	)
 	if err != nil {
 		return err

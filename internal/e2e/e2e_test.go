@@ -1,13 +1,10 @@
 package e2e
 
 import (
-	"github.com/gorilla/mux"
-	internalapi "github.com/mcoot/crosswordgame-go/internal/api/jsonapi"
+	"github.com/mcoot/crosswordgame-go/internal/api"
 	"github.com/mcoot/crosswordgame-go/internal/client"
-	"github.com/mcoot/crosswordgame-go/internal/game"
-	"github.com/mcoot/crosswordgame-go/internal/game/scoring"
 	"github.com/mcoot/crosswordgame-go/internal/game/types"
-	"github.com/mcoot/crosswordgame-go/internal/lobby"
+	"github.com/mcoot/crosswordgame-go/internal/logging"
 	playertypes "github.com/mcoot/crosswordgame-go/internal/player/types"
 	"github.com/mcoot/crosswordgame-go/internal/store"
 	"github.com/stretchr/testify/suite"
@@ -27,20 +24,12 @@ func TestCrosswordGameE2ESuite(t *testing.T) {
 }
 
 func (s *CrosswordGameE2ESuite) SetupSuite() {
-	store := store.NewInMemoryStore()
-	gameScorer, err := scoring.NewTxtDictScorer("../../data/words.txt")
+	logger, err := logging.NewLogger(true)
 	if err != nil {
 		panic(err)
 	}
-	gameManager := game.NewGameManager(store, gameScorer)
-
-	lobbyManager := lobby.NewLobbyManager(store)
-
-	api := internalapi.NewCrosswordGameAPI(gameManager, lobbyManager)
-
-	router := mux.NewRouter()
-	apiRouter := router.PathPrefix("/api/v1").Subrouter()
-	err = api.AttachToRouter(apiRouter)
+	db := store.NewInMemoryStore()
+	router, err := api.SetupAPI(logger, db, "../../schema/openapi.yaml", "../../data/words.txt")
 	if err != nil {
 		panic(err)
 	}
