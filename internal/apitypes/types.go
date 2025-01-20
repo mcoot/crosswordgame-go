@@ -2,7 +2,8 @@ package apitypes
 
 import (
 	"fmt"
-	"github.com/mcoot/crosswordgame-go/internal/game/types"
+	gametypes "github.com/mcoot/crosswordgame-go/internal/game/types"
+	lobbytypes "github.com/mcoot/crosswordgame-go/internal/lobby/types"
 	playertypes "github.com/mcoot/crosswordgame-go/internal/player/types"
 )
 
@@ -27,11 +28,11 @@ type CreateGameRequest struct {
 }
 
 type CreateGameResponse struct {
-	GameId types.GameId `json:"game_id"`
+	GameId gametypes.GameId `json:"game_id"`
 }
 
 type GetGameStateResponse struct {
-	Status                  types.Status           `json:"status"`
+	Status                  gametypes.Status       `json:"status"`
 	SquaresFilled           int                    `json:"squares_filled"`
 	CurrentAnnouncingPlayer playertypes.PlayerId   `json:"current_announcing_player"`
 	Players                 []playertypes.PlayerId `json:"players"`
@@ -42,8 +43,8 @@ type GetPlayerStateResponse struct {
 }
 
 type GetPlayerScoreResponse struct {
-	TotalScore int                 `json:"total_score"`
-	Words      []*types.ScoredWord `json:"words"`
+	TotalScore int                     `json:"total_score"`
+	Words      []*gametypes.ScoredWord `json:"words"`
 }
 
 type SubmitAnnouncementRequest struct {
@@ -58,3 +59,17 @@ type SubmitPlacementRequest struct {
 }
 
 type SubmitPlacementResponse struct{}
+
+type CreateLobbyRequest struct {
+	Name string `json:"name"`
+}
+
+type CreateLobbyResponse struct {
+	LobbyId lobbytypes.LobbyId `json:"lobby_id"`
+}
+
+type GetLobbyStateResponse struct {
+	Name    string                 `json:"name"`
+	Players []playertypes.PlayerId `json:"players"`
+	GameID  gametypes.GameId       `json:"game_id,omitempty"`
+}

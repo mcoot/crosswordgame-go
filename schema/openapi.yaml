@@ -206,6 +206,59 @@ paths:
               application/json:
                 schema:
                   $ref: '#/components/schemas/ErrorResponse'
+  /api/v1/lobby:
+    post:
+      summary: Create a new lobby
+      operationId: createLobby
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateLobbyRequest'
+      responses:
+        '201':
+          description: Created
+          headers:
+            Location:
+              description: Location of the new lobby
+              schema:
+                type: string
+                format: uri
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateGameResponse'
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /api/v1/lobby/{lobby_id}:
+    get:
+      summary: Get lobby state
+      operationId: getLobbyState
+      parameters:
+          - name: lobby_id
+            in: path
+            required: true
+            description: ID of the lobby
+            schema:
+              $ref: '#/components/schemas/LobbyId'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetLobbyStateResponse'
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
 
 components:
   schemas:
@@ -359,3 +412,31 @@ components:
       description: A single letter
       type: string
       maxLength: 1
+    CreateLobbyRequest:
+      type: object
+      properties:
+        name:
+          type: string
+      required:
+        - name
+    CreateLobbyResponse:
+      type: object
+      properties:
+        lobby_id:
+          $ref: '#/components/schemas/LobbyId'
+      required:
+        - lobby_id
+    GetLobbyStateResponse:
+      type: object
+      properties:
+        players:
+          type: array
+          items:
+            $ref: '#/components/schemas/PlayerId'
+        game_id:
+          $ref: '#/components/schemas/GameId'
+      required:
+        - players
+    LobbyId:
+      description: ID of a lobby
+      type: string

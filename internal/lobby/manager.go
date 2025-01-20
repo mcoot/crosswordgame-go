@@ -20,7 +20,7 @@ func NewLobbyManager(store store.LobbyStore) *Manager {
 	}
 }
 
-func (m *Manager) CreateLobby(name string) (types.LobbyId, error) {
+func (m *Manager) NewLobby(name string) (types.LobbyId, error) {
 	rawId, err := uuid.GenerateUUID()
 	if err != nil {
 		return "", err

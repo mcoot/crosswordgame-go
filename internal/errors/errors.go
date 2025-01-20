@@ -16,6 +16,7 @@ const (
 
 type GameError interface {
 	error
+	HTTPCode() int
 	Kind() GameErrorKind
 	Message() string
 }
@@ -35,6 +36,10 @@ type InvalidInputError struct {
 	ErrMessage string
 }
 
+func (e *InvalidInputError) HTTPCode() int {
+	return 400
+}
+
 func (e *InvalidInputError) Kind() GameErrorKind {
 	return GameErrorInvalidInput
 }
@@ -50,6 +55,10 @@ func (e *InvalidInputError) Error() string {
 type NotFoundError struct {
 	ObjectKind string
 	ObjectID   interface{}
+}
+
+func (e *NotFoundError) HTTPCode() int {
+	return 404
 }
 
 func (e *NotFoundError) Kind() GameErrorKind {
@@ -69,6 +78,10 @@ type InvalidActionError struct {
 	Reason string
 }
 
+func (e *InvalidActionError) HTTPCode() int {
+	return 400
+}
+
 func (e *InvalidActionError) Kind() GameErrorKind {
 	return GameErrorInvalidAction
 }
@@ -83,6 +96,10 @@ func (e *InvalidActionError) Error() string {
 
 type UnexpectedGameLogicError struct {
 	ErrMessage string
+}
+
+func (e *UnexpectedGameLogicError) HTTPCode() int {
+	return 500
 }
 
 func (e *UnexpectedGameLogicError) Kind() GameErrorKind {
