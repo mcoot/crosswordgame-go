@@ -4,6 +4,22 @@ info:
   description: Crossword Game
   version: 1.0.0
 paths:
+  /:
+    get:
+      operationId: webIndexRootRedirect
+      responses:
+        '302':
+          description: Redirect to index
+  /index.html:
+    get:
+      summary: Website index
+      operationId: webIndex
+      responses:
+        '200':
+          description: OK
+          content:
+            text/html: {}
+
   /api/v1/health:
     get:
       summary: Health check

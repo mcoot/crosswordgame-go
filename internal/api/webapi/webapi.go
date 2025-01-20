@@ -1,7 +1,7 @@
 package webapi
 
 import (
-	"context"
+	"github.com/gorilla/mux"
 	"github.com/mcoot/crosswordgame-go/internal/game"
 	"github.com/mcoot/crosswordgame-go/internal/lobby"
 	"golang.org/x/tools/godoc/redirect"
@@ -20,11 +20,11 @@ func NewCrosswordGameWebAPI(gameManager *game.Manager, lobbyManager *lobby.Manag
 	}
 }
 
-func (c *CrosswordGameWebAPI) AttachToMux(ctx context.Context, mux *http.ServeMux) (http.Handler, error) {
-	mux.Handle("GET /", redirect.Handler("/index.html"))
-	mux.HandleFunc("GET /index.html", c.Index)
+func (c *CrosswordGameWebAPI) AttachToRouter(router *mux.Router) error {
+	router.Handle("/", redirect.Handler("/index.html")).Methods("GET")
+	router.HandleFunc("/index.html", c.Index).Methods("GET")
 
-	return mux, nil
+	return nil
 }
 
 func (c *CrosswordGameWebAPI) Index(w http.ResponseWriter, r *http.Request) {
