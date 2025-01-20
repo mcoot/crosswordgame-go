@@ -7,6 +7,8 @@ import (
 	"github.com/mcoot/crosswordgame-go/internal/game/scoring"
 	"github.com/mcoot/crosswordgame-go/internal/game/store"
 	"github.com/mcoot/crosswordgame-go/internal/game/types"
+	playertypes "github.com/mcoot/crosswordgame-go/internal/player/types"
+	"slices"
 	"strings"
 )
 
@@ -22,8 +24,8 @@ func NewGameManager(store store.GameStore, scorer scoring.Scorer) *Manager {
 	}
 }
 
-func (m *Manager) NewGame(playerCount int, boardDimension int) (types.GameId, error) {
-	game := types.NewGame(playerCount, boardDimension)
+func (m *Manager) NewGame(players []playertypes.PlayerId, boardDimension int) (types.GameId, error) {
+	game := types.NewGame(players, boardDimension)
 	rawId, err := uuid.GenerateUUID()
 	if err != nil {
 		return "", err
@@ -36,30 +38,30 @@ func (m *Manager) NewGame(playerCount int, boardDimension int) (types.GameId, er
 	return id, nil
 }
 
-func (m *Manager) GetGameState(gameId types.GameId) (*types.GameState, error) {
+func (m *Manager) GetGameState(gameId types.GameId) (*types.Game, error) {
 	game, err := m.store.RetrieveGame(gameId)
 	if err != nil {
 		return nil, err
 	}
-	return &game.GameState, nil
+	return game, nil
 }
 
-func (m *Manager) GetPlayerState(gameId types.GameId, playerId int) (*types.Player, error) {
+func (m *Manager) GetPlayerBoard(gameId types.GameId, playerId playertypes.PlayerId) (*types.Board, error) {
 	game, err := m.store.RetrieveGame(gameId)
 	if err != nil {
 		return nil, err
 	}
 
-	return getPlayer(game, playerId)
+	return getPlayerBoard(game, playerId)
 }
 
-func (m *Manager) GetPlayerScore(gameId types.GameId, playerId int) (int, []*types.ScoredWord, error) {
+func (m *Manager) GetPlayerScore(gameId types.GameId, playerId playertypes.PlayerId) (int, []*types.ScoredWord, error) {
 	game, err := m.store.RetrieveGame(gameId)
 	if err != nil {
 		return 0, nil, err
 	}
 
-	player, err := getPlayer(game, playerId)
+	player, err := getPlayerBoard(game, playerId)
 	if err != nil {
 		return 0, nil, err
 	}
@@ -80,14 +82,14 @@ func (m *Manager) GetPlayerScore(gameId types.GameId, playerId int) (int, []*typ
 	return total, words, nil
 }
 
-func (m *Manager) SubmitAnnouncement(gameId types.GameId, playerId int, announcedLetter string) error {
+func (m *Manager) SubmitAnnouncement(gameId types.GameId, playerId playertypes.PlayerId, announcedLetter string) error {
 	game, err := m.store.RetrieveGame(gameId)
 	if err != nil {
 		return err
 	}
 
 	// Validate the player is real
-	_, err = getPlayer(game, playerId)
+	_, err = getPlayerBoard(game, playerId)
 	if err != nil {
 		return err
 	}
@@ -108,7 +110,7 @@ func (m *Manager) SubmitAnnouncement(gameId types.GameId, playerId int, announce
 			PlayerId: playerId,
 			Action:   "announce",
 			Reason: fmt.Sprintf(
-				"it is not player %d's turn to announce",
+				"it is not player %s's turn to announce",
 				playerId,
 			),
 		}
@@ -125,18 +127,18 @@ func (m *Manager) SubmitAnnouncement(gameId types.GameId, playerId int, announce
 
 	game.Status = types.StatusAwaitingPlacement
 	game.CurrentAnnouncedLetter = announcedLetter
-	game.CurrentAnnouncingPlayer = (playerId + 1) % len(game.Players)
+	rotateAnnouncingPlayer(game)
 
 	return m.store.StoreGame(gameId, game)
 }
 
-func (m *Manager) SubmitPlacement(gameId types.GameId, playerId int, row, column int) error {
+func (m *Manager) SubmitPlacement(gameId types.GameId, playerId playertypes.PlayerId, row, column int) error {
 	game, err := m.store.RetrieveGame(gameId)
 	if err != nil {
 		return err
 	}
 
-	player, err := getPlayer(game, playerId)
+	player, err := getPlayerBoard(game, playerId)
 	if err != nil {
 		return err
 	}
@@ -168,13 +170,11 @@ func (m *Manager) SubmitPlacement(gameId types.GameId, playerId int, row, column
 
 func (m *Manager) fillPlayerSquare(
 	game *types.Game,
-	playerId int,
-	player *types.Player,
+	playerId playertypes.PlayerId,
+	board *types.Board,
 	row int,
 	column int,
 ) error {
-	board := player.Board
-
 	playerFilledSquares := board.FilledSquares()
 	if playerFilledSquares == game.SquaresFilled+1 {
 		// The player already filled a square this turn
@@ -190,7 +190,7 @@ func (m *Manager) fillPlayerSquare(
 		// TODO: abandon game in this case
 		return &errors.UnexpectedGameLogicError{
 			ErrMessage: fmt.Sprintf(
-				"expected player %d to have filled %d squares, but they have %d",
+				"expected player %s to have filled %d squares, but they have %d",
 				playerId,
 				game.SquaresFilled,
 				playerFilledSquares,
@@ -217,8 +217,8 @@ func (m *Manager) fillPlayerSquare(
 func (m *Manager) checkAndProcessEndTurnOrGame(game *types.Game) error {
 	// Check if any players are yet to have their turn
 	playersLeft := false
-	for _, player := range game.Players {
-		if player.Board.FilledSquares() < game.SquaresFilled+1 {
+	for _, board := range game.PlayerBoards {
+		if board.FilledSquares() < game.SquaresFilled+1 {
 			playersLeft = true
 			break
 		}
@@ -240,13 +240,20 @@ func (m *Manager) checkAndProcessEndTurnOrGame(game *types.Game) error {
 	return nil
 }
 
-func getPlayer(game *types.Game, playerId int) (*types.Player, error) {
-	if playerId < 0 || playerId >= len(game.Players) {
+func getPlayerBoard(game *types.Game, playerId playertypes.PlayerId) (*types.Board, error) {
+	idx := slices.Index(game.Players, playerId)
+
+	if idx == -1 {
 		return nil, &errors.NotFoundError{
 			ObjectKind: "player",
 			ObjectID:   playerId,
 		}
 	}
 
-	return game.Players[playerId], nil
+	return game.PlayerBoards[idx], nil
+}
+
+func rotateAnnouncingPlayer(game *types.Game) {
+	idx := slices.Index(game.Players, game.CurrentAnnouncingPlayer)
+	game.CurrentAnnouncingPlayer = game.Players[(idx+1)%len(game.Players)]
 }

@@ -1,5 +1,7 @@
 package types
 
+import playertypes "github.com/mcoot/crosswordgame-go/internal/player/types"
+
 type GameId string
 
 type Status string
@@ -10,36 +12,30 @@ const (
 	StatusFinished             Status = "finished"
 )
 
-type GameState struct {
+type Game struct {
 	Status                  Status
-	PlayerCount             int
+	Players                 []playertypes.PlayerId
 	SquaresFilled           int
 	BoardDimension          int
-	CurrentAnnouncingPlayer int
+	CurrentAnnouncingPlayer playertypes.PlayerId
 	CurrentAnnouncedLetter  string
+	PlayerBoards            []*Board
 }
 
-type Game struct {
-	GameState
-	Players []*Player
-}
-
-func NewGame(playerCount int, boardDimension int) *Game {
-	players := make([]*Player, playerCount)
+func NewGame(players []playertypes.PlayerId, boardDimension int) *Game {
+	playerBoards := make([]*Board, len(players))
 	for i := range players {
-		players[i] = NewPlayer(boardDimension)
+		playerBoards[i] = NewBoard(boardDimension)
 	}
 
 	return &Game{
-		GameState: GameState{
-			Status:                  StatusAwaitingAnnouncement,
-			PlayerCount:             playerCount,
-			SquaresFilled:           0,
-			BoardDimension:          boardDimension,
-			CurrentAnnouncingPlayer: 0,
-			CurrentAnnouncedLetter:  "",
-		},
-		Players: players,
+		Status:                  StatusAwaitingAnnouncement,
+		Players:                 players,
+		SquaresFilled:           0,
+		BoardDimension:          boardDimension,
+		CurrentAnnouncingPlayer: players[0],
+		CurrentAnnouncedLetter:  "",
+		PlayerBoards:            playerBoards,
 	}
 }
 

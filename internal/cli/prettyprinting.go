@@ -56,12 +56,18 @@ func printCreateGameResponse(v *apitypes.CreateGameResponse) {
 }
 
 func printGetGameStateResponse(v *apitypes.GetGameStateResponse) {
+	var playerSb strings.Builder
+	for _, player := range v.Players {
+		playerSb.WriteString(fmt.Sprintf("    %s\n", player))
+	}
+
 	fmt.Printf(`Game:
-  Player Count: %d
+  Players:
+%s
   Current State: %s
   Squares Filled: %d
-  Current Announcing Player: %d
-`, v.PlayerCount, v.Status, v.SquaresFilled, v.CurrentAnnouncingPlayer)
+  Current Announcing Player: %s
+`, playerSb.String(), v.Status, v.SquaresFilled, v.CurrentAnnouncingPlayer)
 }
 
 func printGetPlayerStateResponse(v *apitypes.GetPlayerStateResponse) {

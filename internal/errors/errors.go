@@ -3,6 +3,7 @@ package errors
 import (
 	"errors"
 	"fmt"
+	playertypes "github.com/mcoot/crosswordgame-go/internal/player/types"
 )
 
 type GameErrorKind string
@@ -65,7 +66,7 @@ func (e *NotFoundError) Error() string {
 }
 
 type InvalidActionError struct {
-	PlayerId int
+	PlayerId playertypes.PlayerId
 	Action   string
 	Reason   string
 }
@@ -75,7 +76,7 @@ func (e *InvalidActionError) Kind() GameErrorKind {
 }
 
 func (e *InvalidActionError) Message() string {
-	return fmt.Sprintf("invalid action \"%s\" for player %d: %s", e.Action, e.PlayerId, e.Reason)
+	return fmt.Sprintf("invalid action \"%s\" for player %s: %s", e.Action, e.PlayerId, e.Reason)
 }
 
 func (e *InvalidActionError) Error() string {

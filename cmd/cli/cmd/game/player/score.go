@@ -4,19 +4,20 @@ import (
 	"github.com/mcoot/crosswordgame-go/internal/cli"
 	"github.com/mcoot/crosswordgame-go/internal/client"
 	"github.com/mcoot/crosswordgame-go/internal/game/types"
+	playertypes "github.com/mcoot/crosswordgame-go/internal/player/types"
 	"github.com/spf13/cobra"
 )
 
 type GetPlayerScoreCommand struct {
 	GameId   string
-	PlayerId int
+	PlayerId string
 }
 
 func (c *GetPlayerScoreCommand) Run(cmd *cobra.Command, args []string) error {
 	ctx := cmd.Context()
 	cwg := client.GetClient(ctx)
 
-	score, err := cwg.GetPlayerScore(types.GameId(c.GameId), c.PlayerId)
+	score, err := cwg.GetPlayerScore(types.GameId(c.GameId), playertypes.PlayerId(c.PlayerId))
 	if err != nil {
 		return err
 	}

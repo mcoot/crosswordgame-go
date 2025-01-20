@@ -4,12 +4,13 @@ import (
 	"github.com/mcoot/crosswordgame-go/internal/cli"
 	"github.com/mcoot/crosswordgame-go/internal/client"
 	"github.com/mcoot/crosswordgame-go/internal/game/types"
+	playertypes "github.com/mcoot/crosswordgame-go/internal/player/types"
 	"github.com/spf13/cobra"
 )
 
 type PlayerPlaceCommand struct {
 	GameId   string
-	PlayerId int
+	PlayerId string
 	Row      int
 	Column   int
 }
@@ -18,7 +19,7 @@ func (c *PlayerPlaceCommand) Run(cmd *cobra.Command, args []string) error {
 	ctx := cmd.Context()
 	cwg := client.GetClient(ctx)
 
-	resp, err := cwg.SubmitPlacement(types.GameId(c.GameId), c.PlayerId, c.Row, c.Column)
+	resp, err := cwg.SubmitPlacement(types.GameId(c.GameId), playertypes.PlayerId(c.PlayerId), c.Row, c.Column)
 	if err != nil {
 		return err
 	}

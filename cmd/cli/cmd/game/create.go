@@ -3,11 +3,12 @@ package game
 import (
 	"github.com/mcoot/crosswordgame-go/internal/cli"
 	"github.com/mcoot/crosswordgame-go/internal/client"
+	playertypes "github.com/mcoot/crosswordgame-go/internal/player/types"
 	"github.com/spf13/cobra"
 )
 
 type CreateGameCommand struct {
-	PlayerCount    int
+	PlayerIds      []string
 	BoardDimension int
 }
 
@@ -20,7 +21,12 @@ func (c *CreateGameCommand) Run(cmd *cobra.Command, args []string) error {
 		boardDimension = &c.BoardDimension
 	}
 
-	game, err := cwg.CreateGame(c.PlayerCount, boardDimension)
+	playerIds := make([]playertypes.PlayerId, len(c.PlayerIds))
+	for i, playerId := range c.PlayerIds {
+		playerIds[i] = playertypes.PlayerId(playerId)
+	}
+
+	game, err := cwg.CreateGame(playerIds, boardDimension)
 	if err != nil {
 		return err
 	}
@@ -37,7 +43,9 @@ func (c *CreateGameCommand) Mount(parent *cobra.Command) {
 	}
 
 	createGameCmd.Flags().
-		IntVarP(&c.PlayerCount, "players", "p", 2, "Number of players")
+		StringSliceVarP(&c.PlayerIds, "players", "p", []string{},
+			"Player IDs in the game, comma-separated",
+		)
 	_ = createGameCmd.MarkFlagRequired("players")
 	createGameCmd.Flags().
 		IntVarP(&c.BoardDimension, "dimension", "d", 0, "Board dimension")

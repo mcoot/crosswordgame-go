@@ -6,16 +6,17 @@ import (
 	"fmt"
 	"github.com/mcoot/crosswordgame-go/internal/apitypes"
 	"github.com/mcoot/crosswordgame-go/internal/game/types"
+	playertypes "github.com/mcoot/crosswordgame-go/internal/player/types"
 	"net/http"
 )
 
 const (
 	createGamePath         = "/api/v1/game"
 	getGameStatePath       = "/api/v1/game/%s"
-	getPlayerStatePath     = "/api/v1/game/%s/player/%d"
-	getPlayerScorePath     = "/api/v1/game/%s/player/%d/score"
-	submitAnnouncementPath = "/api/v1/game/%s/player/%d/announce"
-	submitPlacementPath    = "/api/v1/game/%s/player/%d/place"
+	getPlayerStatePath     = "/api/v1/game/%s/player/%s"
+	getPlayerScorePath     = "/api/v1/game/%s/player/%s/score"
+	submitAnnouncementPath = "/api/v1/game/%s/player/%s/announce"
+	submitPlacementPath    = "/api/v1/game/%s/player/%s/place"
 )
 
 type Client struct {
@@ -48,9 +49,9 @@ func (c *Client) Health() (*apitypes.HealthcheckResponse, error) {
 	return &health, nil
 }
 
-func (c *Client) CreateGame(playerCount int, boardDimension *int) (*apitypes.CreateGameResponse, error) {
+func (c *Client) CreateGame(players []playertypes.PlayerId, boardDimension *int) (*apitypes.CreateGameResponse, error) {
 	body := apitypes.CreateGameRequest{
-		PlayerCount: playerCount,
+		Players: players,
 	}
 	if boardDimension != nil {
 		body.BoardDimension = boardDimension
@@ -97,7 +98,7 @@ func (c *Client) GetGameState(gameId types.GameId) (*apitypes.GetGameStateRespon
 	return &gameState, nil
 }
 
-func (c *Client) GetPlayerState(gameId types.GameId, playerId int) (*apitypes.GetPlayerStateResponse, error) {
+func (c *Client) GetPlayerState(gameId types.GameId, playerId playertypes.PlayerId) (*apitypes.GetPlayerStateResponse, error) {
 	resp, err := c.client.Get(c.url(fmt.Sprintf(getPlayerStatePath, gameId, playerId)))
 	if err != nil {
 		return nil, err
@@ -115,7 +116,7 @@ func (c *Client) GetPlayerState(gameId types.GameId, playerId int) (*apitypes.Ge
 	return &playerState, nil
 }
 
-func (c *Client) GetPlayerScore(gameId types.GameId, playerId int) (*apitypes.GetPlayerScoreResponse, error) {
+func (c *Client) GetPlayerScore(gameId types.GameId, playerId playertypes.PlayerId) (*apitypes.GetPlayerScoreResponse, error) {
 	resp, err := c.client.Get(c.url(fmt.Sprintf(getPlayerScorePath, gameId, playerId)))
 	if err != nil {
 		return nil, err
@@ -135,7 +136,7 @@ func (c *Client) GetPlayerScore(gameId types.GameId, playerId int) (*apitypes.Ge
 
 func (c *Client) SubmitAnnouncement(
 	gameId types.GameId,
-	playerId int,
+	playerId playertypes.PlayerId,
 	letter string,
 ) (*apitypes.SubmitAnnouncementResponse, error) {
 	body := apitypes.SubmitAnnouncementRequest{
@@ -167,7 +168,7 @@ func (c *Client) SubmitAnnouncement(
 
 func (c *Client) SubmitPlacement(
 	gameId types.GameId,
-	playerId int,
+	playerId playertypes.PlayerId,
 	row int,
 	column int,
 ) (*apitypes.SubmitPlacementResponse, error) {

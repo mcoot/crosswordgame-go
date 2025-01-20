@@ -31,9 +31,9 @@ func GameIdFlag(cmd *cobra.Command, v *string) {
 	}
 }
 
-func PlayerIdFlag(cmd *cobra.Command, v *int) {
+func PlayerIdFlag(cmd *cobra.Command, v *string) {
 	cmd.Flags().
-		IntVarP(v, "player", "p", -1, "Player ID")
+		StringVarP(v, "player", "p", "", "Player ID")
 	err := cmd.MarkFlagRequired("player")
 	if err != nil {
 		panic(err)

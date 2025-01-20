@@ -3,6 +3,7 @@ package apitypes
 import (
 	"fmt"
 	"github.com/mcoot/crosswordgame-go/internal/game/types"
+	playertypes "github.com/mcoot/crosswordgame-go/internal/player/types"
 )
 
 type ErrorResponse struct {
@@ -21,8 +22,8 @@ type HealthcheckResponse struct {
 }
 
 type CreateGameRequest struct {
-	PlayerCount    int  `json:"player_count"`
-	BoardDimension *int `json:"board_dimension,omitempty"`
+	Players        []playertypes.PlayerId `json:"players"`
+	BoardDimension *int                   `json:"board_dimension,omitempty"`
 }
 
 type CreateGameResponse struct {
@@ -30,10 +31,10 @@ type CreateGameResponse struct {
 }
 
 type GetGameStateResponse struct {
-	Status                  types.Status `json:"status"`
-	SquaresFilled           int          `json:"squares_filled"`
-	CurrentAnnouncingPlayer int          `json:"current_announcing_player"`
-	PlayerCount             int          `json:"player_count"`
+	Status                  types.Status           `json:"status"`
+	SquaresFilled           int                    `json:"squares_filled"`
+	CurrentAnnouncingPlayer playertypes.PlayerId   `json:"current_announcing_player"`
+	Players                 []playertypes.PlayerId `json:"players"`
 }
 
 type GetPlayerStateResponse struct {

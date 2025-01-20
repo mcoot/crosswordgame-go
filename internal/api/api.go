@@ -9,9 +9,9 @@ import (
 	"github.com/mcoot/crosswordgame-go/internal/game/types"
 	"github.com/mcoot/crosswordgame-go/internal/lobby"
 	"github.com/mcoot/crosswordgame-go/internal/logging"
+	playertypes "github.com/mcoot/crosswordgame-go/internal/player/types"
 	"go.uber.org/zap"
 	"net/http"
-	"strconv"
 	"time"
 )
 
@@ -72,7 +72,7 @@ func (c *CrosswordGameAPI) CreateGame(w http.ResponseWriter, r *http.Request) {
 		boardDimension = *req.BoardDimension
 	}
 
-	gameId, err := c.gameManager.NewGame(req.PlayerCount, boardDimension)
+	gameId, err := c.gameManager.NewGame(req.Players, boardDimension)
 	if err != nil {
 		c.sendError(logger, w, err)
 		return
@@ -99,7 +99,7 @@ func (c *CrosswordGameAPI) GetGameState(w http.ResponseWriter, r *http.Request) 
 		Status:                  gameState.Status,
 		SquaresFilled:           gameState.SquaresFilled,
 		CurrentAnnouncingPlayer: gameState.CurrentAnnouncingPlayer,
-		PlayerCount:             gameState.PlayerCount,
+		Players:                 gameState.Players,
 	}
 
 	w.WriteHeader(200)
@@ -112,20 +112,16 @@ func (c *CrosswordGameAPI) GetGameState(w http.ResponseWriter, r *http.Request) 
 func (c *CrosswordGameAPI) GetPlayerState(w http.ResponseWriter, r *http.Request) {
 	logger := c.getLogger(r)
 	gameId := getGameId(r)
-	playerId, err := getPlayerId(r)
-	if err != nil {
-		c.sendError(logger, w, err)
-		return
-	}
+	playerId := getPlayerId(r)
 
-	playerState, err := c.gameManager.GetPlayerState(gameId, playerId)
+	playerState, err := c.gameManager.GetPlayerBoard(gameId, playerId)
 	if err != nil {
 		c.sendError(logger, w, err)
 		return
 	}
 
 	resp := apitypes.GetPlayerStateResponse{
-		Board: playerState.Board.Data,
+		Board: playerState.Data,
 	}
 
 	w.WriteHeader(200)
@@ -138,11 +134,7 @@ func (c *CrosswordGameAPI) GetPlayerState(w http.ResponseWriter, r *http.Request
 func (c *CrosswordGameAPI) SubmitAnnouncement(w http.ResponseWriter, r *http.Request) {
 	logger := c.getLogger(r)
 	gameId := getGameId(r)
-	playerId, err := getPlayerId(r)
-	if err != nil {
-		c.sendError(logger, w, err)
-		return
-	}
+	playerId := getPlayerId(r)
 
 	var req apitypes.SubmitAnnouncementRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
@@ -150,7 +142,7 @@ func (c *CrosswordGameAPI) SubmitAnnouncement(w http.ResponseWriter, r *http.Req
 		return
 	}
 
-	err = c.gameManager.SubmitAnnouncement(gameId, playerId, req.Letter)
+	err := c.gameManager.SubmitAnnouncement(gameId, playerId, req.Letter)
 	if err != nil {
 		c.sendError(logger, w, err)
 		return
@@ -166,11 +158,7 @@ func (c *CrosswordGameAPI) SubmitAnnouncement(w http.ResponseWriter, r *http.Req
 func (c *CrosswordGameAPI) SubmitPlacement(w http.ResponseWriter, r *http.Request) {
 	logger := c.getLogger(r)
 	gameId := getGameId(r)
-	playerId, err := getPlayerId(r)
-	if err != nil {
-		c.sendError(logger, w, err)
-		return
-	}
+	playerId := getPlayerId(r)
 
 	var req apitypes.SubmitPlacementRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
@@ -178,7 +166,7 @@ func (c *CrosswordGameAPI) SubmitPlacement(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	err = c.gameManager.SubmitPlacement(gameId, playerId, req.Row, req.Column)
+	err := c.gameManager.SubmitPlacement(gameId, playerId, req.Row, req.Column)
 	if err != nil {
 		c.sendError(logger, w, err)
 		return
@@ -194,11 +182,7 @@ func (c *CrosswordGameAPI) SubmitPlacement(w http.ResponseWriter, r *http.Reques
 func (c *CrosswordGameAPI) GetPlayerScore(w http.ResponseWriter, r *http.Request) {
 	logger := c.getLogger(r)
 	gameId := getGameId(r)
-	playerId, err := getPlayerId(r)
-	if err != nil {
-		c.sendError(logger, w, err)
-		return
-	}
+	playerId := getPlayerId(r)
 
 	totalScore, words, err := c.gameManager.GetPlayerScore(gameId, playerId)
 	if err != nil {
@@ -270,7 +254,6 @@ func getGameId(r *http.Request) types.GameId {
 	return types.GameId(r.PathValue("gameId"))
 }
 
-func getPlayerId(r *http.Request) (int, error) {
-	playerIdStr := r.PathValue("playerId")
-	return strconv.Atoi(playerIdStr)
+func getPlayerId(r *http.Request) playertypes.PlayerId {
+	return playertypes.PlayerId(r.PathValue("playerId"))
 }

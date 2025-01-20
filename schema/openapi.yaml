@@ -233,17 +233,19 @@ components:
     CreateGameRequest:
       type: object
       properties:
-        player_count:
-          type: integer
-          minimum: 1
-          maximum: 4
+        players:
+          type: array
+          items:
+            $ref: '#/components/schemas/PlayerId'
+          minItems: 1
+          maxItems: 5
         board_dimension:
           type: integer
           minimum: 1
           maximum: 7
           default: 5
       required:
-        - player_count
+        - players
     CreateGameResponse:
       type: object
       properties:
@@ -254,26 +256,24 @@ components:
     GameState:
       type: object
       properties:
-        game_id:
-          $ref: '#/components/schemas/GameId'
         status:
           type: string
           enum:
             - awaiting_announcement
             - awaiting_placement
             - finished
-        player_count:
-          type: integer
-          minimum: 1
+        players:
+          type: array
+          items:
+              $ref: '#/components/schemas/PlayerId'
         squares_filled:
           type: integer
           minimum: 0
         current_announcing_player_id:
           $ref: '#/components/schemas/PlayerId'
       required:
-        - game_id
         - status
-        - player_count
+        - players
         - squares_filled
         - current_announcing_player_id
     PlayerState:
@@ -354,8 +354,7 @@ components:
       type: string
     PlayerId:
       description: ID of a player
-      type: integer
-      minimum: 0
+      type: string
     Letter:
       description: A single letter
       type: string

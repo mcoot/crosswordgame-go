@@ -4,11 +4,13 @@ import (
 	"github.com/mcoot/crosswordgame-go/internal/errors"
 	gametypes "github.com/mcoot/crosswordgame-go/internal/game/types"
 	lobbytypes "github.com/mcoot/crosswordgame-go/internal/lobby/types"
+	playertypes "github.com/mcoot/crosswordgame-go/internal/player/types"
 )
 
 type InMemoryStore struct {
 	games   map[gametypes.GameId]*gametypes.Game
 	lobbies map[lobbytypes.LobbyId]*lobbytypes.Lobby
+	players map[playertypes.PlayerId]*playertypes.Player
 }
 
 func NewInMemoryStore() *InMemoryStore {
@@ -47,4 +49,20 @@ func (s *InMemoryStore) RetrieveLobby(lobbyId lobbytypes.LobbyId) (*lobbytypes.L
 		}
 	}
 	return lobby, nil
+}
+
+func (s *InMemoryStore) StorePlayer(playerId playertypes.PlayerId, player *playertypes.Player) error {
+	s.players[playerId] = player
+	return nil
+}
+
+func (s *InMemoryStore) RetrievePlayer(playerId playertypes.PlayerId) (*playertypes.Player, error) {
+	player, ok := s.players[playerId]
+	if !ok {
+		return nil, &errors.NotFoundError{
+			ObjectKind: "player",
+			ObjectID:   playerId,
+		}
+	}
+	return player, nil
 }
