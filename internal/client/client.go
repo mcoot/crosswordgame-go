@@ -255,59 +255,69 @@ func (c *Client) GetLobbyState(lobbyId lobbytypes.LobbyId) (*apitypes.GetLobbySt
 	return &ret, nil
 }
 
-func (c *Client) JoinLobby(lobbyId lobbytypes.LobbyId, playerId playertypes.PlayerId) error {
+func (c *Client) JoinLobby(lobbyId lobbytypes.LobbyId, playerId playertypes.PlayerId) (*apitypes.JoinLobbyResponse, error) {
 	body := apitypes.JoinLobbyRequest{
 		PlayerId: playerId,
 	}
 	bodyJson, err := json.Marshal(body)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	resp, err := c.client.
 		Post(c.url(fmt.Sprintf(joinLobbyPath, lobbyId)), "application/json", bytes.NewReader(bodyJson))
 	if err != nil {
-		return err
+		return nil, err
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != 200 {
-		return c.parseError(resp)
+		return nil, c.parseError(resp)
 	}
 
-	return nil
+	var ret apitypes.JoinLobbyResponse
+	if err := json.NewDecoder(resp.Body).Decode(&ret); err != nil {
+		return nil, err
+	}
+
+	return &ret, nil
 }
 
-func (c *Client) RemovePlayerFromLobby(lobbyId lobbytypes.LobbyId, playerId playertypes.PlayerId) error {
+func (c *Client) RemovePlayerFromLobby(lobbyId lobbytypes.LobbyId, playerId playertypes.PlayerId) (*apitypes.RemovePlayerFromLobbyResponse, error) {
 	body := apitypes.RemovePlayerFromLobbyRequest{
 		PlayerId: playerId,
 	}
 	bodyJson, err := json.Marshal(body)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	resp, err := c.client.
 		Post(c.url(fmt.Sprintf(removeFromLobbyPath, lobbyId)), "application/json", bytes.NewReader(bodyJson))
 	if err != nil {
-		return err
+		return nil, err
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != 200 {
-		return c.parseError(resp)
+		return nil, c.parseError(resp)
 	}
 
-	return nil
+	var ret apitypes.RemovePlayerFromLobbyResponse
+	if err := json.NewDecoder(resp.Body).Decode(&ret); err != nil {
+		return nil, err
+	}
+
+	return &ret, nil
 }
 
-func (c *Client) AttachGameToLobby(lobbyId lobbytypes.LobbyId, gameId types.GameId) error {
+func (c *Client) AttachGameToLobby(lobbyId lobbytypes.LobbyId, gameId types.GameId) (*apitypes.AttachGameToLobbyResponse, error) {
 	body := apitypes.AttachGameToLobbyRequest{
 		GameId: gameId,
 	}
 	bodyJson, err := json.Marshal(body)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	resp, err := c.client.
@@ -317,22 +327,27 @@ func (c *Client) AttachGameToLobby(lobbyId lobbytypes.LobbyId, gameId types.Game
 			bytes.NewReader(bodyJson),
 		)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != 200 {
-		return c.parseError(resp)
+		return nil, c.parseError(resp)
 	}
 
-	return nil
+	var ret apitypes.AttachGameToLobbyResponse
+	if err := json.NewDecoder(resp.Body).Decode(&ret); err != nil {
+		return nil, err
+	}
+
+	return &ret, nil
 }
 
-func (c *Client) DetachGameFromLobby(lobbyId lobbytypes.LobbyId) error {
+func (c *Client) DetachGameFromLobby(lobbyId lobbytypes.LobbyId) (*apitypes.DetachGameFromLobbyResponse, error) {
 	body := apitypes.DetachGameFromLobbyRequest{}
 	bodyJson, err := json.Marshal(body)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	resp, err := c.client.
@@ -342,15 +357,20 @@ func (c *Client) DetachGameFromLobby(lobbyId lobbytypes.LobbyId) error {
 			bytes.NewReader(bodyJson),
 		)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != 200 {
-		return c.parseError(resp)
+		return nil, c.parseError(resp)
 	}
 
-	return nil
+	var ret apitypes.DetachGameFromLobbyResponse
+	if err := json.NewDecoder(resp.Body).Decode(&ret); err != nil {
+		return nil, err
+	}
+
+	return &ret, nil
 }
 
 func (c *Client) parseError(resp *http.Response) error {

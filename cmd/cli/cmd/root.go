@@ -3,6 +3,7 @@ package cmd
 import (
 	"context"
 	"github.com/mcoot/crosswordgame-go/cmd/cli/cmd/game"
+	"github.com/mcoot/crosswordgame-go/cmd/cli/cmd/lobby"
 	"github.com/mcoot/crosswordgame-go/internal/cli"
 	"github.com/mcoot/crosswordgame-go/internal/client"
 	"github.com/mcoot/crosswordgame-go/internal/logging"
@@ -38,6 +39,7 @@ func init() {
 
 	(&HealthCommand{}).Mount(rootCmd)
 	(&game.GameCommand{}).Mount(rootCmd)
+	(&lobby.LobbyCommand{}).Mount(rootCmd)
 }
 
 func initClient(baseUrl string) *client.Client {

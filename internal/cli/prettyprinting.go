@@ -36,6 +36,24 @@ func apiPrettyPrint(v interface{}) bool {
 	case *apitypes.SubmitPlacementResponse:
 		printSubmitPlacementResponse(v)
 		return true
+	case *apitypes.CreateLobbyResponse:
+		printCreateLobbyResponse(v)
+		return true
+	case *apitypes.GetLobbyStateResponse:
+		printGetLobbyStateResponse(v)
+		return true
+	case *apitypes.JoinLobbyResponse:
+		printJoinLobbyResponse(v)
+		return true
+	case *apitypes.RemovePlayerFromLobbyResponse:
+		printRemoveFromLobbyResponse(v)
+		return true
+	case *apitypes.AttachGameToLobbyResponse:
+		printAttachGameToLobbyResponse(v)
+		return true
+	case *apitypes.DetachGameFromLobbyResponse:
+		printDetachGameFromLobbyResponse(v)
+		return true
 	case []interface{}:
 		spew.Dump(v)
 		return true
@@ -114,4 +132,42 @@ func printGetPlayerScoreResponse(v *apitypes.GetPlayerScoreResponse) {
 	for _, word := range v.Words {
 		fmt.Printf("    %s (%d)\n", word.Word, word.Score)
 	}
+}
+
+func printCreateLobbyResponse(v *apitypes.CreateLobbyResponse) {
+	fmt.Printf(`Lobby created:
+  Lobby ID: %s
+`, v.LobbyId)
+}
+
+func printGetLobbyStateResponse(v *apitypes.GetLobbyStateResponse) {
+	gameIdStr := "<None>"
+	if v.GameID != "" {
+		gameIdStr = string(v.GameID)
+	}
+
+	fmt.Printf(`Lobby:
+  Name: %s
+  Current Game: %s
+  Players:
+`, v.Name, gameIdStr)
+	for _, player := range v.Players {
+		fmt.Printf("    %s\n", player)
+	}
+}
+
+func printJoinLobbyResponse(v *apitypes.JoinLobbyResponse) {
+	fmt.Printf("Joined lobby\n")
+}
+
+func printRemoveFromLobbyResponse(v *apitypes.RemovePlayerFromLobbyResponse) {
+	fmt.Printf("Player removed from lobby\n")
+}
+
+func printAttachGameToLobbyResponse(v *apitypes.AttachGameToLobbyResponse) {
+	fmt.Printf("Game attached to lobby\n")
+}
+
+func printDetachGameFromLobbyResponse(v *apitypes.DetachGameFromLobbyResponse) {
+	fmt.Printf("Game detached from lobby\n")
 }

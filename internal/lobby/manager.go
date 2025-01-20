@@ -50,6 +50,14 @@ func (m *Manager) JoinPlayerToLobby(lobbyId types.LobbyId, playerId playertypes.
 	if err != nil {
 		return err
 	}
+
+	if isPlayerInLobby(lobby, playerId) {
+		return &errors.InvalidActionError{
+			Action: "join_player_to_lobby",
+			Reason: fmt.Sprintf("player %s is already in lobby %s", playerId, lobbyId),
+		}
+	}
+
 	lobby.Players = append(lobby.Players, playerId)
 	return m.store.StoreLobby(lobbyId, lobby)
 }
@@ -59,12 +67,22 @@ func (m *Manager) RemovePlayerFromLobby(lobbyId types.LobbyId, playerId playerty
 	if err != nil {
 		return err
 	}
+	foundPlayer := false
 	for i, p := range lobby.Players {
 		if p == playerId {
 			lobby.Players = append(lobby.Players[:i], lobby.Players[i+1:]...)
+			foundPlayer = true
 			break
 		}
 	}
+
+	if !foundPlayer {
+		return &errors.InvalidActionError{
+			Action: "remove_player_from_lobby",
+			Reason: fmt.Sprintf("player %s is not in lobby %s", playerId, lobbyId),
+		}
+	}
+
 	return m.store.StoreLobby(lobbyId, lobby)
 }
 
@@ -102,4 +120,13 @@ func (m *Manager) DetachGameFromLobby(lobbyId types.LobbyId) error {
 
 	lobby.RunningGame = nil
 	return m.store.StoreLobby(lobbyId, lobby)
+}
+
+func isPlayerInLobby(lobby *types.Lobby, playerId playertypes.PlayerId) bool {
+	for _, p := range lobby.Players {
+		if p == playerId {
+			return true
+		}
+	}
+	return false
 }

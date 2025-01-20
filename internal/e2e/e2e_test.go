@@ -205,3 +205,71 @@ func (s *CrosswordGameE2ESuite) Test_FullGame2x2() {
 	s.Equal(4, playerScore1.TotalScore)
 
 }
+
+func (s *CrosswordGameE2ESuite) Test_LobbyManipulation() {
+	lobbyName := "lobby0"
+	playerIds := []playertypes.PlayerId{
+		"player0",
+		"player1",
+	}
+	boardDim := 2
+	// Create a game to attach later
+	gameId := createGame(s.T(), s.client, playerIds, &boardDim)
+
+	// Create a lobby
+	lobbyId := createLobby(s.T(), s.client, lobbyName)
+
+	// Validate lobby state
+	lobbyState := getLobbyState(s.T(), s.client, lobbyId)
+	s.Equal(lobbyName, lobbyState.Name)
+	s.Equal(0, len(lobbyState.Players))
+	s.Equal(types.GameId(""), lobbyState.GameID)
+
+	// Add players to the lobby
+	joinLobby(s.T(), s.client, lobbyId, playerIds[0])
+	joinLobby(s.T(), s.client, lobbyId, playerIds[1])
+
+	// Validate lobby state after players join
+	lobbyState = getLobbyState(s.T(), s.client, lobbyId)
+	s.Equal(2, len(lobbyState.Players))
+	s.Contains(lobbyState.Players, playerIds[0])
+	s.Contains(lobbyState.Players, playerIds[1])
+
+	// Remove a player from the lobby
+	removePlayerFromLobby(s.T(), s.client, lobbyId, playerIds[0])
+
+	// Validate lobby state after player is removed
+	lobbyState = getLobbyState(s.T(), s.client, lobbyId)
+	s.Equal(1, len(lobbyState.Players))
+	s.NotContains(lobbyState.Players, playerIds[0])
+
+	// Attempting to add a player already in the lobby should fail
+	_, err := s.client.JoinLobby(lobbyId, playerIds[1])
+	s.Error(err)
+
+	// Attempting to remove a player not in the lobby should fail
+	_, err = s.client.RemovePlayerFromLobby(lobbyId, playerIds[0])
+	s.Error(err)
+
+	// Attach the game to the lobby
+	attachGameToLobby(s.T(), s.client, lobbyId, gameId)
+
+	// Validate lobby state after game is attached
+	lobbyState = getLobbyState(s.T(), s.client, lobbyId)
+	s.Equal(gameId, lobbyState.GameID)
+
+	// Attempting to attach a game while one is already attached should fail
+	_, err = s.client.AttachGameToLobby(lobbyId, gameId)
+	s.Error(err)
+
+	// Detach the game from the lobby
+	detachGameFromLobby(s.T(), s.client, lobbyId)
+
+	// Validate lobby state after game is detached
+	lobbyState = getLobbyState(s.T(), s.client, lobbyId)
+	s.Equal(types.GameId(""), lobbyState.GameID)
+
+	// Attempting to detach a game without one attached should fail
+	_, err = s.client.DetachGameFromLobby(lobbyId)
+	s.Error(err)
+}

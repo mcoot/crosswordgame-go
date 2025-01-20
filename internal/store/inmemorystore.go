@@ -15,7 +15,9 @@ type InMemoryStore struct {
 
 func NewInMemoryStore() *InMemoryStore {
 	return &InMemoryStore{
-		games: make(map[gametypes.GameId]*gametypes.Game),
+		games:   make(map[gametypes.GameId]*gametypes.Game),
+		lobbies: make(map[lobbytypes.LobbyId]*lobbytypes.Lobby),
+		players: make(map[playertypes.PlayerId]*playertypes.Player),
 	}
 }
 

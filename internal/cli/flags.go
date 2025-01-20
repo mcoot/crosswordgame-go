@@ -40,6 +40,15 @@ func PlayerIdFlag(cmd *cobra.Command, v *string) {
 	}
 }
 
+func LobbyIdFlag(cmd *cobra.Command, v *string) {
+	cmd.Flags().
+		StringVarP(v, "lobby", "l", "", "Lobby ID")
+	err := cmd.MarkFlagRequired("lobby")
+	if err != nil {
+		panic(err)
+	}
+}
+
 type LetterValue string
 
 func (l *LetterValue) Set(value string) error {
