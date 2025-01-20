@@ -2,7 +2,7 @@ package main
 
 import (
 	"github.com/gorilla/mux"
-	internalapi "github.com/mcoot/crosswordgame-go/internal/api"
+	"github.com/mcoot/crosswordgame-go/internal/api/jsonapi"
 	"github.com/mcoot/crosswordgame-go/internal/game"
 	"github.com/mcoot/crosswordgame-go/internal/game/scoring"
 	"github.com/mcoot/crosswordgame-go/internal/lobby"
@@ -37,7 +37,7 @@ func main() {
 
 	lobbyManager := lobby.NewLobbyManager(db)
 
-	api := internalapi.NewCrosswordGameAPI(gameManager, lobbyManager)
+	api := jsonapi.NewCrosswordGameAPI(gameManager, lobbyManager)
 	err = api.AttachToRouter(apiRouter)
 	if err != nil {
 		logger.Fatalf("error setting up API: %v", err)

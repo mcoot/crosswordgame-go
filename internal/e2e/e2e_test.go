@@ -2,7 +2,7 @@ package e2e
 
 import (
 	"github.com/gorilla/mux"
-	internalapi "github.com/mcoot/crosswordgame-go/internal/api"
+	internalapi "github.com/mcoot/crosswordgame-go/internal/api/jsonapi"
 	"github.com/mcoot/crosswordgame-go/internal/client"
 	"github.com/mcoot/crosswordgame-go/internal/game"
 	"github.com/mcoot/crosswordgame-go/internal/game/scoring"
