@@ -1,4 +1,4 @@
-package apiutils
+package utils
 
 import (
 	"encoding/json"
@@ -9,6 +9,7 @@ import (
 )
 
 func SendResponse(logger *zap.SugaredLogger, w http.ResponseWriter, resp interface{}, code int) {
+	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(code)
 	if err := json.NewEncoder(w).Encode(resp); err != nil {
 		logger.Errorw("error encoding response", "error", err)

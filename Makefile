@@ -10,7 +10,10 @@ run-api:
 test:
 	@go test -v ./...
 
-
 .PHONY: lint
 lint:
 	@go run github.com/golangci/golangci-lint/cmd/golangci-lint run
+
+.PHONY: templ
+templ:
+	@go run github.com/a-h/templ/cmd/templ generate

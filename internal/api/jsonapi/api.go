@@ -3,8 +3,8 @@ package jsonapi
 import (
 	"encoding/json"
 	"github.com/gorilla/mux"
+	"github.com/mcoot/crosswordgame-go/internal/api/jsonapi/utils"
 	"github.com/mcoot/crosswordgame-go/internal/apitypes"
-	"github.com/mcoot/crosswordgame-go/internal/apiutils"
 	"github.com/mcoot/crosswordgame-go/internal/game"
 	"github.com/mcoot/crosswordgame-go/internal/game/types"
 	"github.com/mcoot/crosswordgame-go/internal/lobby"
@@ -50,7 +50,7 @@ func (c *CrosswordGameAPI) AttachToRouter(router *mux.Router) error {
 }
 
 func (c *CrosswordGameAPI) Healthcheck(w http.ResponseWriter, r *http.Request) {
-	apiutils.SendResponse(logging.GetLogger(r.Context()), w, &apitypes.HealthcheckResponse{
+	utils.SendResponse(logging.GetLogger(r.Context()), w, &apitypes.HealthcheckResponse{
 		Status:    "ok",
 		StartTime: c.startTime.Format(time.RFC3339),
 	}, 200)
@@ -61,7 +61,7 @@ func (c *CrosswordGameAPI) CreateGame(w http.ResponseWriter, r *http.Request) {
 
 	var req apitypes.CreateGameRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		apiutils.SendError(logger, w, err)
+		utils.SendError(logger, w, err)
 		return
 	}
 
@@ -72,13 +72,13 @@ func (c *CrosswordGameAPI) CreateGame(w http.ResponseWriter, r *http.Request) {
 
 	gameId, err := c.gameManager.NewGame(req.Players, boardDimension)
 	if err != nil {
-		apiutils.SendError(logger, w, err)
+		utils.SendError(logger, w, err)
 		return
 	}
 
 	w.Header().Add("Location", "/api/v1/game/"+string(gameId))
 
-	apiutils.SendResponse(logger, w, apitypes.CreateGameResponse{GameId: gameId}, 201)
+	utils.SendResponse(logger, w, apitypes.CreateGameResponse{GameId: gameId}, 201)
 }
 
 func (c *CrosswordGameAPI) GetGameState(w http.ResponseWriter, r *http.Request) {
@@ -87,7 +87,7 @@ func (c *CrosswordGameAPI) GetGameState(w http.ResponseWriter, r *http.Request) 
 
 	gameState, err := c.gameManager.GetGameState(gameId)
 	if err != nil {
-		apiutils.SendError(logger, w, err)
+		utils.SendError(logger, w, err)
 		return
 	}
 
@@ -98,7 +98,7 @@ func (c *CrosswordGameAPI) GetGameState(w http.ResponseWriter, r *http.Request) 
 		Players:                 gameState.Players,
 	}
 
-	apiutils.SendResponse(logger, w, resp, 200)
+	utils.SendResponse(logger, w, resp, 200)
 }
 
 func (c *CrosswordGameAPI) GetPlayerState(w http.ResponseWriter, r *http.Request) {
@@ -108,7 +108,7 @@ func (c *CrosswordGameAPI) GetPlayerState(w http.ResponseWriter, r *http.Request
 
 	playerState, err := c.gameManager.GetPlayerBoard(gameId, playerId)
 	if err != nil {
-		apiutils.SendError(logger, w, err)
+		utils.SendError(logger, w, err)
 		return
 	}
 
@@ -116,7 +116,7 @@ func (c *CrosswordGameAPI) GetPlayerState(w http.ResponseWriter, r *http.Request
 		Board: playerState.Data,
 	}
 
-	apiutils.SendResponse(logger, w, resp, 200)
+	utils.SendResponse(logger, w, resp, 200)
 }
 
 func (c *CrosswordGameAPI) SubmitAnnouncement(w http.ResponseWriter, r *http.Request) {
@@ -126,17 +126,17 @@ func (c *CrosswordGameAPI) SubmitAnnouncement(w http.ResponseWriter, r *http.Req
 
 	var req apitypes.SubmitAnnouncementRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		apiutils.SendError(logger, w, err)
+		utils.SendError(logger, w, err)
 		return
 	}
 
 	err := c.gameManager.SubmitAnnouncement(gameId, playerId, req.Letter)
 	if err != nil {
-		apiutils.SendError(logger, w, err)
+		utils.SendError(logger, w, err)
 		return
 	}
 
-	apiutils.SendResponse(logger, w, &apitypes.SubmitAnnouncementResponse{}, 200)
+	utils.SendResponse(logger, w, &apitypes.SubmitAnnouncementResponse{}, 200)
 }
 
 func (c *CrosswordGameAPI) SubmitPlacement(w http.ResponseWriter, r *http.Request) {
@@ -146,17 +146,17 @@ func (c *CrosswordGameAPI) SubmitPlacement(w http.ResponseWriter, r *http.Reques
 
 	var req apitypes.SubmitPlacementRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		apiutils.SendError(logger, w, err)
+		utils.SendError(logger, w, err)
 		return
 	}
 
 	err := c.gameManager.SubmitPlacement(gameId, playerId, req.Row, req.Column)
 	if err != nil {
-		apiutils.SendError(logger, w, err)
+		utils.SendError(logger, w, err)
 		return
 	}
 
-	apiutils.SendResponse(logger, w, &apitypes.SubmitPlacementResponse{}, 200)
+	utils.SendResponse(logger, w, &apitypes.SubmitPlacementResponse{}, 200)
 }
 
 func (c *CrosswordGameAPI) GetPlayerScore(w http.ResponseWriter, r *http.Request) {
@@ -166,7 +166,7 @@ func (c *CrosswordGameAPI) GetPlayerScore(w http.ResponseWriter, r *http.Request
 
 	totalScore, words, err := c.gameManager.GetPlayerScore(gameId, playerId)
 	if err != nil {
-		apiutils.SendError(logger, w, err)
+		utils.SendError(logger, w, err)
 		return
 	}
 
@@ -175,7 +175,7 @@ func (c *CrosswordGameAPI) GetPlayerScore(w http.ResponseWriter, r *http.Request
 		Words:      words,
 	}
 
-	apiutils.SendResponse(logger, w, resp, 200)
+	utils.SendResponse(logger, w, resp, 200)
 }
 
 func (c *CrosswordGameAPI) CreateLobby(w http.ResponseWriter, r *http.Request) {
@@ -183,18 +183,18 @@ func (c *CrosswordGameAPI) CreateLobby(w http.ResponseWriter, r *http.Request) {
 
 	var req apitypes.CreateLobbyRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		apiutils.SendError(logger, w, err)
+		utils.SendError(logger, w, err)
 		return
 	}
 
 	lobbyId, err := c.lobbyManager.NewLobby(req.Name)
 	if err != nil {
-		apiutils.SendError(logger, w, err)
+		utils.SendError(logger, w, err)
 		return
 	}
 
 	w.Header().Add("Location", "/api/v1/lobby/"+string(lobbyId))
-	apiutils.SendResponse(logger, w, apitypes.CreateLobbyResponse{LobbyId: lobbyId}, 201)
+	utils.SendResponse(logger, w, apitypes.CreateLobbyResponse{LobbyId: lobbyId}, 201)
 }
 
 func (c *CrosswordGameAPI) GetLobbyState(w http.ResponseWriter, r *http.Request) {
@@ -203,7 +203,7 @@ func (c *CrosswordGameAPI) GetLobbyState(w http.ResponseWriter, r *http.Request)
 
 	lobbyState, err := c.lobbyManager.GetLobbyState(lobbyId)
 	if err != nil {
-		apiutils.SendError(logger, w, err)
+		utils.SendError(logger, w, err)
 		return
 	}
 
@@ -215,7 +215,7 @@ func (c *CrosswordGameAPI) GetLobbyState(w http.ResponseWriter, r *http.Request)
 		resp.GameID = lobbyState.RunningGame.GameId
 	}
 
-	apiutils.SendResponse(logger, w, resp, 200)
+	utils.SendResponse(logger, w, resp, 200)
 }
 
 func (c *CrosswordGameAPI) JoinPlayerToLobby(w http.ResponseWriter, r *http.Request) {
@@ -224,17 +224,17 @@ func (c *CrosswordGameAPI) JoinPlayerToLobby(w http.ResponseWriter, r *http.Requ
 
 	var req apitypes.JoinLobbyRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		apiutils.SendError(logger, w, err)
+		utils.SendError(logger, w, err)
 		return
 	}
 
 	err := c.lobbyManager.JoinPlayerToLobby(lobbyId, req.PlayerId)
 	if err != nil {
-		apiutils.SendError(logger, w, err)
+		utils.SendError(logger, w, err)
 		return
 	}
 
-	apiutils.SendResponse(logger, w, nil, 200)
+	utils.SendResponse(logger, w, nil, 200)
 }
 
 func (c *CrosswordGameAPI) RemovePlayerFromLobby(w http.ResponseWriter, r *http.Request) {
@@ -243,17 +243,17 @@ func (c *CrosswordGameAPI) RemovePlayerFromLobby(w http.ResponseWriter, r *http.
 
 	var req apitypes.RemovePlayerFromLobbyRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		apiutils.SendError(logger, w, err)
+		utils.SendError(logger, w, err)
 		return
 	}
 
 	err := c.lobbyManager.RemovePlayerFromLobby(lobbyId, req.PlayerId)
 	if err != nil {
-		apiutils.SendError(logger, w, err)
+		utils.SendError(logger, w, err)
 		return
 	}
 
-	apiutils.SendResponse(logger, w, nil, 200)
+	utils.SendResponse(logger, w, nil, 200)
 }
 
 func (c *CrosswordGameAPI) AttachGameToLobby(w http.ResponseWriter, r *http.Request) {
@@ -262,17 +262,17 @@ func (c *CrosswordGameAPI) AttachGameToLobby(w http.ResponseWriter, r *http.Requ
 
 	var req apitypes.AttachGameToLobbyRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		apiutils.SendError(logger, w, err)
+		utils.SendError(logger, w, err)
 		return
 	}
 
 	err := c.lobbyManager.AttachGameToLobby(lobbyId, req.GameId)
 	if err != nil {
-		apiutils.SendError(logger, w, err)
+		utils.SendError(logger, w, err)
 		return
 	}
 
-	apiutils.SendResponse(logger, w, nil, 200)
+	utils.SendResponse(logger, w, nil, 200)
 }
 
 func (c *CrosswordGameAPI) DetachGameFromLobby(w http.ResponseWriter, r *http.Request) {
@@ -281,11 +281,11 @@ func (c *CrosswordGameAPI) DetachGameFromLobby(w http.ResponseWriter, r *http.Re
 
 	err := c.lobbyManager.DetachGameFromLobby(lobbyId)
 	if err != nil {
-		apiutils.SendError(logger, w, err)
+		utils.SendError(logger, w, err)
 		return
 	}
 
-	apiutils.SendResponse(logger, w, nil, 200)
+	utils.SendResponse(logger, w, nil, 200)
 }
 
 func getGameId(r *http.Request) types.GameId {
