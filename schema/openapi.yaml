@@ -228,7 +228,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CreateGameResponse'
+                $ref: '#/components/schemas/CreateLobbyResponse'
         default:
           description: Error
           content:
@@ -253,6 +253,126 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/GetLobbyStateResponse'
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /api/v1/lobby/{lobby_id}/join:
+    post:
+      summary: Join a player into a lobby
+      operationId: joinLobby
+      parameters:
+        - name: lobby_id
+          in: path
+          required: true
+          description: ID of the lobby
+          schema:
+            $ref: '#/components/schemas/LobbyId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/JoinLobbyRequest'
+      responses:
+        '200':
+          description: Joined
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JoinLobbyResponse'
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /api/v1/lobby/{lobby_id}/remove:
+    post:
+      summary: Remove a player from a lobby
+      operationId: removeFromLobby
+      parameters:
+        - name: lobby_id
+          in: path
+          required: true
+          description: ID of the lobby
+          schema:
+            $ref: '#/components/schemas/LobbyId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RemoveFromLobbyRequest'
+      responses:
+        '200':
+          description: Removed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RemoveFromLobbyResponse'
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /api/v1/lobby/{lobby_id}/attach:
+    post:
+      summary: Attach a game to a lobby
+      operationId: attachGameToLobby
+      parameters:
+        - name: lobby_id
+          in: path
+          required: true
+          description: ID of the lobby
+          schema:
+            $ref: '#/components/schemas/LobbyId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AttachGameToLobbyRequest'
+      responses:
+        '200':
+          description: Attached
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AttachGameToLobbyResponse'
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /api/v1/lobby/{lobby_id}/detach:
+    post:
+      summary: Detach a game from a lobby
+      operationId: detachGameFromLobby
+      parameters:
+        - name: lobby_id
+          in: path
+          required: true
+          description: ID of the lobby
+          schema:
+            $ref: '#/components/schemas/LobbyId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DetachGameFromLobbyRequest'
+      responses:
+        '200':
+          description: Detached
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DetachGameFromLobbyResponse'
         default:
           description: Error
           content:
@@ -437,6 +557,37 @@ components:
           $ref: '#/components/schemas/GameId'
       required:
         - players
+    JoinLobbyRequest:
+      type: object
+      properties:
+        player_id:
+          $ref: '#/components/schemas/PlayerId'
+      required:
+        - player_id
+    JoinLobbyResponse:
+      type: object
+    RemoveFromLobbyRequest:
+      type: object
+      properties:
+        player_id:
+          $ref: '#/components/schemas/PlayerId'
+      required:
+        - player_id
+    RemoveFromLobbyResponse:
+      type: object
+    AttachGameToLobbyRequest:
+      type: object
+      properties:
+        game_id:
+          $ref: '#/components/schemas/GameId'
+      required:
+        - game_id
+    AttachGameToLobbyResponse:
+      type: object
+    DetachGameFromLobbyRequest:
+      type: object
+    DetachGameFromLobbyResponse:
+      type: object
     LobbyId:
       description: ID of a lobby
       type: string

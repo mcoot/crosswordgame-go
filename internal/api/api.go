@@ -40,6 +40,10 @@ func (c *CrosswordGameAPI) AttachToMux(ctx context.Context, mux *http.ServeMux, 
 
 	mux.Handle("POST /api/v1/lobby", http.HandlerFunc(c.CreateLobby))
 	mux.Handle("GET /api/v1/lobby/{lobbyId}", http.HandlerFunc(c.GetLobbyState))
+	mux.Handle("POST /api/v1/lobby/{lobbyId}/join", http.HandlerFunc(c.JoinPlayerToLobby))
+	mux.Handle("POST /api/v1/lobby/{lobbyId}/remove", http.HandlerFunc(c.RemovePlayerFromLobby))
+	mux.Handle("POST /api/v1/lobby/{lobbyId}/attach", http.HandlerFunc(c.AttachGameToLobby))
+	mux.Handle("POST /api/v1/lobby/{lobbyId}/detach", http.HandlerFunc(c.DetachGameFromLobby))
 
 	h, err := setupMiddleware(ctx, mux, schemaPath)
 	if err != nil {
@@ -215,6 +219,76 @@ func (c *CrosswordGameAPI) GetLobbyState(w http.ResponseWriter, r *http.Request)
 	}
 
 	apiutils.SendResponse(logger, w, resp, 200)
+}
+
+func (c *CrosswordGameAPI) JoinPlayerToLobby(w http.ResponseWriter, r *http.Request) {
+	logger := apiutils.GetApiLogger(r)
+	lobbyId := getLobbyId(r)
+
+	var req apitypes.JoinLobbyRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		apiutils.SendError(logger, w, err)
+		return
+	}
+
+	err := c.lobbyManager.JoinPlayerToLobby(lobbyId, req.PlayerId)
+	if err != nil {
+		apiutils.SendError(logger, w, err)
+		return
+	}
+
+	apiutils.SendResponse(logger, w, nil, 200)
+}
+
+func (c *CrosswordGameAPI) RemovePlayerFromLobby(w http.ResponseWriter, r *http.Request) {
+	logger := apiutils.GetApiLogger(r)
+	lobbyId := getLobbyId(r)
+
+	var req apitypes.RemovePlayerFromLobbyRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		apiutils.SendError(logger, w, err)
+		return
+	}
+
+	err := c.lobbyManager.RemovePlayerFromLobby(lobbyId, req.PlayerId)
+	if err != nil {
+		apiutils.SendError(logger, w, err)
+		return
+	}
+
+	apiutils.SendResponse(logger, w, nil, 200)
+}
+
+func (c *CrosswordGameAPI) AttachGameToLobby(w http.ResponseWriter, r *http.Request) {
+	logger := apiutils.GetApiLogger(r)
+	lobbyId := getLobbyId(r)
+
+	var req apitypes.AttachGameToLobbyRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		apiutils.SendError(logger, w, err)
+		return
+	}
+
+	err := c.lobbyManager.AttachGameToLobby(lobbyId, req.GameId)
+	if err != nil {
+		apiutils.SendError(logger, w, err)
+		return
+	}
+
+	apiutils.SendResponse(logger, w, nil, 200)
+}
+
+func (c *CrosswordGameAPI) DetachGameFromLobby(w http.ResponseWriter, r *http.Request) {
+	logger := apiutils.GetApiLogger(r)
+	lobbyId := getLobbyId(r)
+
+	err := c.lobbyManager.DetachGameFromLobby(lobbyId)
+	if err != nil {
+		apiutils.SendError(logger, w, err)
+		return
+	}
+
+	apiutils.SendResponse(logger, w, nil, 200)
 }
 
 func getGameId(r *http.Request) types.GameId {

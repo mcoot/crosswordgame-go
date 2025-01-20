@@ -45,7 +45,7 @@ func (m *Manager) GetLobbyState(id types.LobbyId) (*types.Lobby, error) {
 	return lobby, nil
 }
 
-func (m *Manager) AddPlayerToLobby(lobbyId types.LobbyId, playerId playertypes.PlayerId) error {
+func (m *Manager) JoinPlayerToLobby(lobbyId types.LobbyId, playerId playertypes.PlayerId) error {
 	lobby, err := m.store.RetrieveLobby(lobbyId)
 	if err != nil {
 		return err

@@ -73,3 +73,25 @@ type GetLobbyStateResponse struct {
 	Players []playertypes.PlayerId `json:"players"`
 	GameID  gametypes.GameId       `json:"game_id,omitempty"`
 }
+
+type JoinLobbyRequest struct {
+	PlayerId playertypes.PlayerId `json:"player_id"`
+}
+
+type JoinLobbyResponse struct{}
+
+type RemovePlayerFromLobbyRequest struct {
+	PlayerId playertypes.PlayerId `json:"player_id"`
+}
+
+type RemovePlayerFromLobbyResponse struct{}
+
+type AttachGameToLobbyRequest struct {
+	GameId gametypes.GameId `json:"game_id"`
+}
+
+type AttachGameToLobbyResponse struct{}
+
+type DetachGameFromLobbyRequest struct{}
+
+type DetachGameFromLobbyResponse struct{}
