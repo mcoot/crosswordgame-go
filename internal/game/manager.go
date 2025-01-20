@@ -68,8 +68,7 @@ func (m *Manager) GetPlayerScore(gameId types.GameId, playerId playertypes.Playe
 
 	if game.Status != types.StatusFinished {
 		return 0, nil, &errors.InvalidActionError{
-			PlayerId: playerId,
-			Action:   "score",
+			Action: "score",
 			Reason: fmt.Sprintf(
 				"game state is not %s, it is %s",
 				types.StatusFinished,
@@ -96,8 +95,7 @@ func (m *Manager) SubmitAnnouncement(gameId types.GameId, playerId playertypes.P
 
 	if game.Status != types.StatusAwaitingAnnouncement {
 		return &errors.InvalidActionError{
-			PlayerId: playerId,
-			Action:   "announce",
+			Action: "announce",
 			Reason: fmt.Sprintf(
 				"game state is not %s, it is %s",
 				types.StatusAwaitingAnnouncement,
@@ -107,8 +105,7 @@ func (m *Manager) SubmitAnnouncement(gameId types.GameId, playerId playertypes.P
 	}
 	if game.CurrentAnnouncingPlayer != playerId {
 		return &errors.InvalidActionError{
-			PlayerId: playerId,
-			Action:   "announce",
+			Action: "announce",
 			Reason: fmt.Sprintf(
 				"it is not player %s's turn to announce",
 				playerId,
@@ -145,8 +142,7 @@ func (m *Manager) SubmitPlacement(gameId types.GameId, playerId playertypes.Play
 
 	if game.Status != types.StatusAwaitingPlacement {
 		return &errors.InvalidActionError{
-			PlayerId: playerId,
-			Action:   "place",
+			Action: "place",
 			Reason: fmt.Sprintf(
 				"game state is not %s, it is %s",
 				types.StatusAwaitingPlacement,
@@ -179,9 +175,8 @@ func (m *Manager) fillPlayerSquare(
 	if playerFilledSquares == game.SquaresFilled+1 {
 		// The player already filled a square this turn
 		return &errors.InvalidActionError{
-			PlayerId: playerId,
-			Action:   "place",
-			Reason:   "player has already placed a letter this turn",
+			Action: "place",
+			Reason: fmt.Sprintf("player %s has already placed a letter this turn", playerId),
 		}
 	}
 
