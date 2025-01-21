@@ -2,14 +2,9 @@ package template
 
 import lobbytypes "github.com/mcoot/crosswordgame-go/internal/lobby/types"
 
-templ LobbyPage(lobbyId lobbytypes.LobbyId, lobby *lobbytypes.Lobby, gameSpaceItem templ.Component) {
+templ LobbyPage(lobby *lobbytypes.Lobby, gameSpaceItem templ.Component) {
     <h1>Lobby: { lobby.Name }</h1>
-    <p>Lobby ID for joining: { string(lobbyId) }</p>
-    if lobby.RunningGame != nil {
-        <p>Current game: { string(lobby.RunningGame.GameId) }</p>
-    } else {
-        <p>Current game: None</p>
-    }
+    <p>Lobby ID for joining: { string(lobby.Id) }</p>
     @gameSpaceItem
 }
 

@@ -2,8 +2,8 @@ package template
 
 import gametypes "github.com/mcoot/crosswordgame-go/internal/game/types"
 
-templ Game(gameId gametypes.GameId) {
+templ Game(game *gametypes.Game) {
     <div class="cwg-game">
-    <h2>Game: { string(gameId) }</h2>
+    <h2>Game: { string(game.Id) }</h2>
     </div>
 }

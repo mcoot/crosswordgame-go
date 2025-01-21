@@ -46,14 +46,20 @@ func (c *CrosswordGameWebAPI) LobbyPage(w http.ResponseWriter, r *http.Request) 
 
 	gameSpaceItem := template.EmptyGameSpace()
 	if lobbyState.RunningGame != nil {
-		gameSpaceItem = template.Game(lobbyState.RunningGame.GameId)
+		gameState, err := c.gameManager.GetGameState(lobbyState.RunningGame.GameId)
+		if err != nil {
+			utils.SendError(logging.GetLogger(r.Context()), r, w, err)
+			return
+		}
+
+		gameSpaceItem = template.Game(gameState)
 	}
 
 	utils.SendResponse(
 		logging.GetLogger(r.Context()),
 		r,
 		w,
-		template.LobbyPage(lobbyId, lobbyState, gameSpaceItem),
+		template.LobbyPage(lobbyState, gameSpaceItem),
 		200,
 	)
 }
