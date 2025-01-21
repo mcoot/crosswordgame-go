@@ -1,0 +1,15 @@
+package template
+
+import playertypes "github.com/mcoot/crosswordgame-go/internal/player/types"
+
+templ playerList(players []*playertypes.Player, viewingPlayer *playertypes.Player) {
+    <ul>
+        for _, player := range players {
+            if player.Username == viewingPlayer.Username {
+                <li><b>{ player.DisplayName }</b></li>
+            } else {
+                <li>{ player.DisplayName }</li>
+            }
+        }
+    </ul>
+}

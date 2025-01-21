@@ -1,32 +1,76 @@
 package template
 
+import "fmt"
+import "strconv"
+import lobbytypes "github.com/mcoot/crosswordgame-go/internal/lobby/types"
 import gametypes "github.com/mcoot/crosswordgame-go/internal/game/types"
 import playertypes "github.com/mcoot/crosswordgame-go/internal/player/types"
 
-templ board(board *gametypes.Board) {
+func cellLetter(letter string) string {
+    if letter == "" {
+        return "∅"
+    }
+    return letter
+}
+
+templ cellFormContents(letter string, row int, column int, placementEnabled bool) {
+    <input type="hidden" name="placement_row" value={ strconv.Itoa(row) }>
+    <input type="hidden" name="placement_column" value={ strconv.Itoa(column) }>
+    <input type="submit" disabled={ strconv.FormatBool(!placementEnabled) } value={ cellLetter(letter) } />
+}
+
+templ Board(lobbyId lobbytypes.LobbyId, board *gametypes.Board, placementEnabled bool) {
     <div class="cwg-board">
     <table>
         <tbody>
-        for _, row := range board.Data {
+        for r, row := range board.Data {
             <tr>
-            for _, cell := range row {
-                if cell == "" {
-                    <td>∅</td>
-                } else {
-                    <td>{ cell }</td>
-                }
+            for c, cell := range row {
+                <td>
+                <form
+                    id={ fmt.Sprintf("placement-%d-%d-form", r, c) }
+                    action={ templ.URL(fmt.Sprintf("/lobby/%s/place", lobbyId)) } method="post"
+                    hx-post={ fmt.Sprintf("/lobby/%s/place", lobbyId) }
+                    hx-target="#page-content" hx-target-error="#board-error-div"
+                >
+                @cellFormContents(cell, r, c, placementEnabled)
+                </form>
+                </td>
             }
             </tr>
         }
         </tbody>
     </table>
+    <div id="board-error-div"></div>
     </div>
 }
 
-templ Game(game *gametypes.Game, viewingPlayer *playertypes.Player, b *gametypes.Board) {
+templ announcementFormContents() {
+    <label for="announced_letter">Letter to announce:</label>
+    <input type="text" name="announced_letter" placeholder="Letter to announce" />
+    <input type="submit" value="Announce" />
+}
+
+templ AnnouncementForm(lobbyId lobbytypes.LobbyId) {
+    @CommonForm("announcement-form", fmt.Sprintf("/lobby/%s/announce", lobbyId), announcementFormContents())
+}
+
+templ NoAvailablePlayerAction(player *playertypes.Player) {
+    <p>No available actions for {player.DisplayName}, please refresh to see any changes...</p>
+}
+
+templ gameStatus(game *gametypes.Game, players []*playertypes.Player, viewingPlayer *playertypes.Player) {
+    <div>
+    <h3>In game:</h3>
+    @playerList(players, viewingPlayer)
+    <p>Status: { string(game.Status) }</p>
+    </div>
+}
+
+templ Game(game *gametypes.Game, players []*playertypes.Player, viewingPlayer *playertypes.Player) {
     <div class="cwg-game">
     <h2>Game: { string(game.Id) }</h2>
+    @gameStatus(game, players, viewingPlayer)
     <h3>Your ({ viewingPlayer.DisplayName }'s) board</h3>
-    @board(b)
     </div>
 }

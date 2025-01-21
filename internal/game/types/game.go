@@ -2,7 +2,9 @@ package types
 
 import (
 	"github.com/hashicorp/go-uuid"
+	"github.com/mcoot/crosswordgame-go/internal/errors"
 	playertypes "github.com/mcoot/crosswordgame-go/internal/player/types"
+	"slices"
 )
 
 type GameId string
@@ -52,4 +54,29 @@ func NewGame(players []playertypes.PlayerId, boardDimension int) (*Game, error) 
 
 func (g *Game) TotalSquares() int {
 	return g.BoardDimension * g.BoardDimension
+}
+
+func (g *Game) GetIndexForPlayer(playerId playertypes.PlayerId) int {
+	return slices.Index(g.Players, playerId)
+}
+
+func (g *Game) GetPlayerBoard(playerId playertypes.PlayerId) (*Board, error) {
+	idx := g.GetIndexForPlayer(playerId)
+
+	if idx == -1 {
+		return nil, &errors.NotFoundError{
+			ObjectKind: "player",
+			ObjectID:   playerId,
+		}
+	}
+
+	return g.PlayerBoards[idx], nil
+}
+
+func (g *Game) HasPlayerPlacedThisTurn(playerId playertypes.PlayerId) (bool, error) {
+	board, err := g.GetPlayerBoard(playerId)
+	if err != nil {
+		return false, err
+	}
+	return g.SquaresFilled == board.FilledSquares()+1, nil
 }

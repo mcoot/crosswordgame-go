@@ -6,6 +6,7 @@ import "github.com/mcoot/crosswordgame-go/internal/apitypes"
 templ ErrorPage(err apitypes.ErrorResponse) {
     <h1>Error { fmt.Sprintf("%d", err.HTTPCode) }</h1>
     <p>{ err.Kind } - { err.Message }</p>
+    <a href="/">Back to home</a>
 }
 
 templ ErrorSpan(err apitypes.ErrorResponse) {

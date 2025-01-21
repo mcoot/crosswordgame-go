@@ -11,6 +11,7 @@ import (
 	"github.com/mcoot/crosswordgame-go/internal/apitypes"
 	"github.com/mcoot/crosswordgame-go/internal/errors"
 	"github.com/mcoot/crosswordgame-go/internal/game"
+	gametypes "github.com/mcoot/crosswordgame-go/internal/game/types"
 	"github.com/mcoot/crosswordgame-go/internal/lobby"
 	lobbytypes "github.com/mcoot/crosswordgame-go/internal/lobby/types"
 	"github.com/mcoot/crosswordgame-go/internal/logging"
@@ -18,6 +19,7 @@ import (
 	playertypes "github.com/mcoot/crosswordgame-go/internal/player/types"
 	"golang.org/x/tools/godoc/redirect"
 	"net/http"
+	"strconv"
 )
 
 type CrosswordGameWebAPI struct {
@@ -53,6 +55,8 @@ func (c *CrosswordGameWebAPI) AttachToRouter(router *mux.Router) error {
 
 	router.HandleFunc("/lobby/{lobbyId}", c.withLoggedInPlayer(c.LobbyPage)).Methods("GET")
 	router.HandleFunc("/lobby/{lobbyId}/start", c.withLoggedInPlayer(c.StartNewGame)).Methods("POST")
+	router.HandleFunc("/lobby/{lobbyId}/announce", c.withLoggedInPlayer(c.AnnounceLetter)).Methods("POST")
+	router.HandleFunc("/lobby/{lobbyId}/place", c.withLoggedInPlayer(c.PlaceLetter)).Methods("POST")
 
 	return nil
 }
@@ -192,7 +196,10 @@ func (c *CrosswordGameWebAPI) LobbyPage(w http.ResponseWriter, r *http.Request, 
 		lobbyPlayers[i] = p
 	}
 
-	gameSpaceItem := template.GameStartForm(lobbyId)
+	toRender := []templ.Component{
+		template.LobbyDetails(lobbyState, lobbyPlayers, player),
+	}
+
 	if lobbyState.HasRunningGame() {
 		gameState, err := c.gameManager.GetGameState(lobbyState.RunningGame.GameId)
 		if err != nil {
@@ -205,15 +212,36 @@ func (c *CrosswordGameWebAPI) LobbyPage(w http.ResponseWriter, r *http.Request, 
 			return
 		}
 
-		gameSpaceItem = template.Game(gameState, player, board)
+		canPlayerPlace := false
+		if gameState.Status == gametypes.StatusAwaitingPlacement {
+			hasPlayerPlaced, err := gameState.HasPlayerPlacedThisTurn(player.Username)
+			if err != nil {
+				utils.SendError(logging.GetLogger(r.Context()), r, w, err)
+				return
+			}
+			if !hasPlayerPlaced {
+				canPlayerPlace = true
+			}
+		}
+
+		toRender = append(
+			toRender,
+			template.Game(gameState, lobbyPlayers, player),
+			template.Board(lobbyId, board, canPlayerPlace),
+		)
+
+		if gameState.Status == gametypes.StatusAwaitingAnnouncement &&
+			gameState.CurrentAnnouncingPlayer == player.Username {
+			toRender = append(toRender, template.AnnouncementForm(lobbyId))
+		} else {
+			toRender = append(toRender, template.NoAvailablePlayerAction(player))
+		}
+
+	} else {
+		toRender = append(toRender, template.GameStartForm(lobbyId))
 	}
 
-	component := templ.Join(
-		template.LobbyDetails(lobbyState),
-		template.PlayerList(lobbyPlayers, player.Username),
-		gameSpaceItem,
-	)
-
+	component := templ.Join(toRender...)
 	utils.PushUrl(w, fmt.Sprintf("/lobby/%s", lobbyId))
 	utils.SendResponse(
 		logging.GetLogger(r.Context()),
@@ -248,6 +276,108 @@ func (c *CrosswordGameWebAPI) StartNewGame(w http.ResponseWriter, r *http.Reques
 	}
 
 	err = c.lobbyManager.AttachGameToLobby(lobbyId, gameId)
+	if err != nil {
+		utils.SendError(logging.GetLogger(r.Context()), r, w, err)
+		return
+	}
+
+	utils.Redirect(w, r, fmt.Sprintf("/lobby/%s", lobbyId), 303)
+}
+
+func (c *CrosswordGameWebAPI) AnnounceLetter(w http.ResponseWriter, r *http.Request, player *playertypes.Player) {
+	lobbyId := commonutils.GetLobbyIdPathParam(r)
+	lobbyState, err := c.lobbyManager.GetLobbyState(lobbyId)
+	if err != nil {
+		utils.SendError(logging.GetLogger(r.Context()), r, w, err)
+		return
+	}
+
+	err = r.ParseForm()
+	if err != nil {
+		utils.SendError(logging.GetLogger(r.Context()), r, w, err)
+		return
+	}
+
+	letter := r.PostForm.Get("announced_letter")
+	if letter == "" {
+		utils.SendError(logging.GetLogger(r.Context()), r, w, fmt.Errorf("announced_letter is required"))
+		return
+	}
+
+	if !lobbyState.HasRunningGame() {
+		utils.SendError(logging.GetLogger(r.Context()), r, w, &errors.InvalidActionError{
+			Action: "place_letter",
+			Reason: "the lobby has no running game",
+		})
+		return
+	}
+
+	gameId, err := c.gameManager.CreateGame(lobbyState.Players, 5)
+	if err != nil {
+		utils.SendError(logging.GetLogger(r.Context()), r, w, err)
+		return
+	}
+
+	err = c.gameManager.SubmitAnnouncement(gameId, player.Username, letter)
+	if err != nil {
+		utils.SendError(logging.GetLogger(r.Context()), r, w, err)
+		return
+	}
+
+	utils.Redirect(w, r, fmt.Sprintf("/lobby/%s", lobbyId), 303)
+}
+
+func (c *CrosswordGameWebAPI) PlaceLetter(w http.ResponseWriter, r *http.Request, player *playertypes.Player) {
+	lobbyId := commonutils.GetLobbyIdPathParam(r)
+	lobbyState, err := c.lobbyManager.GetLobbyState(lobbyId)
+	if err != nil {
+		utils.SendError(logging.GetLogger(r.Context()), r, w, err)
+		return
+	}
+
+	err = r.ParseForm()
+	if err != nil {
+		utils.SendError(logging.GetLogger(r.Context()), r, w, err)
+		return
+	}
+
+	rawRow := r.PostForm.Get("placement_row")
+	if rawRow == "" {
+		utils.SendError(logging.GetLogger(r.Context()), r, w, fmt.Errorf("placement_row is required"))
+		return
+	}
+	row, err := strconv.Atoi(rawRow)
+	if err != nil {
+		utils.SendError(logging.GetLogger(r.Context()), r, w, err)
+		return
+	}
+
+	rawColumn := r.PostForm.Get("placement_column")
+	if rawColumn == "" {
+		utils.SendError(logging.GetLogger(r.Context()), r, w, fmt.Errorf("placement_column is required"))
+		return
+	}
+	column, err := strconv.Atoi(rawColumn)
+	if err != nil {
+		utils.SendError(logging.GetLogger(r.Context()), r, w, err)
+		return
+	}
+
+	if !lobbyState.HasRunningGame() {
+		utils.SendError(logging.GetLogger(r.Context()), r, w, &errors.InvalidActionError{
+			Action: "place_letter",
+			Reason: "the lobby has no running game",
+		})
+		return
+	}
+
+	gameId, err := c.gameManager.CreateGame(lobbyState.Players, 5)
+	if err != nil {
+		utils.SendError(logging.GetLogger(r.Context()), r, w, err)
+		return
+	}
+
+	err = c.gameManager.SubmitPlacement(gameId, player.Username, row, column)
 	if err != nil {
 		utils.SendError(logging.GetLogger(r.Context()), r, w, err)
 		return

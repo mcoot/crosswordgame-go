@@ -28,5 +28,5 @@ templ CommonForm(formId string, postUrl string, formContents templ.Component) {
     >
     @formContents
     </form>
-    <div id={ fmt.Sprintf("#%s-error-div", formId) }></div>
+    <div id={ fmt.Sprintf("%s-error-div", formId) }></div>
 }

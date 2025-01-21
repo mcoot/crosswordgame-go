@@ -4,25 +4,16 @@ import "fmt"
 import lobbytypes "github.com/mcoot/crosswordgame-go/internal/lobby/types"
 import playertypes "github.com/mcoot/crosswordgame-go/internal/player/types"
 
-templ LobbyDetails(lobby *lobbytypes.Lobby) {
+templ LobbyDetails(lobby *lobbytypes.Lobby, players []*playertypes.Player, viewingPlayer *playertypes.Player) {
     <h1>Lobby: { lobby.Name }</h1>
     <p>Lobby ID for joining: { string(lobby.Id) }</p>
-}
-
-templ PlayerList(players []*playertypes.Player, currentPlayerId playertypes.PlayerId) {
     <div>
-        <h2>Players</h2>
-        <ul>
-            for _, player := range players {
-                if player.Username == currentPlayerId {
-                    <li><b>{ player.DisplayName }</b></li>
-                } else {
-                    <li>{ player.DisplayName }</li>
-                }
-            }
-        </ul>
+    <h2>In lobby:</h2>
+    @playerList(players, viewingPlayer)
     </div>
 }
+
+
 
 templ gameStartFormContents() {
     <input type="submit" value="Start game" />

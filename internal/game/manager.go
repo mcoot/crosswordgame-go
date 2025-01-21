@@ -49,7 +49,7 @@ func (m *Manager) GetPlayerBoard(gameId types.GameId, playerId playertypes.Playe
 		return nil, err
 	}
 
-	return getPlayerBoard(game, playerId)
+	return game.GetPlayerBoard(playerId)
 }
 
 func (m *Manager) GetPlayerScore(gameId types.GameId, playerId playertypes.PlayerId) (int, []*types.ScoredWord, error) {
@@ -58,7 +58,7 @@ func (m *Manager) GetPlayerScore(gameId types.GameId, playerId playertypes.Playe
 		return 0, nil, err
 	}
 
-	player, err := getPlayerBoard(game, playerId)
+	player, err := game.GetPlayerBoard(playerId)
 	if err != nil {
 		return 0, nil, err
 	}
@@ -85,7 +85,7 @@ func (m *Manager) SubmitAnnouncement(gameId types.GameId, playerId playertypes.P
 	}
 
 	// Validate the player is real
-	_, err = getPlayerBoard(game, playerId)
+	_, err = game.GetPlayerBoard(playerId)
 	if err != nil {
 		return err
 	}
@@ -132,7 +132,7 @@ func (m *Manager) SubmitPlacement(gameId types.GameId, playerId playertypes.Play
 		return err
 	}
 
-	player, err := getPlayerBoard(game, playerId)
+	player, err := game.GetPlayerBoard(playerId)
 	if err != nil {
 		return err
 	}
@@ -168,15 +168,19 @@ func (m *Manager) fillPlayerSquare(
 	row int,
 	column int,
 ) error {
-	playerFilledSquares := board.FilledSquares()
-	if playerFilledSquares == game.SquaresFilled+1 {
+
+	hasPlayerPlaced, err := game.HasPlayerPlacedThisTurn(playerId)
+	if err != nil {
+		return err
+	}
+	if hasPlayerPlaced {
 		// The player already filled a square this turn
 		return &errors.InvalidActionError{
 			Action: "place",
 			Reason: fmt.Sprintf("player %s has already placed a letter this turn", playerId),
 		}
 	}
-
+	playerFilledSquares := board.FilledSquares()
 	if playerFilledSquares != game.SquaresFilled {
 		// Something went wrong in the game logic for them to not be on the correct # of squares
 		// TODO: abandon game in this case
@@ -230,19 +234,6 @@ func (m *Manager) checkAndProcessEndTurnOrGame(game *types.Game) error {
 		game.Status = types.StatusAwaitingAnnouncement
 	}
 	return nil
-}
-
-func getPlayerBoard(game *types.Game, playerId playertypes.PlayerId) (*types.Board, error) {
-	idx := slices.Index(game.Players, playerId)
-
-	if idx == -1 {
-		return nil, &errors.NotFoundError{
-			ObjectKind: "player",
-			ObjectID:   playerId,
-		}
-	}
-
-	return game.PlayerBoards[idx], nil
 }
 
 func rotateAnnouncingPlayer(game *types.Game) {
