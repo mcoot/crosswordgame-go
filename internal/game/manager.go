@@ -58,7 +58,7 @@ func (m *Manager) GetPlayerScore(gameId types.GameId, playerId playertypes.Playe
 		return 0, nil, err
 	}
 
-	player, err := game.GetPlayerBoard(playerId)
+	board, err := game.GetPlayerBoard(playerId)
 	if err != nil {
 		return 0, nil, err
 	}
@@ -74,7 +74,7 @@ func (m *Manager) GetPlayerScore(gameId types.GameId, playerId playertypes.Playe
 		}
 	}
 
-	total, words := m.scorer.Score(player)
+	total, words := m.scorer.Score(board.Data)
 	return total, words, nil
 }
 

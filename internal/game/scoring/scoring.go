@@ -6,7 +6,7 @@ import (
 )
 
 type Scorer interface {
-	Score(board *types.Board) (int, []*types.ScoredWord)
+	Score(board [][]string) (int, []*types.ScoredWord)
 }
 
 type TxtDictScorer struct {
@@ -23,7 +23,7 @@ func NewTxtDictScorer(dictFilename string) (*TxtDictScorer, error) {
 	}, nil
 }
 
-func (s *TxtDictScorer) Score(board *types.Board) (int, []*types.ScoredWord) {
+func (s *TxtDictScorer) Score(board [][]string) (int, []*types.ScoredWord) {
 	words := s.findScoringWords(board)
 	total := 0
 	for _, word := range words {
@@ -32,12 +32,12 @@ func (s *TxtDictScorer) Score(board *types.Board) (int, []*types.ScoredWord) {
 	return total, words
 }
 
-func (s *TxtDictScorer) findScoringWords(board *types.Board) []*types.ScoredWord {
+func (s *TxtDictScorer) findScoringWords(board [][]string) []*types.ScoredWord {
 	words := make([]*types.ScoredWord, 0)
 
 	// Horizontal words
-	for r := range len(board.Data) {
-		line := strings.Join(board.Data[r], "")
+	for r := range len(board) {
+		line := strings.Join(board[r], "")
 		words = append(words, s.scoreWordsForLine(lineScoreInput{
 			Line:      line,
 			Direction: types.ScoringDirectionHorizontal,
@@ -47,10 +47,10 @@ func (s *TxtDictScorer) findScoringWords(board *types.Board) []*types.ScoredWord
 	}
 
 	// Vertical words
-	for c := range len(board.Data) {
+	for c := range len(board) {
 		var sb strings.Builder
-		for r := range len(board.Data) {
-			sb.WriteString(board.Data[r][c])
+		for r := range len(board) {
+			sb.WriteString(board[r][c])
 		}
 		line := sb.String()
 		words = append(words, s.scoreWordsForLine(lineScoreInput{
