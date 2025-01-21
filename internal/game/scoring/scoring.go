@@ -6,7 +6,7 @@ import (
 )
 
 type Scorer interface {
-	Score(board [][]string) (int, []*types.ScoredWord)
+	Score(board [][]string) *types.ScoreResult
 }
 
 type TxtDictScorer struct {
@@ -23,13 +23,16 @@ func NewTxtDictScorer(dictFilename string) (*TxtDictScorer, error) {
 	}, nil
 }
 
-func (s *TxtDictScorer) Score(board [][]string) (int, []*types.ScoredWord) {
+func (s *TxtDictScorer) Score(board [][]string) *types.ScoreResult {
 	words := s.findScoringWords(board)
 	total := 0
 	for _, word := range words {
 		total += word.Score
 	}
-	return total, words
+	return &types.ScoreResult{
+		TotalScore: total,
+		Words:      words,
+	}
 }
 
 func (s *TxtDictScorer) findScoringWords(board [][]string) []*types.ScoredWord {

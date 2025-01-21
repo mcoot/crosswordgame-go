@@ -7,6 +7,11 @@ const (
 	ScoringDirectionVertical   ScoringDirection = "vertical"
 )
 
+type ScoreResult struct {
+	TotalScore int
+	Words      []*ScoredWord
+}
+
 type ScoredWord struct {
 	Word        string           `json:"word"`
 	Score       int              `json:"score"`

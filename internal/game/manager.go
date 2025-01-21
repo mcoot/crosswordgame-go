@@ -52,19 +52,19 @@ func (m *Manager) GetPlayerBoard(gameId types.GameId, playerId playertypes.Playe
 	return game.GetPlayerBoard(playerId)
 }
 
-func (m *Manager) GetPlayerScore(gameId types.GameId, playerId playertypes.PlayerId) (int, []*types.ScoredWord, error) {
+func (m *Manager) GetPlayerScore(gameId types.GameId, playerId playertypes.PlayerId) (*types.ScoreResult, error) {
 	game, err := m.store.RetrieveGame(gameId)
 	if err != nil {
-		return 0, nil, err
+		return nil, err
 	}
 
 	board, err := game.GetPlayerBoard(playerId)
 	if err != nil {
-		return 0, nil, err
+		return nil, err
 	}
 
 	if game.Status != types.StatusFinished {
-		return 0, nil, &errors.InvalidActionError{
+		return nil, &errors.InvalidActionError{
 			Action: "score",
 			Reason: fmt.Sprintf(
 				"game state is not %s, it is %s",
@@ -74,8 +74,7 @@ func (m *Manager) GetPlayerScore(gameId types.GameId, playerId playertypes.Playe
 		}
 	}
 
-	total, words := m.scorer.Score(board.Data)
-	return total, words, nil
+	return m.scorer.Score(board.Data), nil
 }
 
 func (m *Manager) SubmitAnnouncement(gameId types.GameId, playerId playertypes.PlayerId, announcedLetter string) error {
