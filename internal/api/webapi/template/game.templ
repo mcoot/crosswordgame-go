@@ -1,9 +1,32 @@
 package template
 
 import gametypes "github.com/mcoot/crosswordgame-go/internal/game/types"
+import playertypes "github.com/mcoot/crosswordgame-go/internal/player/types"
 
-templ Game(game *gametypes.Game) {
+templ board(board *gametypes.Board) {
+    <div class="cwg-board">
+    <table>
+        <tbody>
+        for _, row := range board.Data {
+            <tr>
+            for _, cell := range row {
+                if cell == "" {
+                    <td>∅</td>
+                } else {
+                    <td>{ cell }</td>
+                }
+            }
+            </tr>
+        }
+        </tbody>
+    </table>
+    </div>
+}
+
+templ Game(game *gametypes.Game, viewingPlayer *playertypes.Player, b *gametypes.Board) {
     <div class="cwg-game">
     <h2>Game: { string(game.Id) }</h2>
+    <h3>Your ({ viewingPlayer.DisplayName }'s) board</h3>
+    @board(b)
     </div>
 }

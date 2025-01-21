@@ -199,8 +199,13 @@ func (c *CrosswordGameWebAPI) LobbyPage(w http.ResponseWriter, r *http.Request, 
 			utils.SendError(logging.GetLogger(r.Context()), r, w, err)
 			return
 		}
+		board, err := c.gameManager.GetPlayerBoard(gameState.Id, player.Username)
+		if err != nil {
+			utils.SendError(logging.GetLogger(r.Context()), r, w, err)
+			return
+		}
 
-		gameSpaceItem = template.Game(gameState)
+		gameSpaceItem = template.Game(gameState, player, board)
 	}
 
 	component := templ.Join(
