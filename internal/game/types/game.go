@@ -25,7 +25,7 @@ type Game struct {
 	BoardDimension          int
 	CurrentAnnouncingPlayer playertypes.PlayerId
 	CurrentAnnouncedLetter  string
-	PlayerBoards            []*Board
+	PlayerBoards            map[playertypes.PlayerId]*Board
 }
 
 func NewGame(players []playertypes.PlayerId, boardDimension int) (*Game, error) {
@@ -35,9 +35,9 @@ func NewGame(players []playertypes.PlayerId, boardDimension int) (*Game, error) 
 	}
 	id := GameId(rawId)
 
-	playerBoards := make([]*Board, len(players))
-	for i := range players {
-		playerBoards[i] = NewBoard(boardDimension)
+	playerBoards := make(map[playertypes.PlayerId]*Board)
+	for _, p := range players {
+		playerBoards[p] = NewBoard(boardDimension)
 	}
 
 	return &Game{
@@ -61,16 +61,15 @@ func (g *Game) GetIndexForPlayer(playerId playertypes.PlayerId) int {
 }
 
 func (g *Game) GetPlayerBoard(playerId playertypes.PlayerId) (*Board, error) {
-	idx := g.GetIndexForPlayer(playerId)
-
-	if idx == -1 {
+	board, ok := g.PlayerBoards[playerId]
+	if !ok {
 		return nil, &errors.NotFoundError{
 			ObjectKind: "player",
 			ObjectID:   playerId,
 		}
 	}
 
-	return g.PlayerBoards[idx], nil
+	return board, nil
 }
 
 func (g *Game) HasPlayerPlacedThisTurn(playerId playertypes.PlayerId) (bool, error) {
