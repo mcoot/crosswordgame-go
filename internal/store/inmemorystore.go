@@ -10,18 +10,14 @@ import (
 type InMemoryStore struct {
 	games   map[gametypes.GameId]*gametypes.Game
 	lobbies map[lobbytypes.LobbyId]*lobbytypes.Lobby
-	players map[playertypes.PlayerKind]map[playertypes.PlayerId]*playertypes.Player
+	players map[playertypes.PlayerId]*playertypes.Player
 }
 
 func NewInMemoryStore() *InMemoryStore {
-	playerMap := make(map[playertypes.PlayerKind]map[playertypes.PlayerId]*playertypes.Player)
-	playerMap[playertypes.PlayerKindRegistered] = make(map[playertypes.PlayerId]*playertypes.Player)
-	playerMap[playertypes.PlayerKindEphemeral] = make(map[playertypes.PlayerId]*playertypes.Player)
-
 	return &InMemoryStore{
 		games:   make(map[gametypes.GameId]*gametypes.Game),
 		lobbies: make(map[lobbytypes.LobbyId]*lobbytypes.Lobby),
-		players: playerMap,
+		players: make(map[playertypes.PlayerId]*playertypes.Player),
 	}
 }
 
@@ -58,12 +54,12 @@ func (s *InMemoryStore) RetrieveLobby(lobbyId lobbytypes.LobbyId) (*lobbytypes.L
 }
 
 func (s *InMemoryStore) StorePlayer(player *playertypes.Player) error {
-	s.players[player.Kind][player.Username] = player
+	s.players[player.Username] = player
 	return nil
 }
 
-func (s *InMemoryStore) RetrievePlayer(kind playertypes.PlayerKind, playerId playertypes.PlayerId) (*playertypes.Player, error) {
-	player, ok := s.players[kind][playerId]
+func (s *InMemoryStore) RetrievePlayer(playerId playertypes.PlayerId) (*playertypes.Player, error) {
+	player, ok := s.players[playerId]
 	if !ok {
 		return nil, &errors.NotFoundError{
 			ObjectKind: "player",
