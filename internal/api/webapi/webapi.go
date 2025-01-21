@@ -5,6 +5,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/mcoot/crosswordgame-go/internal/api/webapi/template"
 	"github.com/mcoot/crosswordgame-go/internal/api/webapi/utils"
+	"github.com/mcoot/crosswordgame-go/internal/apitypes"
 	"github.com/mcoot/crosswordgame-go/internal/game"
 	"github.com/mcoot/crosswordgame-go/internal/lobby"
 	"github.com/mcoot/crosswordgame-go/internal/logging"
@@ -25,6 +26,8 @@ func NewCrosswordGameWebAPI(gameManager *game.Manager, lobbyManager *lobby.Manag
 }
 
 func (c *CrosswordGameWebAPI) AttachToRouter(router *mux.Router) error {
+	router.NotFoundHandler = NotFoundHandler()
+
 	router.Handle("/", redirect.Handler("/index.html")).Methods("GET")
 	router.Handle("/index.html", staticHandler(template.Index())).Methods("GET")
 
@@ -34,5 +37,15 @@ func (c *CrosswordGameWebAPI) AttachToRouter(router *mux.Router) error {
 func staticHandler(component templ.Component) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		utils.SendResponse(logging.GetLogger(r.Context()), r, w, component, 200)
+	})
+}
+
+func NotFoundHandler() http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		utils.SendError(logging.GetLogger(r.Context()), r, w, apitypes.ErrorResponse{
+			HTTPCode: 404,
+			Kind:     "not_found",
+			Message:  "page not found",
+		})
 	})
 }

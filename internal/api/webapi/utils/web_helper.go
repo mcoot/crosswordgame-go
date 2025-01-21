@@ -3,6 +3,7 @@ package utils
 import (
 	"github.com/a-h/templ"
 	"github.com/mcoot/crosswordgame-go/internal/api/webapi/template"
+	"github.com/mcoot/crosswordgame-go/internal/apitypes"
 	"go.uber.org/zap"
 	"net/http"
 )
@@ -33,7 +34,25 @@ func SendResponse(
 	}
 
 	if err != nil {
-		logger.Errorw("error rendering response", "error", err)
+		logger.Errorw("error rendering web response", "error", err)
 		return
 	}
+}
+
+func SendError(
+	logger *zap.SugaredLogger,
+	r *http.Request,
+	w http.ResponseWriter,
+	err error,
+) {
+	resp := apitypes.ToErrorResponse(err)
+	// TODO: why nop logger?
+	logger.Warnw(
+		"error handling web request",
+		"message", resp.Message,
+		"http_code", resp.HTTPCode,
+		"kind", resp.Kind,
+	)
+
+	SendResponse(logger, r, w, template.Error(resp), resp.HTTPCode)
 }

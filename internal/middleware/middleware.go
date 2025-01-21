@@ -64,7 +64,13 @@ func buildOpenApiMiddleware(logger *zap.SugaredLogger, schemaPath string) (func(
 					"message", message,
 					"status_code", statusCode,
 				)
-				http.Error(w, message, statusCode)
+
+				if statusCode == http.StatusNotFound {
+					// In case of route not found, leave it to the main handler
+					return
+				} else {
+					http.Error(w, message, statusCode)
+				}
 			},
 		},
 	), nil

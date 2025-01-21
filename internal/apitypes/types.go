@@ -1,7 +1,9 @@
 package apitypes
 
 import (
+	"errors"
 	"fmt"
+	gameerrors "github.com/mcoot/crosswordgame-go/internal/errors"
 	gametypes "github.com/mcoot/crosswordgame-go/internal/game/types"
 	lobbytypes "github.com/mcoot/crosswordgame-go/internal/lobby/types"
 	playertypes "github.com/mcoot/crosswordgame-go/internal/player/types"
@@ -15,6 +17,29 @@ type ErrorResponse struct {
 
 func (e ErrorResponse) Error() string {
 	return fmt.Errorf("%d (%s): %s", e.HTTPCode, e.Kind, e.Message).Error()
+}
+
+func ToErrorResponse(err error) ErrorResponse {
+	var resp ErrorResponse
+	if ok := errors.As(err, &resp); ok {
+		return resp
+	}
+	gameErr, ok := gameerrors.AsGameError(err)
+	if ok {
+		resp = ErrorResponse{
+			Kind:     string(gameErr.Kind()),
+			Message:  gameErr.Message(),
+			HTTPCode: gameErr.HTTPCode(),
+		}
+	} else {
+		resp = ErrorResponse{
+			Kind:     "internal_error",
+			Message:  err.Error(),
+			HTTPCode: 500,
+		}
+	}
+
+	return resp
 }
 
 type HealthcheckResponse struct {
