@@ -3,11 +3,11 @@ package api
 import (
 	"github.com/gorilla/mux"
 	"github.com/mcoot/crosswordgame-go/internal/api/jsonapi"
+	"github.com/mcoot/crosswordgame-go/internal/api/middleware"
 	"github.com/mcoot/crosswordgame-go/internal/api/webapi"
 	"github.com/mcoot/crosswordgame-go/internal/game"
 	"github.com/mcoot/crosswordgame-go/internal/game/scoring"
 	"github.com/mcoot/crosswordgame-go/internal/lobby"
-	"github.com/mcoot/crosswordgame-go/internal/middleware"
 	"github.com/mcoot/crosswordgame-go/internal/store"
 	"github.com/tomarrell/wrapcheck/v2/wrapcheck/testdata/ignore_pkg_errors/src/github.com/pkg/errors"
 	"go.uber.org/zap"
