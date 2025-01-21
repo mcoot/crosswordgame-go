@@ -206,6 +206,18 @@ func (c *CrosswordGameWebAPI) LobbyPage(w http.ResponseWriter, r *http.Request, 
 			utils.SendError(logging.GetLogger(r.Context()), r, w, err)
 			return
 		}
+
+		gamePlayers := make([]*playertypes.Player, len(gameState.Players))
+		for i, playerId := range gameState.Players {
+			p, err := c.playerManager.LookupPlayer(playerId)
+			if err != nil {
+				utils.SendError(logging.GetLogger(r.Context()), r, w, err)
+				return
+			}
+
+			gamePlayers[i] = p
+		}
+
 		board, err := c.gameManager.GetPlayerBoard(gameState.Id, player.Username)
 		if err != nil {
 			utils.SendError(logging.GetLogger(r.Context()), r, w, err)
@@ -228,7 +240,7 @@ func (c *CrosswordGameWebAPI) LobbyPage(w http.ResponseWriter, r *http.Request, 
 			toRender,
 			template.Game(
 				gameState,
-				lobbyPlayers,
+				gamePlayers,
 				player,
 				template.Board(lobbyId, player, board, canPlayerPlace),
 			),
@@ -239,6 +251,9 @@ func (c *CrosswordGameWebAPI) LobbyPage(w http.ResponseWriter, r *http.Request, 
 			toRender = append(toRender, template.AnnouncementForm(lobbyId))
 		}
 
+		if gameState.Status == gametypes.StatusFinished {
+			toRender = append(toRender, template.GameScores(gamePlayers, player, gameState.PlayerScores))
+		}
 	} else {
 		toRender = append(toRender, template.GameStartForm(lobbyId))
 	}

@@ -88,3 +88,42 @@ templ Game(
     @boardComponent
     </div>
 }
+
+templ GameScores(
+    players []*playertypes.Player,
+    viewingPlayer *playertypes.Player,
+    scores map[playertypes.PlayerId]*gametypes.ScoreResult,
+) {
+    <h3>Game scores</h3>
+    <table>
+    <thead>
+        <tr>
+        <th>Player</th>
+        <th>Score</th>
+        <th>Words</th>
+        </tr>
+    </thead>
+    <tbody>
+    for _, player := range players {
+        <tr>
+        <td>
+        if player.Username == viewingPlayer.Username {
+            <b>{ player.DisplayName }</b>
+        } else {
+            { player.DisplayName }
+        }
+        </td>
+        <td>{ strconv.Itoa(scores[player.Username].TotalScore) }</td>
+        <td>{ strconv.Itoa(scores[player.Username].TotalScore) }</td>
+        <td>
+        <ul>
+        for _, word := range scores[player.Username].Words {
+            <li>{ word.Word } - { strconv.Itoa(word.Score) }</li>
+        }
+        </ul>
+        </td>
+        </tr>
+    }
+    </tbody>
+    </table>
+}
