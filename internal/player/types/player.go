@@ -5,6 +5,7 @@ import (
 	"github.com/hashicorp/go-uuid"
 	"github.com/mcoot/crosswordgame-go/internal/errors"
 	"strings"
+	"time"
 )
 
 type PlayerKind string
@@ -22,13 +23,15 @@ type Player struct {
 	Kind        PlayerKind
 	Username    PlayerId
 	DisplayName string
+	LastLogin   time.Time
 }
 
-func newPlayer(kind PlayerKind, username PlayerId, displayName string) *Player {
+func newPlayer(kind PlayerKind, username PlayerId, displayName string, lastLogin time.Time) *Player {
 	return &Player{
 		Kind:        kind,
 		Username:    username,
 		DisplayName: displayName,
+		LastLogin:   lastLogin,
 	}
 }
 
@@ -39,7 +42,7 @@ func NewEphemeralPlayer(displayName string) (*Player, error) {
 	}
 	id := PlayerId(fmt.Sprintf("%s%s", ephemeralPlayerPrefix, rawId))
 
-	return newPlayer(PlayerKindEphemeral, id, displayName), nil
+	return newPlayer(PlayerKindEphemeral, id, displayName, time.Now()), nil
 }
 
 func NewRegisteredPlayer(username PlayerId, displayName string) (*Player, error) {
@@ -49,5 +52,6 @@ func NewRegisteredPlayer(username PlayerId, displayName string) (*Player, error)
 		}
 	}
 
-	return newPlayer(PlayerKindRegistered, username, displayName), nil
+	// TODO: Creation shouldn't count as a login
+	return newPlayer(PlayerKindRegistered, username, displayName, time.Now()), nil
 }

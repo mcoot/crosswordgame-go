@@ -79,7 +79,39 @@ func (c *CrosswordGameWebAPI) Index(w http.ResponseWriter, r *http.Request) {
 }
 
 func (c *CrosswordGameWebAPI) Login(w http.ResponseWriter, r *http.Request) {
-	utils.SendError(logging.GetLogger(r.Context()), r, w, fmt.Errorf("not implemented"))
+	err := r.ParseForm()
+	if err != nil {
+		utils.SendError(logging.GetLogger(r.Context()), r, w, err)
+		return
+	}
+
+	displayName := r.PostForm.Get("display_name")
+	if displayName == "" {
+		utils.SendError(logging.GetLogger(r.Context()), r, w, fmt.Errorf("display_name is required"))
+		return
+	}
+
+	playerId, err := c.playerManager.LoginAsEphemeral(displayName)
+	if err != nil {
+		utils.SendError(logging.GetLogger(r.Context()), r, w, err)
+		return
+	}
+
+	session, err := commonutils.GetSessionDetails(c.sessionStore, r)
+	if err != nil {
+		utils.SendError(logging.GetLogger(r.Context()), r, w, err)
+		return
+	}
+
+	session.PlayerId = playerId
+
+	err = commonutils.SetSession(c.sessionStore, session, w, r)
+	if err != nil {
+		utils.SendError(logging.GetLogger(r.Context()), r, w, err)
+		return
+	}
+
+	http.Redirect(w, r, "/index", 303)
 }
 
 func (c *CrosswordGameWebAPI) LobbyPage(w http.ResponseWriter, r *http.Request) {

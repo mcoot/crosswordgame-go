@@ -68,7 +68,7 @@ func LoginForm() templ.Component {
 			templ_7745c5c3_Var2 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "<form id=\"login-form\" action=\"/login\" method=\"post\" hx-post=\"/login\" hx-target=\"#page-content\" hx-target-error=\"#login-error-div\"><h2>Ephemeral login</h2><label for=\"displayName\">Display name:</label> <input type=\"text\" name=\"displayName\" placeholder=\"name\"> <input type=\"submit\" value=\"Login\"></form><div id=\"login-error-div\">a</div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "<form id=\"login-form\" action=\"/login\" method=\"post\" hx-post=\"/login\" hx-target=\"#page-content\" hx-target-error=\"#login-error-div\"><h2>Ephemeral login</h2><label for=\"display_name\">Display name:</label> <input type=\"text\" name=\"display_name\" placeholder=\"name\"> <input type=\"submit\" value=\"Login\"></form><div id=\"login-error-div\">a</div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -181,7 +181,7 @@ func JoinForm() templ.Component {
 			templ_7745c5c3_Var7 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "<form><label for=\"lobbyId\">Lobby ID:</label> <input type=\"text\" name=\"lobbyId\" placeholder=\"lobby\"> <button>Join lobby</button></form>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "<form><label for=\"lobby_id\">Lobby ID:</label> <input type=\"text\" name=\"lobby_id\" placeholder=\"lobby\"> <button>Join lobby</button></form>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

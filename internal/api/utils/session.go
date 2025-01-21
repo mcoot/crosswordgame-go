@@ -42,7 +42,7 @@ func GetSessionDetails(sessionStore sessions.Store, r *http.Request) (*Session, 
 }
 
 func SetSession(store sessions.Store, session *Session, w http.ResponseWriter, r *http.Request) error {
-	session.Session.Values["player_id"] = session.PlayerId
+	session.Session.Values["player_id"] = string(session.PlayerId)
 
 	err := store.Save(r, w, session.Session)
 	if err != nil {
