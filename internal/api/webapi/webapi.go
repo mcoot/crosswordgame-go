@@ -268,8 +268,26 @@ func (c *CrosswordGameWebAPI) StartNewGame(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
+	err = r.ParseForm()
+	if err != nil {
+		utils.SendError(logging.GetLogger(r.Context()), r, w, err)
+		return
+	}
+
+	boardSizeRaw := r.PostForm.Get("board_size")
+	if boardSizeRaw == "" {
+		utils.SendError(logging.GetLogger(r.Context()), r, w, fmt.Errorf("announced_letter is required"))
+		return
+	}
+
+	boardSize, err := strconv.Atoi(boardSizeRaw)
+	if err != nil {
+		utils.SendError(logging.GetLogger(r.Context()), r, w, err)
+		return
+	}
+
 	// TODO: Have some UX to handle players joining a lobby mid-game (who can't be in the game)
-	gameId, err := c.gameManager.CreateGame(lobbyState.Players, 5)
+	gameId, err := c.gameManager.CreateGame(lobbyState.Players, boardSize)
 	if err != nil {
 		utils.SendError(logging.GetLogger(r.Context()), r, w, err)
 		return
@@ -312,13 +330,7 @@ func (c *CrosswordGameWebAPI) AnnounceLetter(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	gameId, err := c.gameManager.CreateGame(lobbyState.Players, 5)
-	if err != nil {
-		utils.SendError(logging.GetLogger(r.Context()), r, w, err)
-		return
-	}
-
-	err = c.gameManager.SubmitAnnouncement(gameId, player.Username, letter)
+	err = c.gameManager.SubmitAnnouncement(lobbyState.RunningGame.GameId, player.Username, letter)
 	if err != nil {
 		utils.SendError(logging.GetLogger(r.Context()), r, w, err)
 		return
@@ -371,13 +383,7 @@ func (c *CrosswordGameWebAPI) PlaceLetter(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	gameId, err := c.gameManager.CreateGame(lobbyState.Players, 5)
-	if err != nil {
-		utils.SendError(logging.GetLogger(r.Context()), r, w, err)
-		return
-	}
-
-	err = c.gameManager.SubmitPlacement(gameId, player.Username, row, column)
+	err = c.gameManager.SubmitPlacement(lobbyState.RunningGame.GameId, player.Username, row, column)
 	if err != nil {
 		utils.SendError(logging.GetLogger(r.Context()), r, w, err)
 		return

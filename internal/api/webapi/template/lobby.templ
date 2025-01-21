@@ -16,6 +16,8 @@ templ LobbyDetails(lobby *lobbytypes.Lobby, players []*playertypes.Player, viewi
 
 
 templ gameStartFormContents() {
+    <label for="board_size">Board size:</label>
+    <input type="number" name="board_size" value=5 placeholder="Size" />
     <input type="submit" value="Start game" />
 }
 

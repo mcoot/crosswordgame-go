@@ -96,7 +96,7 @@ func gameStartFormContents() templ.Component {
 			templ_7745c5c3_Var4 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "<input type=\"submit\" value=\"Start game\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "<label for=\"board_size\">Board size:</label> <input type=\"number\" name=\"board_size\" value=\"5\" placeholder=\"Size\"> <input type=\"submit\" value=\"Start game\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
