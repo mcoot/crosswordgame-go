@@ -1,8 +1,8 @@
 package webapi
 
 import (
-	"github.com/a-h/templ"
 	"github.com/gorilla/mux"
+	"github.com/gorilla/sessions"
 	commonutils "github.com/mcoot/crosswordgame-go/internal/api/utils"
 	"github.com/mcoot/crosswordgame-go/internal/api/webapi/template"
 	"github.com/mcoot/crosswordgame-go/internal/api/webapi/utils"
@@ -16,17 +16,20 @@ import (
 )
 
 type CrosswordGameWebAPI struct {
+	sessionStore  sessions.Store
 	gameManager   *game.Manager
 	lobbyManager  *lobby.Manager
 	playerManager *player.Manager
 }
 
 func NewCrosswordGameWebAPI(
+	sessionStore sessions.Store,
 	gameManager *game.Manager,
 	lobbyManager *lobby.Manager,
 	playerManager *player.Manager,
 ) *CrosswordGameWebAPI {
 	return &CrosswordGameWebAPI{
+		sessionStore:  sessionStore,
 		gameManager:   gameManager,
 		lobbyManager:  lobbyManager,
 		playerManager: playerManager,
@@ -36,11 +39,17 @@ func NewCrosswordGameWebAPI(
 func (c *CrosswordGameWebAPI) AttachToRouter(router *mux.Router) error {
 	router.NotFoundHandler = router.NewRoute().BuildOnly().Handler(NotFoundHandler()).GetHandler()
 
-	router.Handle("/", redirect.Handler("/index.html")).Methods("GET")
-	router.Handle("/index", staticHandler(template.Index())).Methods("GET")
+	router.Handle("/", redirect.Handler("/index")).Methods("GET")
+	router.HandleFunc("/index", c.Index).Methods("GET")
 	router.HandleFunc("/lobby/{lobbyId}", c.LobbyPage).Methods("GET")
 
 	return nil
+}
+
+func (c *CrosswordGameWebAPI) Index(w http.ResponseWriter, r *http.Request) {
+	formComponent := template.LoginForm()
+
+	utils.SendResponse(logging.GetLogger(r.Context()), r, w, template.Index(formComponent), 200)
 }
 
 func (c *CrosswordGameWebAPI) LobbyPage(w http.ResponseWriter, r *http.Request) {
@@ -69,12 +78,6 @@ func (c *CrosswordGameWebAPI) LobbyPage(w http.ResponseWriter, r *http.Request) 
 		template.LobbyPage(lobbyState, gameSpaceItem),
 		200,
 	)
-}
-
-func staticHandler(component templ.Component) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		utils.SendResponse(logging.GetLogger(r.Context()), r, w, component, 200)
-	})
 }
 
 func NotFoundHandler() http.Handler {

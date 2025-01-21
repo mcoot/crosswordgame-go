@@ -2,6 +2,7 @@ package api
 
 import (
 	"github.com/gorilla/mux"
+	"github.com/gorilla/sessions"
 	"github.com/mcoot/crosswordgame-go/internal/api/jsonapi"
 	"github.com/mcoot/crosswordgame-go/internal/api/webapi"
 	"github.com/mcoot/crosswordgame-go/internal/game"
@@ -14,7 +15,13 @@ import (
 	"net/http"
 )
 
-func SetupAPI(logger *zap.SugaredLogger, db store.Store, schemaPath string, dictPath string) (http.Handler, error) {
+func SetupAPI(
+	logger *zap.SugaredLogger,
+	db store.Store,
+	sessionStore sessions.Store,
+	schemaPath string,
+	dictPath string,
+) (http.Handler, error) {
 	router := mux.NewRouter()
 
 	apiRouter := router.PathPrefix("/api/v1").Subrouter()
@@ -27,12 +34,12 @@ func SetupAPI(logger *zap.SugaredLogger, db store.Store, schemaPath string, dict
 	lobbyManager := lobby.NewLobbyManager(db)
 	playerManager := player.NewPlayerManager(db)
 
-	jsonApi := jsonapi.NewCrosswordGameAPI(gameManager, lobbyManager, playerManager)
+	jsonApi := jsonapi.NewCrosswordGameAPI(sessionStore, gameManager, lobbyManager, playerManager)
 	err = jsonApi.AttachToRouter(apiRouter, logger, schemaPath)
 	if err != nil {
 		return nil, errors.Wrap(err, "error attaching JSON API to router")
 	}
-	webApi := webapi.NewCrosswordGameWebAPI(gameManager, lobbyManager, playerManager)
+	webApi := webapi.NewCrosswordGameWebAPI(sessionStore, gameManager, lobbyManager, playerManager)
 	err = webApi.AttachToRouter(router)
 	if err != nil {
 		return nil, errors.Wrap(err, "error attaching web API to router")

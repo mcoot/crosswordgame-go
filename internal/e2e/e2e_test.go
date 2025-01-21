@@ -1,6 +1,7 @@
 package e2e
 
 import (
+	"github.com/gorilla/sessions"
 	"github.com/mcoot/crosswordgame-go/internal/api"
 	"github.com/mcoot/crosswordgame-go/internal/client"
 	"github.com/mcoot/crosswordgame-go/internal/game/types"
@@ -28,8 +29,15 @@ func (s *CrosswordGameE2ESuite) SetupSuite() {
 	if err != nil {
 		panic(err)
 	}
+	sessionStore := sessions.NewCookieStore([]byte("test-key"))
 	db := store.NewInMemoryStore()
-	handler, err := api.SetupAPI(logger, db, "../../schema/openapi.yaml", "../../data/words.txt")
+	handler, err := api.SetupAPI(
+		logger,
+		db,
+		sessionStore,
+		"../../schema/openapi.yaml",
+		"../../data/words.txt",
+	)
 	if err != nil {
 		panic(err)
 	}

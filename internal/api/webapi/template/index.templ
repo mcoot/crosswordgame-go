@@ -1,6 +1,33 @@
 package template
 
-templ Index() {
+templ Index(formComponent templ.Component) {
     <h1>Crossword Game</h1>
     <p>Welcome to the Crossword Game!</p>
+    <div>
+        @formComponent
+    </div>
+}
+
+templ LoginForm() {
+    <form>
+    <h2>Ephemeral login</h2>
+    <label for="displayName">Display name:</label>
+    <input type="text" name="displayName" placeholder="name" />
+    <input type="submit" value="Login" />
+    </form>
+}
+
+templ HostForm() {
+    <form>
+    <h2>Host lobby</h2>
+    <input type="submit" value="Host new lobby" />
+    </form>
+}
+
+templ JoinForm() {
+    <form>
+    <label for="lobbyId">Lobby ID:</label>
+    <input type="text" name="lobbyId" placeholder="lobby" />
+    <button>Join lobby</button>
+    </form>
 }
