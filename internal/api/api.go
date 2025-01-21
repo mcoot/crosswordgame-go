@@ -3,7 +3,6 @@ package api
 import (
 	"github.com/gorilla/mux"
 	"github.com/mcoot/crosswordgame-go/internal/api/jsonapi"
-	"github.com/mcoot/crosswordgame-go/internal/api/middleware"
 	"github.com/mcoot/crosswordgame-go/internal/api/webapi"
 	"github.com/mcoot/crosswordgame-go/internal/game"
 	"github.com/mcoot/crosswordgame-go/internal/game/scoring"
@@ -17,7 +16,7 @@ import (
 func SetupAPI(logger *zap.SugaredLogger, db store.Store, schemaPath string, dictPath string) (http.Handler, error) {
 	router := mux.NewRouter()
 
-	err := middleware.SetupRoutedMiddleware(router, logger, schemaPath)
+	err := SetupRoutedMiddleware(router, logger, schemaPath)
 	if err != nil {
 		return nil, errors.Wrap(err, "error setting up middleware")
 	}
@@ -42,7 +41,7 @@ func SetupAPI(logger *zap.SugaredLogger, db store.Store, schemaPath string, dict
 		return nil, errors.Wrap(err, "error attaching web API to router")
 	}
 
-	handler := middleware.SetupGlobalMiddleware(router, logger)
+	handler := SetupGlobalMiddleware(router, logger)
 
 	return handler, nil
 }
