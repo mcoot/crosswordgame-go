@@ -26,6 +26,7 @@ type Game struct {
 	CurrentAnnouncingPlayer playertypes.PlayerId
 	CurrentAnnouncedLetter  string
 	PlayerBoards            map[playertypes.PlayerId]*Board
+	PlayerScores            map[playertypes.PlayerId]*ScoreResult
 }
 
 func NewGame(players []playertypes.PlayerId, boardDimension int) (*Game, error) {
@@ -49,6 +50,7 @@ func NewGame(players []playertypes.PlayerId, boardDimension int) (*Game, error) 
 		CurrentAnnouncingPlayer: players[0],
 		CurrentAnnouncedLetter:  "",
 		PlayerBoards:            playerBoards,
+		PlayerScores:            make(map[playertypes.PlayerId]*ScoreResult),
 	}, nil
 }
 
@@ -70,6 +72,25 @@ func (g *Game) GetPlayerBoard(playerId playertypes.PlayerId) (*Board, error) {
 	}
 
 	return board, nil
+}
+
+func (g *Game) GetPlayerScore(playerId playertypes.PlayerId) (*ScoreResult, error) {
+	if g.GetIndexForPlayer(playerId) == -1 {
+		return nil, &errors.NotFoundError{
+			ObjectKind: "player",
+			ObjectID:   playerId,
+		}
+	}
+
+	score, ok := g.PlayerScores[playerId]
+	if !ok {
+		return nil, &errors.InvalidActionError{
+			Action: "score",
+			Reason: "player score is not yet calculated",
+		}
+	}
+
+	return score, nil
 }
 
 func (g *Game) HasPlayerPlacedThisTurn(playerId playertypes.PlayerId) (bool, error) {

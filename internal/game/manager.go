@@ -58,11 +58,6 @@ func (m *Manager) GetPlayerScore(gameId types.GameId, playerId playertypes.Playe
 		return nil, err
 	}
 
-	board, err := game.GetPlayerBoard(playerId)
-	if err != nil {
-		return nil, err
-	}
-
 	if game.Status != types.StatusFinished {
 		return nil, &errors.InvalidActionError{
 			Action: "score",
@@ -74,7 +69,12 @@ func (m *Manager) GetPlayerScore(gameId types.GameId, playerId playertypes.Playe
 		}
 	}
 
-	return m.scorer.Score(board.Data), nil
+	score, err := game.GetPlayerScore(playerId)
+	if err != nil {
+		return nil, err
+	}
+
+	return score, nil
 }
 
 func (m *Manager) SubmitAnnouncement(gameId types.GameId, playerId playertypes.PlayerId, announcedLetter string) error {
@@ -227,6 +227,10 @@ func (m *Manager) checkAndProcessEndTurnOrGame(game *types.Game) error {
 
 	// Check if the game is over
 	if game.SquaresFilled == game.TotalSquares() {
+		// Calculate scores
+		for playerId, board := range game.PlayerBoards {
+			game.PlayerScores[playerId] = m.scorer.Score(board.Data)
+		}
 		game.Status = types.StatusFinished
 	} else {
 		// Proceed to the next turn
