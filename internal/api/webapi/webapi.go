@@ -48,9 +48,10 @@ func (c *CrosswordGameWebAPI) AttachToRouter(router *mux.Router) error {
 	router.Handle("/index.html", redirect.Handler("/index")).Methods("GET")
 	router.HandleFunc("/index", c.Index).Methods("GET")
 	router.HandleFunc("/login", c.Login).Methods("POST")
-	router.HandleFunc("/lobby/host", c.withLoggedInPlayer(c.StartLobbyAsHost)).Methods("POST")
-	router.HandleFunc("/lobby/join", c.withLoggedInPlayer(c.JoinLobby)).Methods("POST")
-	router.HandleFunc("/lobby/view/{lobbyId}", c.withLoggedInPlayer(c.LobbyPage)).Methods("GET")
+	router.HandleFunc("/host", c.withLoggedInPlayer(c.StartLobbyAsHost)).Methods("POST")
+	router.HandleFunc("/join", c.withLoggedInPlayer(c.JoinLobby)).Methods("POST")
+
+	router.HandleFunc("/lobby/{lobbyId}", c.withLoggedInPlayer(c.LobbyPage)).Methods("GET")
 
 	return nil
 }
@@ -146,7 +147,7 @@ func (c *CrosswordGameWebAPI) StartLobbyAsHost(w http.ResponseWriter, r *http.Re
 		return
 	}
 
-	utils.Redirect(w, r, fmt.Sprintf("/lobby/view/%s", lobbyId), 303)
+	utils.Redirect(w, r, fmt.Sprintf("/lobby/%s", lobbyId), 303)
 }
 
 func (c *CrosswordGameWebAPI) JoinLobby(w http.ResponseWriter, r *http.Request, player *playertypes.Player) {
@@ -168,7 +169,7 @@ func (c *CrosswordGameWebAPI) JoinLobby(w http.ResponseWriter, r *http.Request, 
 		return
 	}
 
-	utils.Redirect(w, r, fmt.Sprintf("/lobby/view/%s", lobbyId), 303)
+	utils.Redirect(w, r, fmt.Sprintf("/lobby/%s", lobbyId), 303)
 }
 
 func (c *CrosswordGameWebAPI) LobbyPage(w http.ResponseWriter, r *http.Request, player *playertypes.Player) {
@@ -207,7 +208,7 @@ func (c *CrosswordGameWebAPI) LobbyPage(w http.ResponseWriter, r *http.Request, 
 		gameSpaceItem,
 	)
 
-	utils.PushUrl(w, fmt.Sprintf("/lobby/view/%s", lobbyId))
+	utils.PushUrl(w, fmt.Sprintf("/lobby/%s", lobbyId))
 	utils.SendResponse(
 		logging.GetLogger(r.Context()),
 		r,

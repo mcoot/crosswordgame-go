@@ -34,8 +34,8 @@ templ LoggedInPlayerDetails(player *playertypes.Player) {
 templ HostForm() {
     <form
         id="host-form"
-        action="/lobby/host" method="post"
-        hx-post="/lobby/host" hx-target="#page-content" hx-target-error="#host-error-div"
+        action="/host" method="post"
+        hx-post="/host" hx-target="#page-content" hx-target-error="#host-error-div"
     >
     <h2>Host lobby</h2>
     <input type="text" name="lobby_name" placeholder="lobby name" />
@@ -47,8 +47,8 @@ templ HostForm() {
 templ JoinForm() {
     <form
         id="join-form"
-        action="/lobby/join" method="post"
-        hx-post="/lobby/join" hx-target="#page-content" hx-target-error="#join-error-div"
+        action="/join" method="post"
+        hx-post="/join" hx-target="#page-content" hx-target-error="#join-error-div"
     >
     <label for="lobby_id">Lobby ID:</label>
     <input type="text" name="lobby_id" placeholder="lobby id" />
