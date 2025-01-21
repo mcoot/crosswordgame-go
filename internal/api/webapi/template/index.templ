@@ -1,5 +1,7 @@
 package template
 
+import playertypes "github.com/mcoot/crosswordgame-go/internal/player/types"
+
 templ Index(formComponent templ.Component) {
     <h1>Crossword Game</h1>
     <p>Welcome to the Crossword Game!</p>
@@ -9,12 +11,23 @@ templ Index(formComponent templ.Component) {
 }
 
 templ LoginForm() {
-    <form>
+    <form
+        id="login-form"
+        action="/login" method="post"
+        hx-post="/login" hx-target="#page-content" hx-target-error="#login-error-div">
     <h2>Ephemeral login</h2>
     <label for="displayName">Display name:</label>
     <input type="text" name="displayName" placeholder="name" />
     <input type="submit" value="Login" />
     </form>
+    <div id="login-error-div">a</div>
+}
+
+templ LoggedInPlayerDetails(player *playertypes.Player) {
+    <div>
+    <h2>Logged in as: { player.DisplayName }</h2>
+    <p>Player ID: { string(player.Username) }</p>
+    </div>
 }
 
 templ HostForm() {

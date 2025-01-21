@@ -32,6 +32,11 @@ func AsGameError(err error) (GameError, bool) {
 	return nil, false
 }
 
+func IsNotFoundError(err error) bool {
+	ge, ok := AsGameError(err)
+	return ok && ge.Kind() == GameErrorNotFound
+}
+
 type InvalidInputError struct {
 	ErrMessage string
 }
