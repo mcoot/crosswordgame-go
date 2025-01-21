@@ -16,11 +16,6 @@ import (
 func SetupAPI(logger *zap.SugaredLogger, db store.Store, schemaPath string, dictPath string) (http.Handler, error) {
 	router := mux.NewRouter()
 
-	err := SetupRoutedMiddleware(router, logger, schemaPath)
-	if err != nil {
-		return nil, errors.Wrap(err, "error setting up middleware")
-	}
-
 	apiRouter := router.PathPrefix("/api/v1").Subrouter()
 
 	gameScorer, err := scoring.NewTxtDictScorer(dictPath)
@@ -31,7 +26,7 @@ func SetupAPI(logger *zap.SugaredLogger, db store.Store, schemaPath string, dict
 	lobbyManager := lobby.NewLobbyManager(db)
 
 	jsonApi := jsonapi.NewCrosswordGameAPI(gameManager, lobbyManager)
-	err = jsonApi.AttachToRouter(apiRouter)
+	err = jsonApi.AttachToRouter(apiRouter, logger, schemaPath)
 	if err != nil {
 		return nil, errors.Wrap(err, "error attaching JSON API to router")
 	}

@@ -11,6 +11,7 @@ import (
 	lobbytypes "github.com/mcoot/crosswordgame-go/internal/lobby/types"
 	"github.com/mcoot/crosswordgame-go/internal/logging"
 	playertypes "github.com/mcoot/crosswordgame-go/internal/player/types"
+	"go.uber.org/zap"
 	"net/http"
 	"time"
 )
@@ -29,7 +30,12 @@ func NewCrosswordGameAPI(gameManager *game.Manager, lobbyManager *lobby.Manager)
 	}
 }
 
-func (c *CrosswordGameAPI) AttachToRouter(router *mux.Router) error {
+func (c *CrosswordGameAPI) AttachToRouter(router *mux.Router, baseLogger *zap.SugaredLogger, schemaPath string) error {
+	err := setupMiddleware(router, baseLogger, schemaPath)
+	if err != nil {
+		return err
+	}
+
 	router.HandleFunc("/health", c.Healthcheck).Methods("GET")
 
 	router.HandleFunc("/game", c.CreateGame).Methods("POST")
