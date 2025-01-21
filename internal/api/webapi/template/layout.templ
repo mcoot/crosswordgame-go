@@ -1,5 +1,7 @@
 package template
 
+import "fmt"
+
 templ Layout(contents templ.Component) {
     <!DOCTYPE html>
     <html lang="en">
@@ -16,4 +18,15 @@ templ Layout(contents templ.Component) {
             </div>
         </body>
     </html>
+}
+
+templ CommonForm(formId string, postUrl string, formContents templ.Component) {
+    <form
+        id={ formId }
+        action={ templ.URL(postUrl) } method="post"
+        hx-post={ postUrl } hx-target="#page-content" hx-target-error={ fmt.Sprintf("#%s-error-div", formId) }
+    >
+    @formContents
+    </form>
+    <div id={ fmt.Sprintf("#%s-error-div", formId) }></div>
 }

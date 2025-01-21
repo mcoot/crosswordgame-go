@@ -52,6 +52,7 @@ func (c *CrosswordGameWebAPI) AttachToRouter(router *mux.Router) error {
 	router.HandleFunc("/join", c.withLoggedInPlayer(c.JoinLobby)).Methods("POST")
 
 	router.HandleFunc("/lobby/{lobbyId}", c.withLoggedInPlayer(c.LobbyPage)).Methods("GET")
+	router.HandleFunc("/lobby/{lobbyId}/start", c.withLoggedInPlayer(c.StartNewGame)).Methods("POST")
 
 	return nil
 }
@@ -191,8 +192,8 @@ func (c *CrosswordGameWebAPI) LobbyPage(w http.ResponseWriter, r *http.Request, 
 		lobbyPlayers[i] = p
 	}
 
-	gameSpaceItem := template.EmptyGame()
-	if lobbyState.RunningGame != nil {
+	gameSpaceItem := template.GameStartForm(lobbyId)
+	if lobbyState.HasRunningGame() {
 		gameState, err := c.gameManager.GetGameState(lobbyState.RunningGame.GameId)
 		if err != nil {
 			utils.SendError(logging.GetLogger(r.Context()), r, w, err)
@@ -216,6 +217,38 @@ func (c *CrosswordGameWebAPI) LobbyPage(w http.ResponseWriter, r *http.Request, 
 		component,
 		200,
 	)
+}
+
+func (c *CrosswordGameWebAPI) StartNewGame(w http.ResponseWriter, r *http.Request, player *playertypes.Player) {
+	lobbyId := commonutils.GetLobbyIdPathParam(r)
+	lobbyState, err := c.lobbyManager.GetLobbyState(lobbyId)
+	if err != nil {
+		utils.SendError(logging.GetLogger(r.Context()), r, w, err)
+		return
+	}
+
+	if lobbyState.HasRunningGame() {
+		utils.SendError(logging.GetLogger(r.Context()), r, w, &errors.InvalidActionError{
+			Action: "start_new_game",
+			Reason: "the lobby already has a running game",
+		})
+		return
+	}
+
+	// TODO: Have some UX to handle players joining a lobby mid-game (who can't be in the game)
+	gameId, err := c.gameManager.CreateGame(lobbyState.Players, 5)
+	if err != nil {
+		utils.SendError(logging.GetLogger(r.Context()), r, w, err)
+		return
+	}
+
+	err = c.lobbyManager.AttachGameToLobby(lobbyId, gameId)
+	if err != nil {
+		utils.SendError(logging.GetLogger(r.Context()), r, w, err)
+		return
+	}
+
+	utils.Redirect(w, r, fmt.Sprintf("/lobby/%s", lobbyId), 303)
 }
 
 func NotFoundHandler() http.Handler {

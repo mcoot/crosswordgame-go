@@ -10,18 +10,14 @@ templ Index(formComponent templ.Component) {
     </div>
 }
 
-templ LoginForm() {
-    <form
-        id="login-form"
-        action="/login" method="post"
-        hx-post="/login" hx-target="#page-content" hx-target-error="#login-error-div"
-    >
-    <h2>Ephemeral login</h2>
+templ loginFormContents() {
     <label for="display_name">Display name:</label>
     <input type="text" name="display_name" placeholder="name" />
     <input type="submit" value="Login" />
-    </form>
-    <div id="login-error-div"></div>
+}
+
+templ LoginForm() {
+    @CommonForm("login-form", "/login", loginFormContents())
 }
 
 templ LoggedInPlayerDetails(player *playertypes.Player) {
@@ -31,28 +27,22 @@ templ LoggedInPlayerDetails(player *playertypes.Player) {
     </div>
 }
 
-templ HostForm() {
-    <form
-        id="host-form"
-        action="/host" method="post"
-        hx-post="/host" hx-target="#page-content" hx-target-error="#host-error-div"
-    >
-    <h2>Host lobby</h2>
+templ hostFormContents() {
+    <label for="lobby_name">Lobby name:</label>
     <input type="text" name="lobby_name" placeholder="lobby name" />
     <input type="submit" value="Host new lobby" />
-    </form>
-    <div id="host-error-div"></div>
+}
+
+templ HostForm() {
+    @CommonForm("host-form", "/host", hostFormContents())
+}
+
+templ joinFormContents() {
+    <label for="lobby_id">Lobby ID:</label>
+    <input type="text" name="lobby_id" placeholder="lobby id" />
+    <input type="submit" value="Join lobby" />
 }
 
 templ JoinForm() {
-    <form
-        id="join-form"
-        action="/join" method="post"
-        hx-post="/join" hx-target="#page-content" hx-target-error="#join-error-div"
-    >
-    <label for="lobby_id">Lobby ID:</label>
-    <input type="text" name="lobby_id" placeholder="lobby id" />
-    <button>Join lobby</button>
-    </form>
-    <div id="join-error-div"></div>
+    @CommonForm("join-form", "/join", joinFormContents())
 }

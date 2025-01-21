@@ -1,5 +1,6 @@
 package template
 
+import "fmt"
 import lobbytypes "github.com/mcoot/crosswordgame-go/internal/lobby/types"
 import playertypes "github.com/mcoot/crosswordgame-go/internal/player/types"
 
@@ -23,6 +24,10 @@ templ PlayerList(players []*playertypes.Player, currentPlayerId playertypes.Play
     </div>
 }
 
-templ EmptyGame() {
-    <p>No game running</p>
+templ gameStartFormContents() {
+    <input type="submit" value="Start game" />
+}
+
+templ GameStartForm(lobbyId lobbytypes.LobbyId) {
+    @CommonForm("game-start-form", fmt.Sprintf("/lobby/%s/start", lobbyId), gameStartFormContents())
 }

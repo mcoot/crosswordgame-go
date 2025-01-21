@@ -86,7 +86,7 @@ func (m *Manager) AttachGameToLobby(lobbyId types.LobbyId, gameId gametypes.Game
 		return err
 	}
 
-	if lobby.RunningGame != nil {
+	if lobby.HasRunningGame() {
 		return &errors.InvalidActionError{
 			Action: "attach_game_to_lobby",
 			Reason: fmt.Sprintf("lobby %s already has a running game, %s", lobbyId, lobby.RunningGame.GameId),
@@ -105,7 +105,7 @@ func (m *Manager) DetachGameFromLobby(lobbyId types.LobbyId) error {
 		return err
 	}
 
-	if lobby.RunningGame == nil {
+	if !lobby.HasRunningGame() {
 		return &errors.InvalidActionError{
 			Action: "detach_game_from_lobby",
 			Reason: fmt.Sprintf("lobby %s does not have a running game", lobbyId),

@@ -226,7 +226,7 @@ func (c *CrosswordGameAPI) GetLobbyState(w http.ResponseWriter, r *http.Request)
 		Name:    lobbyState.Name,
 		Players: lobbyState.Players,
 	}
-	if lobbyState.RunningGame != nil {
+	if lobbyState.HasRunningGame() {
 		resp.GameID = lobbyState.RunningGame.GameId
 	}
 

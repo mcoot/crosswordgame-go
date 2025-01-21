@@ -28,3 +28,7 @@ func NewLobby(name string) (*Lobby, error) {
 		RunningGame: nil,
 	}, nil
 }
+
+func (l *Lobby) HasRunningGame() bool {
+	return l.RunningGame != nil
+}
