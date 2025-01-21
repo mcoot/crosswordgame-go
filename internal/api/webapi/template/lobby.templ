@@ -22,5 +22,6 @@ templ gameStartFormContents() {
 }
 
 templ GameStartForm(lobbyId lobbytypes.LobbyId) {
+    <h2>Start a new game</h2>
     @CommonForm("game-start-form", fmt.Sprintf("/lobby/%s/start", lobbyId), gameStartFormContents())
 }

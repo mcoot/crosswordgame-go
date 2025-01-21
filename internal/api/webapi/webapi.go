@@ -252,7 +252,11 @@ func (c *CrosswordGameWebAPI) LobbyPage(w http.ResponseWriter, r *http.Request, 
 		}
 
 		if gameState.Status == gametypes.StatusFinished {
-			toRender = append(toRender, template.GameScores(gamePlayers, player, gameState.PlayerScores))
+			toRender = append(
+				toRender,
+				template.GameScores(gamePlayers, player, gameState.PlayerScores),
+				template.GameStartForm(lobbyId),
+			)
 		}
 	} else {
 		toRender = append(toRender, template.GameStartForm(lobbyId))
@@ -278,11 +282,15 @@ func (c *CrosswordGameWebAPI) StartNewGame(w http.ResponseWriter, r *http.Reques
 	}
 
 	if lobbyState.HasRunningGame() {
-		utils.SendError(logging.GetLogger(r.Context()), r, w, &errors.InvalidActionError{
-			Action: "start_new_game",
-			Reason: "the lobby already has a running game",
-		})
-		return
+		err = c.lobbyManager.DetachGameFromLobby(lobbyId)
+		if err != nil {
+			if errors.IsNotFoundError(err) {
+				// The game was already detached, so we can just continue
+			} else {
+				utils.SendError(logging.GetLogger(r.Context()), r, w, err)
+				return
+			}
+		}
 	}
 
 	err = r.ParseForm()
