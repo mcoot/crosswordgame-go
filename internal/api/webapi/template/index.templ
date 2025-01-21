@@ -14,13 +14,14 @@ templ LoginForm() {
     <form
         id="login-form"
         action="/login" method="post"
-        hx-post="/login" hx-target="#page-content" hx-target-error="#login-error-div">
+        hx-post="/login" hx-target="#page-content" hx-target-error="#login-error-div"
+    >
     <h2>Ephemeral login</h2>
     <label for="display_name">Display name:</label>
     <input type="text" name="display_name" placeholder="name" />
     <input type="submit" value="Login" />
     </form>
-    <div id="login-error-div">a</div>
+    <div id="login-error-div"></div>
 }
 
 templ LoggedInPlayerDetails(player *playertypes.Player) {
@@ -31,16 +32,27 @@ templ LoggedInPlayerDetails(player *playertypes.Player) {
 }
 
 templ HostForm() {
-    <form>
+    <form
+        id="host-form"
+        action="/lobby/host" method="post"
+        hx-post="/lobby/host" hx-target="#page-content" hx-target-error="#host-error-div"
+    >
     <h2>Host lobby</h2>
+    <input type="text" name="lobby_name" placeholder="lobby name" />
     <input type="submit" value="Host new lobby" />
     </form>
+    <div id="host-error-div"></div>
 }
 
 templ JoinForm() {
-    <form>
+    <form
+        id="join-form"
+        action="/lobby/join" method="post"
+        hx-post="/lobby/join" hx-target="#page-content" hx-target-error="#join-error-div"
+    >
     <label for="lobby_id">Lobby ID:</label>
-    <input type="text" name="lobby_id" placeholder="lobby" />
+    <input type="text" name="lobby_id" placeholder="lobby id" />
     <button>Join lobby</button>
     </form>
+    <div id="join-error-div"></div>
 }

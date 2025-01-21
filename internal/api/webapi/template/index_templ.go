@@ -68,7 +68,7 @@ func LoginForm() templ.Component {
 			templ_7745c5c3_Var2 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "<form id=\"login-form\" action=\"/login\" method=\"post\" hx-post=\"/login\" hx-target=\"#page-content\" hx-target-error=\"#login-error-div\"><h2>Ephemeral login</h2><label for=\"display_name\">Display name:</label> <input type=\"text\" name=\"display_name\" placeholder=\"name\"> <input type=\"submit\" value=\"Login\"></form><div id=\"login-error-div\">a</div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "<form id=\"login-form\" action=\"/login\" method=\"post\" hx-post=\"/login\" hx-target=\"#page-content\" hx-target-error=\"#login-error-div\"><h2>Ephemeral login</h2><label for=\"display_name\">Display name:</label> <input type=\"text\" name=\"display_name\" placeholder=\"name\"> <input type=\"submit\" value=\"Login\"></form><div id=\"login-error-div\"></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -104,7 +104,7 @@ func LoggedInPlayerDetails(player *playertypes.Player) templ.Component {
 		var templ_7745c5c3_Var4 string
 		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(player.DisplayName)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/api/webapi/template/index.templ`, Line: 28, Col: 42}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/api/webapi/template/index.templ`, Line: 29, Col: 42}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 		if templ_7745c5c3_Err != nil {
@@ -117,7 +117,7 @@ func LoggedInPlayerDetails(player *playertypes.Player) templ.Component {
 		var templ_7745c5c3_Var5 string
 		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(string(player.Username))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/api/webapi/template/index.templ`, Line: 29, Col: 43}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/api/webapi/template/index.templ`, Line: 30, Col: 43}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 		if templ_7745c5c3_Err != nil {
@@ -152,7 +152,7 @@ func HostForm() templ.Component {
 			templ_7745c5c3_Var6 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "<form><h2>Host lobby</h2><input type=\"submit\" value=\"Host new lobby\"></form>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "<form id=\"host-form\" action=\"/lobby/host\" method=\"post\" hx-post=\"/lobby/host\" hx-target=\"#page-content\" hx-target-error=\"#host-error-div\"><h2>Host lobby</h2><input type=\"text\" name=\"lobby_name\" placeholder=\"lobby name\"> <input type=\"submit\" value=\"Host new lobby\"></form><div id=\"host-error-div\"></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -181,7 +181,7 @@ func JoinForm() templ.Component {
 			templ_7745c5c3_Var7 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "<form><label for=\"lobby_id\">Lobby ID:</label> <input type=\"text\" name=\"lobby_id\" placeholder=\"lobby\"> <button>Join lobby</button></form>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "<form id=\"join-form\" action=\"/lobby/join\" method=\"post\" hx-post=\"/lobby/join\" hx-target=\"#page-content\" hx-target-error=\"#join-error-div\"><label for=\"lobby_id\">Lobby ID:</label> <input type=\"text\" name=\"lobby_id\" placeholder=\"lobby id\"> <button>Join lobby</button></form><div id=\"join-error-div\"></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

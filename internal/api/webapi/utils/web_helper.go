@@ -8,6 +8,11 @@ import (
 	"net/http"
 )
 
+func PushUrl(w http.ResponseWriter, url string) {
+	w.Header().Set("HX-Push-Url", url)
+	w.Header().Add("Access-Control-Expose-Headers", "Hx-Push-Url")
+}
+
 func SendResponse(
 	logger *zap.SugaredLogger,
 	r *http.Request,
@@ -39,6 +44,10 @@ func SendResponse(
 		logger.Errorw("error rendering web response", "error", err)
 		return
 	}
+}
+
+func Redirect(w http.ResponseWriter, r *http.Request, url string, code int) {
+	http.Redirect(w, r, url, code)
 }
 
 func SendError(

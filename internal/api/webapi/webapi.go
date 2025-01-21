@@ -12,8 +12,10 @@ import (
 	"github.com/mcoot/crosswordgame-go/internal/errors"
 	"github.com/mcoot/crosswordgame-go/internal/game"
 	"github.com/mcoot/crosswordgame-go/internal/lobby"
+	lobbytypes "github.com/mcoot/crosswordgame-go/internal/lobby/types"
 	"github.com/mcoot/crosswordgame-go/internal/logging"
 	"github.com/mcoot/crosswordgame-go/internal/player"
+	playertypes "github.com/mcoot/crosswordgame-go/internal/player/types"
 	"golang.org/x/tools/godoc/redirect"
 	"net/http"
 )
@@ -43,9 +45,12 @@ func (c *CrosswordGameWebAPI) AttachToRouter(router *mux.Router) error {
 	router.NotFoundHandler = router.NewRoute().BuildOnly().Handler(NotFoundHandler()).GetHandler()
 
 	router.Handle("/", redirect.Handler("/index")).Methods("GET")
+	router.Handle("/index.html", redirect.Handler("/index")).Methods("GET")
 	router.HandleFunc("/index", c.Index).Methods("GET")
 	router.HandleFunc("/login", c.Login).Methods("POST")
-	router.HandleFunc("/lobby/{lobbyId}", c.LobbyPage).Methods("GET")
+	router.HandleFunc("/lobby/host", c.withLoggedInPlayer(c.StartLobbyAsHost)).Methods("POST")
+	router.HandleFunc("/lobby/join", c.withLoggedInPlayer(c.JoinLobby)).Methods("POST")
+	router.HandleFunc("/lobby/view/{lobbyId}", c.withLoggedInPlayer(c.LobbyPage)).Methods("GET")
 
 	return nil
 }
@@ -75,6 +80,7 @@ func (c *CrosswordGameWebAPI) Index(w http.ResponseWriter, r *http.Request) {
 		formComponent = template.LoginForm()
 	}
 
+	utils.PushUrl(w, "/index")
 	utils.SendResponse(logging.GetLogger(r.Context()), r, w, template.Index(formComponent), 200)
 }
 
@@ -111,10 +117,61 @@ func (c *CrosswordGameWebAPI) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	http.Redirect(w, r, "/index", 303)
+	utils.Redirect(w, r, "/index", 303)
 }
 
-func (c *CrosswordGameWebAPI) LobbyPage(w http.ResponseWriter, r *http.Request) {
+func (c *CrosswordGameWebAPI) StartLobbyAsHost(w http.ResponseWriter, r *http.Request, player *playertypes.Player) {
+	err := r.ParseForm()
+	if err != nil {
+		utils.SendError(logging.GetLogger(r.Context()), r, w, err)
+		return
+	}
+
+	lobbyName := r.PostForm.Get("lobby_name")
+	if lobbyName == "" {
+		utils.SendError(logging.GetLogger(r.Context()), r, w, fmt.Errorf("lobby_name is required"))
+		return
+	}
+
+	lobbyId, err := c.lobbyManager.CreateLobby(lobbyName)
+	if err != nil {
+		utils.SendError(logging.GetLogger(r.Context()), r, w, err)
+		return
+	}
+
+	err = c.lobbyManager.JoinPlayerToLobby(lobbyId, player.Username)
+	if err != nil {
+		// TODO: Scrap the lobby?
+		utils.SendError(logging.GetLogger(r.Context()), r, w, err)
+		return
+	}
+
+	utils.Redirect(w, r, fmt.Sprintf("/lobby/view/%s", lobbyId), 303)
+}
+
+func (c *CrosswordGameWebAPI) JoinLobby(w http.ResponseWriter, r *http.Request, player *playertypes.Player) {
+	err := r.ParseForm()
+	if err != nil {
+		utils.SendError(logging.GetLogger(r.Context()), r, w, err)
+		return
+	}
+
+	lobbyId := r.PostForm.Get("lobby_id")
+	if lobbyId == "" {
+		utils.SendError(logging.GetLogger(r.Context()), r, w, fmt.Errorf("lobby_id is required"))
+		return
+	}
+
+	err = c.lobbyManager.JoinPlayerToLobby(lobbytypes.LobbyId(lobbyId), player.Username)
+	if err != nil {
+		utils.SendError(logging.GetLogger(r.Context()), r, w, err)
+		return
+	}
+
+	utils.Redirect(w, r, fmt.Sprintf("/lobby/view/%s", lobbyId), 303)
+}
+
+func (c *CrosswordGameWebAPI) LobbyPage(w http.ResponseWriter, r *http.Request, player *playertypes.Player) {
 	lobbyId := commonutils.GetLobbyIdPathParam(r)
 	lobbyState, err := c.lobbyManager.GetLobbyState(lobbyId)
 	if err != nil {
@@ -122,7 +179,18 @@ func (c *CrosswordGameWebAPI) LobbyPage(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	gameSpaceItem := template.EmptyGameSpace()
+	lobbyPlayers := make([]*playertypes.Player, len(lobbyState.Players))
+	for i, playerId := range lobbyState.Players {
+		p, err := c.playerManager.LookupPlayer(playerId)
+		if err != nil {
+			utils.SendError(logging.GetLogger(r.Context()), r, w, err)
+			return
+		}
+
+		lobbyPlayers[i] = p
+	}
+
+	gameSpaceItem := template.EmptyGame()
 	if lobbyState.RunningGame != nil {
 		gameState, err := c.gameManager.GetGameState(lobbyState.RunningGame.GameId)
 		if err != nil {
@@ -133,11 +201,18 @@ func (c *CrosswordGameWebAPI) LobbyPage(w http.ResponseWriter, r *http.Request) 
 		gameSpaceItem = template.Game(gameState)
 	}
 
+	component := templ.Join(
+		template.LobbyDetails(lobbyState),
+		template.PlayerList(lobbyPlayers, player.Username),
+		gameSpaceItem,
+	)
+
+	utils.PushUrl(w, fmt.Sprintf("/lobby/view/%s", lobbyId))
 	utils.SendResponse(
 		logging.GetLogger(r.Context()),
 		r,
 		w,
-		template.LobbyPage(lobbyState, gameSpaceItem),
+		component,
 		200,
 	)
 }
@@ -150,4 +225,33 @@ func NotFoundHandler() http.Handler {
 			Message:  "page not found",
 		})
 	})
+}
+
+func (c *CrosswordGameWebAPI) withLoggedInPlayer(
+	f func(w http.ResponseWriter, r *http.Request, player *playertypes.Player),
+) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		session, err := commonutils.GetSessionDetails(c.sessionStore, r)
+		if err != nil {
+			utils.SendError(logging.GetLogger(r.Context()), r, w, err)
+			return
+		}
+
+		if session.PlayerId == "" {
+			utils.SendError(logging.GetLogger(r.Context()), r, w, apitypes.ErrorResponse{
+				HTTPCode: 401,
+				Kind:     "unauthorized",
+				Message:  "not logged in",
+			})
+			return
+		}
+
+		p, err := c.playerManager.LookupPlayer(session.PlayerId)
+		if err != nil {
+			utils.SendError(logging.GetLogger(r.Context()), r, w, err)
+			return
+		}
+
+		f(w, r, p)
+	}
 }

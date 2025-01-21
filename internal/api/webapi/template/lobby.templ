@@ -1,13 +1,28 @@
 package template
 
 import lobbytypes "github.com/mcoot/crosswordgame-go/internal/lobby/types"
+import playertypes "github.com/mcoot/crosswordgame-go/internal/player/types"
 
-templ LobbyPage(lobby *lobbytypes.Lobby, gameSpaceItem templ.Component) {
+templ LobbyDetails(lobby *lobbytypes.Lobby) {
     <h1>Lobby: { lobby.Name }</h1>
     <p>Lobby ID for joining: { string(lobby.Id) }</p>
-    @gameSpaceItem
 }
 
-templ EmptyGameSpace() {
+templ PlayerList(players []*playertypes.Player, currentPlayerId playertypes.PlayerId) {
+    <div>
+        <h2>Players</h2>
+        <ul>
+            for _, player := range players {
+                if player.Username == currentPlayerId {
+                    <li><b>{ player.DisplayName }</b></li>
+                } else {
+                    <li>{ player.DisplayName }</li>
+                }
+            }
+        </ul>
+    </div>
+}
+
+templ EmptyGame() {
     <p>No game running</p>
 }
