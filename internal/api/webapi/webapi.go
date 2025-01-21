@@ -226,8 +226,12 @@ func (c *CrosswordGameWebAPI) LobbyPage(w http.ResponseWriter, r *http.Request, 
 
 		toRender = append(
 			toRender,
-			template.Game(gameState, lobbyPlayers, player),
-			template.Board(lobbyId, board, canPlayerPlace),
+			template.Game(
+				gameState,
+				lobbyPlayers,
+				player,
+				template.Board(lobbyId, player, board, canPlayerPlace),
+			),
 		)
 
 		if gameState.Status == gametypes.StatusAwaitingAnnouncement &&

@@ -16,15 +16,19 @@ func cellLetter(letter string) string {
 templ cellFormContents(letter string, row int, column int, placementEnabled bool) {
     <input type="hidden" name="placement_row" value={ strconv.Itoa(row) }>
     <input type="hidden" name="placement_column" value={ strconv.Itoa(column) }>
-    <input type="submit"
-        value={ cellLetter(letter) }
+    <input type="submit" value={ cellLetter(letter) }
         if !placementEnabled {
             disabled
-        }
-    />
+        }/>
 }
 
-templ Board(lobbyId lobbytypes.LobbyId, board *gametypes.Board, placementEnabled bool) {
+templ Board(
+    lobbyId lobbytypes.LobbyId,
+    viewingPlayer *playertypes.Player,
+    board *gametypes.Board,
+    placementEnabled bool,
+) {
+    <h3>Your ({ viewingPlayer.DisplayName }'s) board</h3>
     <div class="cwg-board">
     <table>
         <tbody>
@@ -60,6 +64,10 @@ templ AnnouncementForm(lobbyId lobbytypes.LobbyId) {
     @CommonForm("announcement-form", fmt.Sprintf("/lobby/%s/announce", lobbyId), announcementFormContents())
 }
 
+templ gameHeader(game *gametypes.Game) {
+    <h2>Game: { string(game.Id) }</h2>
+}
+
 templ gameStatus(game *gametypes.Game, players []*playertypes.Player, viewingPlayer *playertypes.Player) {
     <div>
     <h3>In game:</h3>
@@ -68,10 +76,15 @@ templ gameStatus(game *gametypes.Game, players []*playertypes.Player, viewingPla
     </div>
 }
 
-templ Game(game *gametypes.Game, players []*playertypes.Player, viewingPlayer *playertypes.Player) {
+templ Game(
+    game *gametypes.Game,
+    players []*playertypes.Player,
+    viewingPlayer *playertypes.Player,
+    boardComponent templ.Component,
+) {
     <div class="cwg-game">
-    <h2>Game: { string(game.Id) }</h2>
+    @gameHeader(game)
     @gameStatus(game, players, viewingPlayer)
-    <h3>Your ({ viewingPlayer.DisplayName }'s) board</h3>
+    @boardComponent
     </div>
 }
