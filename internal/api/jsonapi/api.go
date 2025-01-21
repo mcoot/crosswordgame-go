@@ -74,7 +74,7 @@ func (c *CrosswordGameAPI) CreateGame(w http.ResponseWriter, r *http.Request) {
 		boardDimension = *req.BoardDimension
 	}
 
-	gameId, err := c.gameManager.NewGame(req.Players, boardDimension)
+	gameId, err := c.gameManager.CreateGame(req.Players, boardDimension)
 	if err != nil {
 		utils.SendError(logger, w, err)
 		return
@@ -191,7 +191,7 @@ func (c *CrosswordGameAPI) CreateLobby(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	lobbyId, err := c.lobbyManager.NewLobby(req.Name)
+	lobbyId, err := c.lobbyManager.CreateLobby(req.Name)
 	if err != nil {
 		utils.SendError(logger, w, err)
 		return

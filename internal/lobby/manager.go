@@ -2,7 +2,6 @@ package lobby
 
 import (
 	"fmt"
-	"github.com/hashicorp/go-uuid"
 	"github.com/mcoot/crosswordgame-go/internal/errors"
 	gametypes "github.com/mcoot/crosswordgame-go/internal/game/types"
 	"github.com/mcoot/crosswordgame-go/internal/lobby/types"
@@ -20,21 +19,16 @@ func NewLobbyManager(store store.LobbyStore) *Manager {
 	}
 }
 
-func (m *Manager) NewLobby(name string) (types.LobbyId, error) {
-	rawId, err := uuid.GenerateUUID()
+func (m *Manager) CreateLobby(name string) (types.LobbyId, error) {
+	lobby, err := types.NewLobby(name)
 	if err != nil {
 		return "", err
 	}
-	id := types.LobbyId(rawId)
-	err = m.store.StoreLobby(id, &types.Lobby{
-		Name:        name,
-		Players:     make([]playertypes.PlayerId, 0),
-		RunningGame: nil,
-	})
+	err = m.store.StoreLobby(lobby.Id, lobby)
 	if err != nil {
 		return "", err
 	}
-	return id, nil
+	return lobby.Id, nil
 }
 
 func (m *Manager) GetLobbyState(id types.LobbyId) (*types.Lobby, error) {

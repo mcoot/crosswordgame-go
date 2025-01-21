@@ -2,7 +2,6 @@ package game
 
 import (
 	"fmt"
-	"github.com/hashicorp/go-uuid"
 	"github.com/mcoot/crosswordgame-go/internal/errors"
 	"github.com/mcoot/crosswordgame-go/internal/game/scoring"
 	"github.com/mcoot/crosswordgame-go/internal/game/types"
@@ -24,18 +23,16 @@ func NewGameManager(store store.GameStore, scorer scoring.Scorer) *Manager {
 	}
 }
 
-func (m *Manager) NewGame(players []playertypes.PlayerId, boardDimension int) (types.GameId, error) {
-	game := types.NewGame(players, boardDimension)
-	rawId, err := uuid.GenerateUUID()
+func (m *Manager) CreateGame(players []playertypes.PlayerId, boardDimension int) (types.GameId, error) {
+	game, err := types.NewGame(players, boardDimension)
 	if err != nil {
 		return "", err
 	}
-	id := types.GameId(rawId)
-	err = m.store.StoreGame(id, game)
+	err = m.store.StoreGame(game.Id, game)
 	if err != nil {
 		return "", err
 	}
-	return id, nil
+	return game.Id, nil
 }
 
 func (m *Manager) GetGameState(gameId types.GameId) (*types.Game, error) {

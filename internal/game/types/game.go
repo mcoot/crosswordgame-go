@@ -1,6 +1,9 @@
 package types
 
-import playertypes "github.com/mcoot/crosswordgame-go/internal/player/types"
+import (
+	"github.com/hashicorp/go-uuid"
+	playertypes "github.com/mcoot/crosswordgame-go/internal/player/types"
+)
 
 type GameId string
 
@@ -13,6 +16,7 @@ const (
 )
 
 type Game struct {
+	Id                      GameId
 	Status                  Status
 	Players                 []playertypes.PlayerId
 	SquaresFilled           int
@@ -22,13 +26,20 @@ type Game struct {
 	PlayerBoards            []*Board
 }
 
-func NewGame(players []playertypes.PlayerId, boardDimension int) *Game {
+func NewGame(players []playertypes.PlayerId, boardDimension int) (*Game, error) {
+	rawId, err := uuid.GenerateUUID()
+	if err != nil {
+		return nil, err
+	}
+	id := GameId(rawId)
+
 	playerBoards := make([]*Board, len(players))
 	for i := range players {
 		playerBoards[i] = NewBoard(boardDimension)
 	}
 
 	return &Game{
+		Id:                      id,
 		Status:                  StatusAwaitingAnnouncement,
 		Players:                 players,
 		SquaresFilled:           0,
@@ -36,7 +47,7 @@ func NewGame(players []playertypes.PlayerId, boardDimension int) *Game {
 		CurrentAnnouncingPlayer: players[0],
 		CurrentAnnouncedLetter:  "",
 		PlayerBoards:            playerBoards,
-	}
+	}, nil
 }
 
 func (g *Game) TotalSquares() int {
