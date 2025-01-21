@@ -28,7 +28,7 @@ func (m *Manager) CreateGame(players []playertypes.PlayerId, boardDimension int)
 	if err != nil {
 		return "", err
 	}
-	err = m.store.StoreGame(game.Id, game)
+	err = m.store.StoreGame(game)
 	if err != nil {
 		return "", err
 	}
@@ -123,7 +123,7 @@ func (m *Manager) SubmitAnnouncement(gameId types.GameId, playerId playertypes.P
 	game.CurrentAnnouncedLetter = announcedLetter
 	rotateAnnouncingPlayer(game)
 
-	return m.store.StoreGame(gameId, game)
+	return m.store.StoreGame(game)
 }
 
 func (m *Manager) SubmitPlacement(gameId types.GameId, playerId playertypes.PlayerId, row, column int) error {
@@ -158,7 +158,7 @@ func (m *Manager) SubmitPlacement(gameId types.GameId, playerId playertypes.Play
 		return err
 	}
 
-	return m.store.StoreGame(gameId, game)
+	return m.store.StoreGame(game)
 }
 
 func (m *Manager) fillPlayerSquare(

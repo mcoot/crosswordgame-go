@@ -7,18 +7,18 @@ import (
 )
 
 type GameStore interface {
-	StoreGame(gameId gametypes.GameId, game *gametypes.Game) error
+	StoreGame(game *gametypes.Game) error
 	RetrieveGame(gameId gametypes.GameId) (*gametypes.Game, error)
 }
 
 type LobbyStore interface {
-	StoreLobby(lobbyId lobbytypes.LobbyId, lobby *lobbytypes.Lobby) error
+	StoreLobby(lobby *lobbytypes.Lobby) error
 	RetrieveLobby(lobbyId lobbytypes.LobbyId) (*lobbytypes.Lobby, error)
 }
 
 type PlayerStore interface {
-	StorePlayer(playerId playertypes.PlayerId, player *playertypes.Player) error
-	RetrievePlayer(playerId playertypes.PlayerId) (*playertypes.Player, error)
+	StorePlayer(player *playertypes.Player) error
+	RetrievePlayer(kind playertypes.PlayerKind, playerId playertypes.PlayerId) (*playertypes.Player, error)
 }
 
 type Store interface {

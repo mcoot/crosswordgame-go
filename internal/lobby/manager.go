@@ -24,7 +24,7 @@ func (m *Manager) CreateLobby(name string) (types.LobbyId, error) {
 	if err != nil {
 		return "", err
 	}
-	err = m.store.StoreLobby(lobby.Id, lobby)
+	err = m.store.StoreLobby(lobby)
 	if err != nil {
 		return "", err
 	}
@@ -53,7 +53,7 @@ func (m *Manager) JoinPlayerToLobby(lobbyId types.LobbyId, playerId playertypes.
 	}
 
 	lobby.Players = append(lobby.Players, playerId)
-	return m.store.StoreLobby(lobbyId, lobby)
+	return m.store.StoreLobby(lobby)
 }
 
 func (m *Manager) RemovePlayerFromLobby(lobbyId types.LobbyId, playerId playertypes.PlayerId) error {
@@ -77,7 +77,7 @@ func (m *Manager) RemovePlayerFromLobby(lobbyId types.LobbyId, playerId playerty
 		}
 	}
 
-	return m.store.StoreLobby(lobbyId, lobby)
+	return m.store.StoreLobby(lobby)
 }
 
 func (m *Manager) AttachGameToLobby(lobbyId types.LobbyId, gameId gametypes.GameId) error {
@@ -96,7 +96,7 @@ func (m *Manager) AttachGameToLobby(lobbyId types.LobbyId, gameId gametypes.Game
 	lobby.RunningGame = &types.RunningGame{
 		GameId: gameId,
 	}
-	return m.store.StoreLobby(lobbyId, lobby)
+	return m.store.StoreLobby(lobby)
 }
 
 func (m *Manager) DetachGameFromLobby(lobbyId types.LobbyId) error {
@@ -113,7 +113,7 @@ func (m *Manager) DetachGameFromLobby(lobbyId types.LobbyId) error {
 	}
 
 	lobby.RunningGame = nil
-	return m.store.StoreLobby(lobbyId, lobby)
+	return m.store.StoreLobby(lobby)
 }
 
 func isPlayerInLobby(lobby *types.Lobby, playerId playertypes.PlayerId) bool {
