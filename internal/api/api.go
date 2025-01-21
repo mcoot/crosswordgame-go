@@ -7,6 +7,7 @@ import (
 	"github.com/mcoot/crosswordgame-go/internal/game"
 	"github.com/mcoot/crosswordgame-go/internal/game/scoring"
 	"github.com/mcoot/crosswordgame-go/internal/lobby"
+	"github.com/mcoot/crosswordgame-go/internal/player"
 	"github.com/mcoot/crosswordgame-go/internal/store"
 	"github.com/tomarrell/wrapcheck/v2/wrapcheck/testdata/ignore_pkg_errors/src/github.com/pkg/errors"
 	"go.uber.org/zap"
@@ -24,13 +25,14 @@ func SetupAPI(logger *zap.SugaredLogger, db store.Store, schemaPath string, dict
 	}
 	gameManager := game.NewGameManager(db, gameScorer)
 	lobbyManager := lobby.NewLobbyManager(db)
+	playerManager := player.NewPlayerManager(db)
 
-	jsonApi := jsonapi.NewCrosswordGameAPI(gameManager, lobbyManager)
+	jsonApi := jsonapi.NewCrosswordGameAPI(gameManager, lobbyManager, playerManager)
 	err = jsonApi.AttachToRouter(apiRouter, logger, schemaPath)
 	if err != nil {
 		return nil, errors.Wrap(err, "error attaching JSON API to router")
 	}
-	webApi := webapi.NewCrosswordGameWebAPI(gameManager, lobbyManager)
+	webApi := webapi.NewCrosswordGameWebAPI(gameManager, lobbyManager, playerManager)
 	err = webApi.AttachToRouter(router)
 	if err != nil {
 		return nil, errors.Wrap(err, "error attaching web API to router")

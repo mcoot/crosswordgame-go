@@ -9,22 +9,29 @@ import (
 	"github.com/mcoot/crosswordgame-go/internal/game"
 	"github.com/mcoot/crosswordgame-go/internal/lobby"
 	"github.com/mcoot/crosswordgame-go/internal/logging"
+	"github.com/mcoot/crosswordgame-go/internal/player"
 	"go.uber.org/zap"
 	"net/http"
 	"time"
 )
 
 type CrosswordGameAPI struct {
-	startTime    time.Time
-	gameManager  *game.Manager
-	lobbyManager *lobby.Manager
+	startTime     time.Time
+	gameManager   *game.Manager
+	lobbyManager  *lobby.Manager
+	playerManager *player.Manager
 }
 
-func NewCrosswordGameAPI(gameManager *game.Manager, lobbyManager *lobby.Manager) *CrosswordGameAPI {
+func NewCrosswordGameAPI(
+	gameManager *game.Manager,
+	lobbyManager *lobby.Manager,
+	playerManager *player.Manager,
+) *CrosswordGameAPI {
 	return &CrosswordGameAPI{
-		startTime:    time.Now(),
-		gameManager:  gameManager,
-		lobbyManager: lobbyManager,
+		startTime:     time.Now(),
+		gameManager:   gameManager,
+		lobbyManager:  lobbyManager,
+		playerManager: playerManager,
 	}
 }
 

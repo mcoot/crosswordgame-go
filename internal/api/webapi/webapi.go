@@ -10,19 +10,26 @@ import (
 	"github.com/mcoot/crosswordgame-go/internal/game"
 	"github.com/mcoot/crosswordgame-go/internal/lobby"
 	"github.com/mcoot/crosswordgame-go/internal/logging"
+	"github.com/mcoot/crosswordgame-go/internal/player"
 	"golang.org/x/tools/godoc/redirect"
 	"net/http"
 )
 
 type CrosswordGameWebAPI struct {
-	gameManager  *game.Manager
-	lobbyManager *lobby.Manager
+	gameManager   *game.Manager
+	lobbyManager  *lobby.Manager
+	playerManager *player.Manager
 }
 
-func NewCrosswordGameWebAPI(gameManager *game.Manager, lobbyManager *lobby.Manager) *CrosswordGameWebAPI {
+func NewCrosswordGameWebAPI(
+	gameManager *game.Manager,
+	lobbyManager *lobby.Manager,
+	playerManager *player.Manager,
+) *CrosswordGameWebAPI {
 	return &CrosswordGameWebAPI{
-		gameManager:  gameManager,
-		lobbyManager: lobbyManager,
+		gameManager:   gameManager,
+		lobbyManager:  lobbyManager,
+		playerManager: playerManager,
 	}
 }
 
