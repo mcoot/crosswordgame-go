@@ -3,7 +3,11 @@ package template
 import "fmt"
 import "github.com/mcoot/crosswordgame-go/internal/apitypes"
 
-templ Error(err apitypes.ErrorResponse) {
+templ ErrorPage(err apitypes.ErrorResponse) {
     <h1>Error { fmt.Sprintf("%d", err.HTTPCode) }</h1>
     <p>{ err.Kind } - { err.Message }</p>
+}
+
+templ ErrorSpan(err apitypes.ErrorResponse) {
+    <span class="cwg-error">Error { fmt.Sprintf("%d", err.HTTPCode) } - { err.Kind } - { err.Message }</span>
 }

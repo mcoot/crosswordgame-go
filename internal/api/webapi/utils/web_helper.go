@@ -15,6 +15,8 @@ func SendResponse(
 	component templ.Component,
 	code int,
 ) {
+	htmx := GetHTMXRequestProperties(r)
+
 	// If scripting is enabled and HTMX intends to swap out just the contents,
 	// we don't need to re-send the layout, just the page contents
 	// But for initial load and progressive enhancement,
@@ -26,7 +28,7 @@ func SendResponse(
 	var err error
 
 	// If HTMX is present (HX-Request) and has a target (HX-Target), just render the page component
-	if r.Header.Get("HX-Request") == "true" && r.Header.Get("HX-Target") != "" {
+	if htmx.IsTargeted() {
 		err = component.Render(r.Context(), w)
 	} else {
 		c := template.Layout(component)
@@ -45,6 +47,8 @@ func SendError(
 	w http.ResponseWriter,
 	err error,
 ) {
+	htmx := GetHTMXRequestProperties(r)
+
 	resp := apitypes.ToErrorResponse(err)
 	logger.Warnw(
 		"error handling web request",
@@ -53,5 +57,26 @@ func SendError(
 		"kind", resp.Kind,
 	)
 
-	SendResponse(logger, r, w, template.Error(resp), resp.HTTPCode)
+	component := template.ErrorPage(resp)
+	if htmx.IsTargeted() {
+		component = template.ErrorSpan(resp)
+	}
+
+	SendResponse(logger, r, w, component, resp.HTTPCode)
+}
+
+type HTMXRequestProperties struct {
+	IsHTMX     bool
+	HTMXTarget string
+}
+
+func GetHTMXRequestProperties(r *http.Request) HTMXRequestProperties {
+	return HTMXRequestProperties{
+		IsHTMX:     r.Header.Get("HX-Request") == "true",
+		HTMXTarget: r.Header.Get("HX-Target"),
+	}
+}
+
+func (p HTMXRequestProperties) IsTargeted() bool {
+	return p.IsHTMX && p.HTMXTarget != ""
 }
