@@ -15,7 +15,7 @@ func SendResponse(
 	component templ.Component,
 	code int,
 ) {
-	htmx := GetHTMXRequestProperties(r)
+	htmx := GetHTMXProperties(r)
 
 	// If scripting is enabled and HTMX intends to swap out just the contents,
 	// we don't need to re-send the layout, just the page contents
@@ -47,7 +47,7 @@ func SendError(
 	w http.ResponseWriter,
 	err error,
 ) {
-	htmx := GetHTMXRequestProperties(r)
+	htmx := GetHTMXProperties(r)
 
 	resp := apitypes.ToErrorResponse(err)
 	logger.Warnw(
@@ -65,18 +65,20 @@ func SendError(
 	SendResponse(logger, r, w, component, resp.HTTPCode)
 }
 
-type HTMXRequestProperties struct {
+type HTMXProperties struct {
 	IsHTMX     bool
+	IsBoosted  bool
 	HTMXTarget string
 }
 
-func GetHTMXRequestProperties(r *http.Request) HTMXRequestProperties {
-	return HTMXRequestProperties{
+func GetHTMXProperties(r *http.Request) HTMXProperties {
+	return HTMXProperties{
 		IsHTMX:     r.Header.Get("HX-Request") == "true",
+		IsBoosted:  r.Header.Get("HX-Boosted") == "true",
 		HTMXTarget: r.Header.Get("HX-Target"),
 	}
 }
 
-func (p HTMXRequestProperties) IsTargeted() bool {
+func (p HTMXProperties) IsTargeted() bool {
 	return p.IsHTMX && p.HTMXTarget != ""
 }
