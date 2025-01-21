@@ -14,13 +14,13 @@ func main() {
 		log.Fatalf("error creating logger: %v", err)
 	}
 	db := store.NewInMemoryStore()
-	router, err := api.SetupAPI(logger, db, "./schema/openapi.yaml", "./data/words.txt")
+	handler, err := api.SetupAPI(logger, db, "./schema/openapi.yaml", "./data/words.txt")
 	if err != nil {
 		logger.Fatalf("error setting up API: %v", err)
 	}
 
 	logger.Infow("starting server", "port", 8080)
-	if err := http.ListenAndServe(":8080", router); err != nil {
+	if err := http.ListenAndServe(":8080", handler); err != nil {
 		logger.Fatalf("error serving: %v", err)
 	}
 }

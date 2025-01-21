@@ -26,7 +26,7 @@ func NewCrosswordGameWebAPI(gameManager *game.Manager, lobbyManager *lobby.Manag
 }
 
 func (c *CrosswordGameWebAPI) AttachToRouter(router *mux.Router) error {
-	router.NotFoundHandler = NotFoundHandler()
+	router.NotFoundHandler = router.NewRoute().BuildOnly().Handler(NotFoundHandler()).GetHandler()
 
 	router.Handle("/", redirect.Handler("/index.html")).Methods("GET")
 	router.Handle("/index.html", staticHandler(template.Index())).Methods("GET")

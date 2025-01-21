@@ -11,12 +11,13 @@ import (
 	"github.com/mcoot/crosswordgame-go/internal/store"
 	"github.com/tomarrell/wrapcheck/v2/wrapcheck/testdata/ignore_pkg_errors/src/github.com/pkg/errors"
 	"go.uber.org/zap"
+	"net/http"
 )
 
-func SetupAPI(logger *zap.SugaredLogger, db store.Store, schemaPath string, dictPath string) (*mux.Router, error) {
+func SetupAPI(logger *zap.SugaredLogger, db store.Store, schemaPath string, dictPath string) (http.Handler, error) {
 	router := mux.NewRouter()
 
-	err := middleware.SetupMiddleware(router, logger, schemaPath)
+	err := middleware.SetupRoutedMiddleware(router, logger, schemaPath)
 	if err != nil {
 		return nil, errors.Wrap(err, "error setting up middleware")
 	}
@@ -41,5 +42,7 @@ func SetupAPI(logger *zap.SugaredLogger, db store.Store, schemaPath string, dict
 		return nil, errors.Wrap(err, "error attaching web API to router")
 	}
 
-	return router, nil
+	handler := middleware.SetupGlobalMiddleware(router, logger)
+
+	return handler, nil
 }

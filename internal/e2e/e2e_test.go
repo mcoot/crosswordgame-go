@@ -29,13 +29,13 @@ func (s *CrosswordGameE2ESuite) SetupSuite() {
 		panic(err)
 	}
 	db := store.NewInMemoryStore()
-	router, err := api.SetupAPI(logger, db, "../../schema/openapi.yaml", "../../data/words.txt")
+	handler, err := api.SetupAPI(logger, db, "../../schema/openapi.yaml", "../../data/words.txt")
 	if err != nil {
 		panic(err)
 	}
 
 	// Run the API as an httptest server
-	s.server = httptest.NewServer(router)
+	s.server = httptest.NewServer(handler)
 	s.client = client.NewClient(&http.Client{}, s.server.URL)
 }
 

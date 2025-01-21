@@ -8,9 +8,10 @@ import (
 	nethttpmiddleware "github.com/oapi-codegen/nethttp-middleware"
 	"go.uber.org/zap"
 	"net/http"
+	"slices"
 )
 
-func SetupMiddleware(router *mux.Router, baseLogger *zap.SugaredLogger, schemaPath string) error {
+func SetupRoutedMiddleware(router *mux.Router, baseLogger *zap.SugaredLogger, schemaPath string) error {
 	openApiMiddleware, err := buildOpenApiMiddleware(
 		baseLogger.Named("openapi"),
 		schemaPath,
@@ -19,11 +20,22 @@ func SetupMiddleware(router *mux.Router, baseLogger *zap.SugaredLogger, schemaPa
 		return err
 	}
 
-	router.Use(loggerInContextMiddleware(baseLogger))
-	router.Use(requestLoggerMiddleware)
 	router.Use(openApiMiddleware)
 
 	return nil
+}
+
+func SetupGlobalMiddleware(h http.Handler, baseLogger *zap.SugaredLogger) http.Handler {
+	middlewares := []func(next http.Handler) http.Handler{
+		loggerInContextMiddleware(baseLogger),
+		requestLoggerMiddleware,
+	}
+	slices.Reverse(middlewares)
+
+	for _, middleware := range middlewares {
+		h = middleware(h)
+	}
+	return h
 }
 
 func loggerInContextMiddleware(baseLogger *zap.SugaredLogger) func(next http.Handler) http.Handler {
@@ -64,13 +76,7 @@ func buildOpenApiMiddleware(logger *zap.SugaredLogger, schemaPath string) (func(
 					"message", message,
 					"status_code", statusCode,
 				)
-
-				if statusCode == http.StatusNotFound {
-					// In case of route not found, leave it to the main handler
-					return
-				} else {
-					http.Error(w, message, statusCode)
-				}
+				http.Error(w, message, statusCode)
 			},
 		},
 	), nil

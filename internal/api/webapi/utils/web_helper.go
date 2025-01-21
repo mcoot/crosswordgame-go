@@ -46,7 +46,6 @@ func SendError(
 	err error,
 ) {
 	resp := apitypes.ToErrorResponse(err)
-	// TODO: why nop logger?
 	logger.Warnw(
 		"error handling web request",
 		"message", resp.Message,
