@@ -233,8 +233,6 @@ func (c *CrosswordGameWebAPI) LobbyPage(w http.ResponseWriter, r *http.Request, 
 		if gameState.Status == gametypes.StatusAwaitingAnnouncement &&
 			gameState.CurrentAnnouncingPlayer == player.Username {
 			toRender = append(toRender, template.AnnouncementForm(lobbyId))
-		} else {
-			toRender = append(toRender, template.NoAvailablePlayerAction(player))
 		}
 
 	} else {
