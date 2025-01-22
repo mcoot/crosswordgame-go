@@ -196,9 +196,7 @@ func (c *CrosswordGameWebAPI) LobbyPage(w http.ResponseWriter, r *http.Request, 
 		lobbyPlayers[i] = p
 	}
 
-	toRender := []templ.Component{
-		template.LobbyDetails(lobbyState, lobbyPlayers, player),
-	}
+	gameComponents := []templ.Component{}
 
 	if lobbyState.HasRunningGame() {
 		gameState, err := c.gameManager.GetGameState(lobbyState.RunningGame.GameId)
@@ -236,8 +234,8 @@ func (c *CrosswordGameWebAPI) LobbyPage(w http.ResponseWriter, r *http.Request, 
 			}
 		}
 
-		toRender = append(
-			toRender,
+		gameComponents = append(
+			gameComponents,
 			template.Game(
 				gameState,
 				gamePlayers,
@@ -248,21 +246,22 @@ func (c *CrosswordGameWebAPI) LobbyPage(w http.ResponseWriter, r *http.Request, 
 
 		if gameState.Status == gametypes.StatusAwaitingAnnouncement &&
 			gameState.CurrentAnnouncingPlayer == player.Username {
-			toRender = append(toRender, template.AnnouncementForm(lobbyId))
+			gameComponents = append(gameComponents, template.AnnouncementForm(lobbyId))
 		}
 
 		if gameState.Status == gametypes.StatusFinished {
-			toRender = append(
-				toRender,
+			gameComponents = append(
+				gameComponents,
 				template.GameScores(gamePlayers, player, gameState.PlayerScores),
 				template.GameStartForm(lobbyId),
 			)
 		}
 	} else {
-		toRender = append(toRender, template.GameStartForm(lobbyId))
+		gameComponents = append(gameComponents, template.GameStartForm(lobbyId))
 	}
 
-	component := templ.Join(toRender...)
+	gameComponent := templ.Join(gameComponents...)
+	component := template.Lobby(lobbyState, lobbyPlayers, player, gameComponent)
 	utils.PushUrl(w, fmt.Sprintf("/lobby/%s", lobbyId))
 	utils.SendResponse(
 		logging.GetLogger(r.Context()),

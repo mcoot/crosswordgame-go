@@ -4,16 +4,23 @@ import "fmt"
 import lobbytypes "github.com/mcoot/crosswordgame-go/internal/lobby/types"
 import playertypes "github.com/mcoot/crosswordgame-go/internal/player/types"
 
-templ LobbyDetails(lobby *lobbytypes.Lobby, players []*playertypes.Player, viewingPlayer *playertypes.Player) {
-    <h1>Lobby: { lobby.Name }</h1>
-    <p>Lobby ID for joining: { string(lobby.Id) }</p>
-    <div>
-    <h2>In lobby:</h2>
-    @playerList(players, viewingPlayer)
+templ lobbyBase(lobby *lobbytypes.Lobby, players []*playertypes.Player, viewingPlayer *playertypes.Player) {
+    <div id="lobby-div">
+        <h1>Lobby: { lobby.Name }</h1>
+        <p>Lobby ID for joining: { string(lobby.Id) }</p>
+        <div id="lobby-playerlist">
+            <h2>In lobby:</h2>
+            @playerList(players, viewingPlayer)
+        </div>
+        { children... }
     </div>
 }
 
-
+templ Lobby(lobby *lobbytypes.Lobby, players []*playertypes.Player, viewingPlayer *playertypes.Player, gameComponent templ.Component) {
+    @lobbyBase(lobby, players, viewingPlayer) {
+        @gameComponent
+    }
+}
 
 templ gameStartFormContents() {
     <label for="board_size">Board size:</label>
