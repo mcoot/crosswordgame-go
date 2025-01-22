@@ -110,6 +110,7 @@ func (c *CrosswordGameAPI) GetGameState(w http.ResponseWriter, r *http.Request) 
 		Status:                  gameState.Status,
 		SquaresFilled:           gameState.SquaresFilled,
 		CurrentAnnouncingPlayer: gameState.CurrentAnnouncingPlayer,
+		CurrentAnnouncedLetter:  gameState.CurrentAnnouncedLetter,
 		Players:                 gameState.Players,
 	}
 

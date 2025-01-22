@@ -85,7 +85,8 @@ func printGetGameStateResponse(v *apitypes.GetGameStateResponse) {
   Current State: %s
   Squares Filled: %d
   Current Announcing Player: %s
-`, playerSb.String(), v.Status, v.SquaresFilled, v.CurrentAnnouncingPlayer)
+  Current AnnouncedLetter: %s
+`, playerSb.String(), v.Status, v.SquaresFilled, v.CurrentAnnouncingPlayer, v.CurrentAnnouncedLetter)
 }
 
 func printGetPlayerStateResponse(v *apitypes.GetPlayerStateResponse) {

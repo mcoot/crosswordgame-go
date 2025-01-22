@@ -444,6 +444,8 @@ components:
           minimum: 0
         current_announcing_player_id:
           $ref: '#/components/schemas/PlayerId'
+        current_announced_letter:
+          $ref: '#/components/schemas/Letter'
       required:
         - status
         - players

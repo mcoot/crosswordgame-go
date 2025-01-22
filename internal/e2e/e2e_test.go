@@ -98,6 +98,7 @@ func (s *CrosswordGameE2ESuite) Test_FullGame2x2() {
 	gameState = getGameState(s.T(), s.client, gameId)
 	s.Equal(types.StatusAwaitingPlacement, gameState.Status)
 	s.Equal(playerIds[1], gameState.CurrentAnnouncingPlayer)
+	s.Equal("A", gameState.CurrentAnnouncedLetter)
 	s.Equal(0, gameState.SquaresFilled)
 
 	// Both players place letters
@@ -108,6 +109,7 @@ func (s *CrosswordGameE2ESuite) Test_FullGame2x2() {
 	gameState = getGameState(s.T(), s.client, gameId)
 	s.Equal(types.StatusAwaitingAnnouncement, gameState.Status)
 	s.Equal(playerIds[1], gameState.CurrentAnnouncingPlayer)
+	s.Equal("A", gameState.CurrentAnnouncedLetter)
 	s.Equal(1, gameState.SquaresFilled)
 
 	// Validate player states after first round placements
@@ -129,6 +131,7 @@ func (s *CrosswordGameE2ESuite) Test_FullGame2x2() {
 	gameState = getGameState(s.T(), s.client, gameId)
 	s.Equal(types.StatusAwaitingPlacement, gameState.Status)
 	s.Equal(playerIds[0], gameState.CurrentAnnouncingPlayer)
+	s.Equal("S", gameState.CurrentAnnouncedLetter)
 	s.Equal(1, gameState.SquaresFilled)
 
 	// Player 0 attempting to overwrite an existing letter should fail
@@ -143,6 +146,7 @@ func (s *CrosswordGameE2ESuite) Test_FullGame2x2() {
 	gameState = getGameState(s.T(), s.client, gameId)
 	s.Equal(types.StatusAwaitingAnnouncement, gameState.Status)
 	s.Equal(playerIds[0], gameState.CurrentAnnouncingPlayer)
+	s.Equal("S", gameState.CurrentAnnouncedLetter)
 	s.Equal(2, gameState.SquaresFilled)
 
 	// Validate player states after second round placements

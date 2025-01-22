@@ -60,6 +60,7 @@ type GetGameStateResponse struct {
 	Status                  gametypes.Status       `json:"status"`
 	SquaresFilled           int                    `json:"squares_filled"`
 	CurrentAnnouncingPlayer playertypes.PlayerId   `json:"current_announcing_player"`
+	CurrentAnnouncedLetter  string                 `json:"current_announced_letter"`
 	Players                 []playertypes.PlayerId `json:"players"`
 }
 
