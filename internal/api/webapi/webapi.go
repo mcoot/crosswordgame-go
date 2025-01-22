@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/a-h/templ"
 	"github.com/gorilla/mux"
-	"github.com/gorilla/sessions"
 	commonutils "github.com/mcoot/crosswordgame-go/internal/api/utils"
 	"github.com/mcoot/crosswordgame-go/internal/api/webapi/template"
 	"github.com/mcoot/crosswordgame-go/internal/api/webapi/utils"
@@ -23,23 +22,23 @@ import (
 )
 
 type CrosswordGameWebAPI struct {
-	sessionStore  sessions.Store
-	gameManager   *game.Manager
-	lobbyManager  *lobby.Manager
-	playerManager *player.Manager
+	sessionManager *commonutils.SessionManager
+	gameManager    *game.Manager
+	lobbyManager   *lobby.Manager
+	playerManager  *player.Manager
 }
 
 func NewCrosswordGameWebAPI(
-	sessionStore sessions.Store,
+	sessionManager *commonutils.SessionManager,
 	gameManager *game.Manager,
 	lobbyManager *lobby.Manager,
 	playerManager *player.Manager,
 ) *CrosswordGameWebAPI {
 	return &CrosswordGameWebAPI{
-		sessionStore:  sessionStore,
-		gameManager:   gameManager,
-		lobbyManager:  lobbyManager,
-		playerManager: playerManager,
+		sessionManager: sessionManager,
+		gameManager:    gameManager,
+		lobbyManager:   lobbyManager,
+		playerManager:  playerManager,
 	}
 }
 
@@ -62,7 +61,7 @@ func (c *CrosswordGameWebAPI) AttachToRouter(router *mux.Router) error {
 }
 
 func (c *CrosswordGameWebAPI) Index(w http.ResponseWriter, r *http.Request) {
-	session, err := commonutils.GetSessionDetails(c.sessionStore, r)
+	session, err := c.sessionManager.GetSession(r)
 	if err != nil {
 		utils.SendError(logging.GetLogger(r.Context()), r, w, err)
 		return
@@ -109,7 +108,7 @@ func (c *CrosswordGameWebAPI) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	session, err := commonutils.GetSessionDetails(c.sessionStore, r)
+	session, err := c.sessionManager.GetSession(r)
 	if err != nil {
 		utils.SendError(logging.GetLogger(r.Context()), r, w, err)
 		return
@@ -117,7 +116,7 @@ func (c *CrosswordGameWebAPI) Login(w http.ResponseWriter, r *http.Request) {
 
 	session.PlayerId = playerId
 
-	err = commonutils.SetSession(c.sessionStore, session, w, r)
+	err = c.sessionManager.SetSession(session, w, r)
 	if err != nil {
 		utils.SendError(logging.GetLogger(r.Context()), r, w, err)
 		return
@@ -430,13 +429,13 @@ func (c *CrosswordGameWebAPI) withLoggedInPlayer(
 	f func(w http.ResponseWriter, r *http.Request, player *playertypes.Player),
 ) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		session, err := commonutils.GetSessionDetails(c.sessionStore, r)
+		session, err := c.sessionManager.GetSession(r)
 		if err != nil {
 			utils.SendError(logging.GetLogger(r.Context()), r, w, err)
 			return
 		}
 
-		if session.PlayerId == "" {
+		if !session.IsLoggedIn() {
 			utils.SendError(logging.GetLogger(r.Context()), r, w, apitypes.ErrorResponse{
 				HTTPCode: 401,
 				Kind:     "unauthorized",

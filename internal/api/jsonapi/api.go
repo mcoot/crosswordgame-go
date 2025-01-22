@@ -3,7 +3,6 @@ package jsonapi
 import (
 	"encoding/json"
 	"github.com/gorilla/mux"
-	"github.com/gorilla/sessions"
 	"github.com/mcoot/crosswordgame-go/internal/api/jsonapi/utils"
 	commonutils "github.com/mcoot/crosswordgame-go/internal/api/utils"
 	"github.com/mcoot/crosswordgame-go/internal/apitypes"
@@ -18,21 +17,18 @@ import (
 
 type CrosswordGameAPI struct {
 	startTime     time.Time
-	sessionStore  sessions.Store
 	gameManager   *game.Manager
 	lobbyManager  *lobby.Manager
 	playerManager *player.Manager
 }
 
 func NewCrosswordGameAPI(
-	sessionStore sessions.Store,
 	gameManager *game.Manager,
 	lobbyManager *lobby.Manager,
 	playerManager *player.Manager,
 ) *CrosswordGameAPI {
 	return &CrosswordGameAPI{
 		startTime:     time.Now(),
-		sessionStore:  sessionStore,
 		gameManager:   gameManager,
 		lobbyManager:  lobbyManager,
 		playerManager: playerManager,

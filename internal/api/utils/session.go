@@ -12,12 +12,22 @@ type Session struct {
 	PlayerId playertypes.PlayerId
 }
 
+type SessionManager struct {
+	sessionStore sessions.Store
+}
+
 func (s *Session) IsLoggedIn() bool {
 	return s.PlayerId != ""
 }
 
-func GetSessionDetails(sessionStore sessions.Store, r *http.Request) (*Session, error) {
-	session, err := sessionStore.Get(r, "session")
+func NewSessionManager(sessionStore sessions.Store) *SessionManager {
+	return &SessionManager{
+		sessionStore: sessionStore,
+	}
+}
+
+func (sm *SessionManager) GetSession(r *http.Request) (*Session, error) {
+	session, err := sm.sessionStore.Get(r, "session")
 	if err != nil {
 		return nil, err
 	}
@@ -41,10 +51,10 @@ func GetSessionDetails(sessionStore sessions.Store, r *http.Request) (*Session, 
 	}, nil
 }
 
-func SetSession(store sessions.Store, session *Session, w http.ResponseWriter, r *http.Request) error {
+func (sm *SessionManager) SetSession(session *Session, w http.ResponseWriter, r *http.Request) error {
 	session.Session.Values["player_id"] = string(session.PlayerId)
 
-	err := store.Save(r, w, session.Session)
+	err := sm.sessionStore.Save(r, w, session.Session)
 	if err != nil {
 		return err
 	}

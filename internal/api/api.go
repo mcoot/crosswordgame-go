@@ -4,6 +4,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/gorilla/sessions"
 	"github.com/mcoot/crosswordgame-go/internal/api/jsonapi"
+	"github.com/mcoot/crosswordgame-go/internal/api/utils"
 	"github.com/mcoot/crosswordgame-go/internal/api/webapi"
 	"github.com/mcoot/crosswordgame-go/internal/game"
 	"github.com/mcoot/crosswordgame-go/internal/game/scoring"
@@ -26,6 +27,8 @@ func SetupAPI(
 
 	apiRouter := router.PathPrefix("/api/v1").Subrouter()
 
+	sessionManager := utils.NewSessionManager(sessionStore)
+
 	gameScorer, err := scoring.NewTxtDictScorer(dictPath)
 	if err != nil {
 		return nil, errors.Wrap(err, "error creating building dictionary scorer")
@@ -34,12 +37,12 @@ func SetupAPI(
 	lobbyManager := lobby.NewLobbyManager(db)
 	playerManager := player.NewPlayerManager(db)
 
-	jsonApi := jsonapi.NewCrosswordGameAPI(sessionStore, gameManager, lobbyManager, playerManager)
+	jsonApi := jsonapi.NewCrosswordGameAPI(gameManager, lobbyManager, playerManager)
 	err = jsonApi.AttachToRouter(apiRouter, logger, schemaPath)
 	if err != nil {
 		return nil, errors.Wrap(err, "error attaching JSON API to router")
 	}
-	webApi := webapi.NewCrosswordGameWebAPI(sessionStore, gameManager, lobbyManager, playerManager)
+	webApi := webapi.NewCrosswordGameWebAPI(sessionManager, gameManager, lobbyManager, playerManager)
 	err = webApi.AttachToRouter(router)
 	if err != nil {
 		return nil, errors.Wrap(err, "error attaching web API to router")
