@@ -1,0 +1,55 @@
+package template
+
+import "fmt"
+import "strconv"
+import lobbytypes "github.com/mcoot/crosswordgame-go/internal/lobby/types"
+import gametypes "github.com/mcoot/crosswordgame-go/internal/game/types"
+import playertypes "github.com/mcoot/crosswordgame-go/internal/player/types"
+
+func cellLetter(letter string) string {
+    if letter == "" {
+        return "∅"
+    }
+    return letter
+}
+
+templ cellFormContents(letter string, row int, column int, placementEnabled bool) {
+    <input type="hidden" name="placement_row" value={ strconv.Itoa(row) }>
+    <input type="hidden" name="placement_column" value={ strconv.Itoa(column) }>
+    <input type="submit" value={ cellLetter(letter) }
+        if !placementEnabled {
+            disabled
+        }/>
+}
+
+templ Board(
+    lobbyId lobbytypes.LobbyId,
+    viewingPlayer *playertypes.Player,
+    board *gametypes.Board,
+    placementEnabled bool,
+) {
+    <h3>Your ({ viewingPlayer.DisplayName }'s) board</h3>
+    <div class="cwg-board">
+    <table>
+        <tbody>
+        for r, row := range board.Data {
+            <tr>
+            for c, cell := range row {
+                <td>
+                <form
+                    id={ fmt.Sprintf("placement-%d-%d-form", r, c) }
+                    action={ templ.URL(fmt.Sprintf("/lobby/%s/place", lobbyId)) } method="post"
+                    hx-post={ fmt.Sprintf("/lobby/%s/place", lobbyId) }
+                    hx-target="#page-content" hx-target-error="#board-error-div"
+                >
+                @cellFormContents(cell, r, c, placementEnabled)
+                </form>
+                </td>
+            }
+            </tr>
+        }
+        </tbody>
+    </table>
+    <div id="board-error-div"></div>
+    </div>
+}
