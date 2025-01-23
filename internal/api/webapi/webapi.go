@@ -210,71 +210,17 @@ func (c *CrosswordGameWebAPI) LobbyPage(w http.ResponseWriter, r *http.Request, 
 		lobbyPlayers[i] = p
 	}
 
-	gameComponents := []templ.Component{}
-
+	var gameComponent templ.Component
 	if lobbyState.HasRunningGame() {
-		gameState, err := c.gameManager.GetGameState(lobbyState.RunningGame.GameId)
+		gameComponent, err = c.buildLobbyGameComponent(player, lobbyState)
 		if err != nil {
 			utils.SendError(logging.GetLogger(r.Context()), r, w, err)
 			return
-		}
-
-		gamePlayers := make([]*playertypes.Player, len(gameState.Players))
-		for i, playerId := range gameState.Players {
-			p, err := c.playerManager.LookupPlayer(playerId)
-			if err != nil {
-				utils.SendError(logging.GetLogger(r.Context()), r, w, err)
-				return
-			}
-
-			gamePlayers[i] = p
-		}
-
-		board, err := c.gameManager.GetPlayerBoard(gameState.Id, player.Username)
-		if err != nil {
-			utils.SendError(logging.GetLogger(r.Context()), r, w, err)
-			return
-		}
-
-		canPlayerPlace := false
-		if gameState.Status == gametypes.StatusAwaitingPlacement {
-			hasPlayerPlaced, err := gameState.HasPlayerPlacedThisTurn(player.Username)
-			if err != nil {
-				utils.SendError(logging.GetLogger(r.Context()), r, w, err)
-				return
-			}
-			if !hasPlayerPlaced {
-				canPlayerPlace = true
-			}
-		}
-
-		gameComponents = append(
-			gameComponents,
-			template.Game(
-				gameState,
-				gamePlayers,
-				player,
-				template.Board(lobbyId, player, board, canPlayerPlace),
-			),
-		)
-
-		if gameState.Status == gametypes.StatusAwaitingAnnouncement &&
-			gameState.CurrentAnnouncingPlayer == player.Username {
-			gameComponents = append(gameComponents, template.AnnouncementForm(lobbyId))
-		}
-
-		if gameState.Status == gametypes.StatusFinished {
-			gameComponents = append(
-				gameComponents,
-				template.GameScores(gamePlayers, player, gameState.PlayerScores),
-				template.GameStartForm(lobbyId),
-			)
 		}
 	} else {
-		gameComponents = append(gameComponents, template.GameStartForm(lobbyId))
+		gameComponent = template.GameStartForm(lobbyId)
 	}
 
-	gameComponent := templ.Join(gameComponents...)
 	component := template.Lobby(lobbyState, lobbyPlayers, player, gameComponent)
 	utils.PushUrl(w, fmt.Sprintf("/lobby/%s", lobbyId))
 	utils.SendResponse(
@@ -284,6 +230,113 @@ func (c *CrosswordGameWebAPI) LobbyPage(w http.ResponseWriter, r *http.Request, 
 		component,
 		200,
 	)
+}
+
+func (c *CrosswordGameWebAPI) buildLobbyGameComponent(
+	player *playertypes.Player,
+	lobbyState *lobbytypes.Lobby,
+) (templ.Component, error) {
+	gameState, err := c.gameManager.GetGameState(lobbyState.RunningGame.GameId)
+	if err != nil {
+		return nil, err
+	}
+
+	gamePlayers := make([]*playertypes.Player, len(gameState.Players))
+	for i, playerId := range gameState.Players {
+		p, err := c.playerManager.LookupPlayer(playerId)
+		if err != nil {
+			return nil, err
+		}
+
+		gamePlayers[i] = p
+	}
+
+	isPlayerInGame := false
+	for _, playerId := range gameState.Players {
+		if playerId == player.Username {
+			isPlayerInGame = true
+			break
+		}
+	}
+
+	var ingameComponent templ.Component
+	if isPlayerInGame {
+		ingameComponent, err = c.buildLobbyGamePlayerComponent(player, lobbyState, gameState, gamePlayers)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		ingameComponent, err = c.buildLobbyGameSpectatorComponent(lobbyState, gameState, gamePlayers)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	var components []templ.Component
+	components = append(components, ingameComponent)
+	if gameState.Status == gametypes.StatusFinished {
+		components = append(
+			components,
+			template.GameScores(gamePlayers, player, gameState.PlayerScores),
+			template.GameStartForm(lobbyState.Id),
+		)
+	}
+
+	return template.GameView(gameState, gamePlayers, player, isPlayerInGame, templ.Join(components...)), nil
+}
+
+func (c *CrosswordGameWebAPI) buildLobbyGamePlayerComponent(
+	player *playertypes.Player,
+	lobbyState *lobbytypes.Lobby,
+	gameState *gametypes.Game,
+	gamePlayers []*playertypes.Player,
+) (templ.Component, error) {
+	board, err := c.gameManager.GetPlayerBoard(gameState.Id, player.Username)
+	if err != nil {
+		return nil, err
+	}
+
+	canPlayerPlace := false
+	if gameState.Status == gametypes.StatusAwaitingPlacement {
+		hasPlayerPlaced, err := gameState.HasPlayerPlacedThisTurn(player.Username)
+		if err != nil {
+			return nil, err
+		}
+		if !hasPlayerPlaced {
+			canPlayerPlace = true
+		}
+	}
+
+	var components []templ.Component
+
+	components = append(
+		components,
+		template.Board(lobbyState.Id, player, board, canPlayerPlace),
+	)
+
+	if gameState.Status == gametypes.StatusAwaitingAnnouncement &&
+		gameState.CurrentAnnouncingPlayer == player.Username {
+		components = append(components, template.AnnouncementForm(lobbyState.Id))
+	}
+
+	return templ.Join(components...), nil
+}
+
+func (c *CrosswordGameWebAPI) buildLobbyGameSpectatorComponent(
+	lobbyState *lobbytypes.Lobby,
+	gameState *gametypes.Game,
+	gamePlayers []*playertypes.Player,
+) (templ.Component, error) {
+	var boardComponents []templ.Component
+	for _, p := range gamePlayers {
+		board, err := c.gameManager.GetPlayerBoard(gameState.Id, p.Username)
+		if err != nil {
+			return nil, err
+		}
+		boardComponents = append(boardComponents, template.Board(lobbyState.Id, p, board, false))
+	}
+
+	return templ.Join(boardComponents...), nil
 }
 
 func (c *CrosswordGameWebAPI) StartNewGame(w http.ResponseWriter, r *http.Request, player *playertypes.Player) {

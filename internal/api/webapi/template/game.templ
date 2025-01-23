@@ -14,8 +14,12 @@ templ AnnouncementForm(lobbyId lobbytypes.LobbyId) {
     }
 }
 
-templ gameHeader(game *gametypes.Game) {
-    <h2>Game: { string(game.Id) }</h2>
+templ gameHeader(game *gametypes.Game, isPlaying bool) {
+    if isPlaying {
+        <h2>Game { string(game.Id) }</h2>
+    } else {
+        <h2>Game { string(game.Id) } (spectating)</h2>
+    }
 }
 
 templ gameStatus(game *gametypes.Game, players []*playertypes.Player, viewingPlayer *playertypes.Player) {
@@ -26,24 +30,15 @@ templ gameStatus(game *gametypes.Game, players []*playertypes.Player, viewingPla
     </div>
 }
 
-templ Game(
-    game *gametypes.Game,
-    players []*playertypes.Player,
-    viewingPlayer *playertypes.Player,
-    boardComponent templ.Component,
-) {
+templ GameView(game *gametypes.Game, players []*playertypes.Player, viewingPlayer *playertypes.Player, isPlaying bool, ingameView templ.Component) {
     <div class="cwg-game">
-    @gameHeader(game)
-    @gameStatus(game, players, viewingPlayer)
-    @boardComponent
+        @gameHeader(game, isPlaying)
+        @gameStatus(game, players, viewingPlayer)
+        @ingameView
     </div>
 }
 
-templ GameScores(
-    players []*playertypes.Player,
-    viewingPlayer *playertypes.Player,
-    scores map[playertypes.PlayerId]*gametypes.ScoreResult,
-) {
+templ GameScores(players []*playertypes.Player, viewingPlayer *playertypes.Player, scores map[playertypes.PlayerId]*gametypes.ScoreResult) {
     <h3>Game scores</h3>
     <table>
     <thead>
