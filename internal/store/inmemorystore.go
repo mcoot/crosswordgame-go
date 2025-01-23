@@ -68,3 +68,19 @@ func (s *InMemoryStore) RetrievePlayer(playerId playertypes.PlayerId) (*playerty
 	}
 	return player, nil
 }
+
+func (s *InMemoryStore) RetrieveLobbyForPlayer(playerId playertypes.PlayerId) (*lobbytypes.Lobby, error) {
+	// TODO: For an actual database, the DB layer should enforce the player being in one lobby
+	for _, lobby := range s.lobbies {
+		for _, playerIdInLobby := range lobby.Players {
+			if playerIdInLobby == playerId {
+				return lobby, nil
+			}
+		}
+	}
+	return nil, &errors.NotFoundError{
+		ObjectKind: "lobby",
+		KeyKind:    "player",
+		ObjectID:   playerId,
+	}
+}

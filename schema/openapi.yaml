@@ -379,6 +379,30 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+  /api/v1/player/{player_id}/lobby:
+    get:
+      summary: Get the ID of the lobby the player is currently in
+      operationId: getLobbyForPlayer
+      parameters:
+        - name: player_id
+          in: path
+          required: true
+          description: ID of the player
+          schema:
+            $ref: '#/components/schemas/PlayerId'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetLobbyForPlayerResponse'
+        default:
+          description: Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
 
 components:
   schemas:
@@ -590,6 +614,8 @@ components:
       type: object
     DetachGameFromLobbyResponse:
       type: object
+    GetLobbyForPlayerResponse:
+      $ref: '#/components/schemas/GetLobbyStateResponse'
     LobbyId:
       description: ID of a lobby
       type: string

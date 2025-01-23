@@ -26,6 +26,8 @@ const (
 	removeFromLobbyPath     = "/api/v1/lobby/%s/remove"
 	attachGameToLobbyPath   = "/api/v1/lobby/%s/attach"
 	detachGameFromLobbyPath = "/api/v1/lobby/%s/detach"
+
+	getLobbyForPlayerPath = "/api/v1/player/%s/lobby"
 )
 
 type Client struct {
@@ -367,6 +369,25 @@ func (c *Client) DetachGameFromLobby(lobbyId lobbytypes.LobbyId) (*apitypes.Deta
 	}
 
 	var ret apitypes.DetachGameFromLobbyResponse
+	if err := json.NewDecoder(resp.Body).Decode(&ret); err != nil {
+		return nil, err
+	}
+
+	return &ret, nil
+}
+
+func (c *Client) GetLobbyForPlayer(playerId playertypes.PlayerId) (*apitypes.GetLobbyStateResponse, error) {
+	resp, err := c.client.Get(c.url(fmt.Sprintf(getLobbyForPlayerPath, playerId)))
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != 200 {
+		return nil, c.parseError(resp)
+	}
+
+	var ret apitypes.GetLobbyStateResponse
 	if err := json.NewDecoder(resp.Body).Decode(&ret); err != nil {
 		return nil, err
 	}

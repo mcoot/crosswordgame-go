@@ -59,6 +59,7 @@ func (e *InvalidInputError) Error() string {
 
 type NotFoundError struct {
 	ObjectKind string
+	KeyKind    string
 	ObjectID   interface{}
 }
 
@@ -71,7 +72,12 @@ func (e *NotFoundError) Kind() GameErrorKind {
 }
 
 func (e *NotFoundError) Message() string {
-	return fmt.Sprintf("%s \"%v\" not found", e.ObjectKind, e.ObjectID)
+	key := "ID"
+	if e.KeyKind != "" {
+		key = e.KeyKind
+	}
+
+	return fmt.Sprintf("%s with %s \"%v\" not found", e.ObjectKind, key, e.ObjectID)
 }
 
 func (e *NotFoundError) Error() string {

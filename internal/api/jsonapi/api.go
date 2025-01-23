@@ -57,6 +57,9 @@ func (c *CrosswordGameAPI) AttachToRouter(router *mux.Router, baseLogger *zap.Su
 	router.HandleFunc("/lobby/{lobbyId}/attach", c.AttachGameToLobby).Methods("POST")
 	router.HandleFunc("/lobby/{lobbyId}/detach", c.DetachGameFromLobby).Methods("POST")
 
+	// TODO: The CLI will have to be reworked to add proper player management here (e.g. session support)
+	router.HandleFunc("/player/{playerId}/lobby", c.GetLobbyForPlayer).Methods("GET")
+
 	return nil
 }
 
@@ -298,4 +301,25 @@ func (c *CrosswordGameAPI) DetachGameFromLobby(w http.ResponseWriter, r *http.Re
 	}
 
 	utils.SendResponse(logger, w, nil, 200)
+}
+
+func (c *CrosswordGameAPI) GetLobbyForPlayer(w http.ResponseWriter, r *http.Request) {
+	logger := logging.GetLogger(r.Context())
+	playerId := commonutils.GetPlayerIdPathParam(r)
+
+	lobbyState, err := c.playerManager.GetLobbyForPlayer(playerId)
+	if err != nil {
+		utils.SendError(logger, w, err)
+		return
+	}
+
+	resp := apitypes.GetLobbyStateResponse{
+		Name:    lobbyState.Name,
+		Players: lobbyState.Players,
+	}
+	if lobbyState.HasRunningGame() {
+		resp.GameID = lobbyState.RunningGame.GameId
+	}
+
+	utils.SendResponse(logger, w, resp, 200)
 }

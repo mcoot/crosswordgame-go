@@ -86,6 +86,16 @@ func getLobbyState(t *testing.T, client *client.Client, lobbyId lobbytypes.Lobby
 	return lobbyState
 }
 
+//func getLobbyForPlayer(t *testing.T, client *client.Client, playerId playertypes.PlayerId) *apitypes.GetLobbyStateResponse {
+//	t.Helper()
+//
+//	lobby, err := client.GetLobbyForPlayer(playerId)
+//	assert.NoError(t, err)
+//	assert.NotNil(t, lobby)
+//
+//	return lobby
+//}
+
 func joinLobby(t *testing.T, client *client.Client, lobbyId lobbytypes.LobbyId, playerId playertypes.PlayerId) *apitypes.JoinLobbyResponse {
 	t.Helper()
 

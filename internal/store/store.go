@@ -19,6 +19,7 @@ type LobbyStore interface {
 type PlayerStore interface {
 	StorePlayer(player *playertypes.Player) error
 	RetrievePlayer(playerId playertypes.PlayerId) (*playertypes.Player, error)
+	RetrieveLobbyForPlayer(playerId playertypes.PlayerId) (*lobbytypes.Lobby, error)
 }
 
 type Store interface {

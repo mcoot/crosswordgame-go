@@ -1,6 +1,7 @@
 package player
 
 import (
+	lobbytypes "github.com/mcoot/crosswordgame-go/internal/lobby/types"
 	playertypes "github.com/mcoot/crosswordgame-go/internal/player/types"
 	"github.com/mcoot/crosswordgame-go/internal/store"
 )
@@ -30,4 +31,13 @@ func (m *Manager) LoginAsEphemeral(displayName string) (playertypes.PlayerId, er
 
 func (m *Manager) LookupPlayer(playerId playertypes.PlayerId) (*playertypes.Player, error) {
 	return m.store.RetrievePlayer(playerId)
+}
+
+func (m *Manager) GetLobbyForPlayer(playerId playertypes.PlayerId) (*lobbytypes.Lobby, error) {
+	player, err := m.LookupPlayer(playerId)
+	if err != nil {
+		return nil, err
+	}
+
+	return m.store.RetrieveLobbyForPlayer(player.Username)
 }
