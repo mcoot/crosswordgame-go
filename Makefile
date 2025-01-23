@@ -22,3 +22,7 @@ templ:
 .PHONY: docker-build
 docker-build:
 	@docker build -t mcoot/crossword-game -f ./build/crossword-game.Dockerfile .
+
+.PHONY: docker-push
+docker-push:
+	@docker push mcoot/crossword-game
