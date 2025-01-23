@@ -17,3 +17,8 @@ lint:
 .PHONY: templ
 templ:
 	@go run github.com/a-h/templ/cmd/templ generate
+
+
+.PHONY: docker-build
+docker-build:
+	@docker build -t mcoot/crossword-game -f ./cmd/crossword-game/Dockerfile .
