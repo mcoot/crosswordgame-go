@@ -255,6 +255,7 @@ func (c *CrosswordGameWebAPI) buildLobbyGameComponent(
 	}
 
 	gamePlayers := make([]*playertypes.Player, len(gameState.Players))
+	var currentAnnouncingPlayer *playertypes.Player
 	for i, playerId := range gameState.Players {
 		p, err := c.playerManager.LookupPlayer(playerId)
 		if err != nil {
@@ -262,6 +263,9 @@ func (c *CrosswordGameWebAPI) buildLobbyGameComponent(
 		}
 
 		gamePlayers[i] = p
+		if playerId == gameState.CurrentAnnouncingPlayer {
+			currentAnnouncingPlayer = p
+		}
 	}
 
 	isPlayerInGame := false
@@ -271,6 +275,8 @@ func (c *CrosswordGameWebAPI) buildLobbyGameComponent(
 			break
 		}
 	}
+
+	gameStatusComponent := template.GameStatus(gameState, gamePlayers, currentAnnouncingPlayer, player, isPlayerInGame)
 
 	var ingameComponent templ.Component
 	if isPlayerInGame {
@@ -298,7 +304,7 @@ func (c *CrosswordGameWebAPI) buildLobbyGameComponent(
 	}
 	components = append(components, template.GameAbandonForm(lobbyState.Id, isGameFinished))
 
-	return template.GameView(gameState, gamePlayers, player, isPlayerInGame, templ.Join(components...)), nil
+	return template.GameView(gameState, gamePlayers, player, gameStatusComponent, templ.Join(components...)), nil
 }
 
 func (c *CrosswordGameWebAPI) buildLobbyGamePlayerComponent(

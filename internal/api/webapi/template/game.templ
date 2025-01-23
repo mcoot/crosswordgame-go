@@ -14,26 +14,31 @@ templ AnnouncementForm(lobbyId lobbytypes.LobbyId) {
     }
 }
 
-templ gameHeader(game *gametypes.Game, isPlaying bool) {
-    if isPlaying {
-        <h2>Game { string(game.Id) }</h2>
-    } else {
-        <h2>Game { string(game.Id) } (spectating)</h2>
-    }
-}
-
-templ gameStatus(game *gametypes.Game, players []*playertypes.Player, viewingPlayer *playertypes.Player) {
+templ GameStatus(game *gametypes.Game, players []*playertypes.Player, currentAnnouncingPlayer *playertypes.Player, viewingPlayer *playertypes.Player, isPlaying bool) {
     <div>
+    if !isPlaying {
+        <p>You are spectating this game</p>
+    }
     <h3>In game:</h3>
     @playerList(players, viewingPlayer)
-    <p>Status: { string(game.Status) }</p>
+    switch game.Status {
+    case gametypes.StatusAwaitingPlacement:
+        <p>Status: waiting for all players to place letter <code>{ game.CurrentAnnouncedLetter }</code></p>
+    case gametypes.StatusAwaitingAnnouncement:
+        <p>Status: waiting for <span>@playerName(currentAnnouncingPlayer, viewingPlayer)</span> to announce</p>
+    case gametypes.StatusFinished:
+        <p>Status: game finished</p>
+    default:
+        <p>Status: unknown status</p>
+    }
+
     </div>
 }
 
-templ GameView(game *gametypes.Game, players []*playertypes.Player, viewingPlayer *playertypes.Player, isPlaying bool, ingameView templ.Component) {
+templ GameView(game *gametypes.Game, players []*playertypes.Player, viewingPlayer *playertypes.Player, gameStatusView templ.Component, ingameView templ.Component) {
     <div class="cwg-game">
-        @gameHeader(game, isPlaying)
-        @gameStatus(game, players, viewingPlayer)
+        <h2>Game { string(game.Id) }</h2>
+        @gameStatusView
         @ingameView
     </div>
 }
