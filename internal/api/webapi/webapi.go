@@ -53,7 +53,9 @@ func (c *CrosswordGameWebAPI) AttachToRouter(router *mux.Router) error {
 	router.HandleFunc("/join", c.withLoggedInPlayer(c.JoinLobby)).Methods("POST")
 
 	router.HandleFunc("/lobby/{lobbyId}", c.withLoggedInPlayer(c.LobbyPage)).Methods("GET")
+	router.HandleFunc("/lobby/{lobbyId}/leave", c.withLoggedInPlayer(c.LeaveLobby)).Methods("POST")
 	router.HandleFunc("/lobby/{lobbyId}/start", c.withLoggedInPlayer(c.StartNewGame)).Methods("POST")
+	router.HandleFunc("/lobby/{lobbyId}/abandon", c.withLoggedInPlayer(c.AbandonGame)).Methods("POST")
 	router.HandleFunc("/lobby/{lobbyId}/announce", c.withLoggedInPlayer(c.AnnounceLetter)).Methods("POST")
 	router.HandleFunc("/lobby/{lobbyId}/place", c.withLoggedInPlayer(c.PlaceLetter)).Methods("POST")
 
@@ -191,6 +193,17 @@ func (c *CrosswordGameWebAPI) JoinLobby(w http.ResponseWriter, r *http.Request, 
 	utils.Redirect(w, r, fmt.Sprintf("/lobby/%s", lobbyId), 303)
 }
 
+func (c *CrosswordGameWebAPI) LeaveLobby(w http.ResponseWriter, r *http.Request, player *playertypes.Player) {
+	lobbyId := commonutils.GetLobbyIdPathParam(r)
+	err := c.lobbyManager.RemovePlayerFromLobby(lobbyId, player.Username)
+	if err != nil {
+		utils.SendError(logging.GetLogger(r.Context()), r, w, err)
+		return
+	}
+
+	utils.Redirect(w, r, "/index", 303)
+}
+
 func (c *CrosswordGameWebAPI) LobbyPage(w http.ResponseWriter, r *http.Request, player *playertypes.Player) {
 	lobbyId := commonutils.GetLobbyIdPathParam(r)
 	lobbyState, err := c.lobbyManager.GetLobbyState(lobbyId)
@@ -272,15 +285,18 @@ func (c *CrosswordGameWebAPI) buildLobbyGameComponent(
 		}
 	}
 
+	isGameFinished := gameState.Status == gametypes.StatusFinished
+
 	var components []templ.Component
 	components = append(components, ingameComponent)
-	if gameState.Status == gametypes.StatusFinished {
+	if isGameFinished {
 		components = append(
 			components,
 			template.GameScores(gamePlayers, player, gameState.PlayerScores),
 			template.GameStartForm(lobbyState.Id),
 		)
 	}
+	components = append(components, template.GameAbandonForm(lobbyState.Id, isGameFinished))
 
 	return template.GameView(gameState, gamePlayers, player, isPlayerInGame, templ.Join(components...)), nil
 }
@@ -385,6 +401,31 @@ func (c *CrosswordGameWebAPI) StartNewGame(w http.ResponseWriter, r *http.Reques
 	}
 
 	err = c.lobbyManager.AttachGameToLobby(lobbyId, gameId)
+	if err != nil {
+		utils.SendError(logging.GetLogger(r.Context()), r, w, err)
+		return
+	}
+
+	utils.Redirect(w, r, fmt.Sprintf("/lobby/%s", lobbyId), 303)
+}
+
+func (c *CrosswordGameWebAPI) AbandonGame(w http.ResponseWriter, r *http.Request, player *playertypes.Player) {
+	lobbyId := commonutils.GetLobbyIdPathParam(r)
+	lobbyState, err := c.lobbyManager.GetLobbyState(lobbyId)
+	if err != nil {
+		utils.SendError(logging.GetLogger(r.Context()), r, w, err)
+		return
+	}
+
+	if !lobbyState.HasRunningGame() {
+		utils.SendError(logging.GetLogger(r.Context()), r, w, &errors.InvalidActionError{
+			Action: "abandon_game",
+			Reason: "the lobby has no running game",
+		})
+		return
+	}
+
+	err = c.lobbyManager.DetachGameFromLobby(lobbyId)
 	if err != nil {
 		utils.SendError(logging.GetLogger(r.Context()), r, w, err)
 		return
