@@ -98,5 +98,5 @@ func (g *Game) HasPlayerPlacedThisTurn(playerId playertypes.PlayerId) (bool, err
 	if err != nil {
 		return false, err
 	}
-	return g.SquaresFilled == board.FilledSquares()+1, nil
+	return board.FilledSquares() == g.SquaresFilled+1, nil
 }
