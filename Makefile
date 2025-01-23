@@ -21,4 +21,4 @@ templ:
 
 .PHONY: docker-build
 docker-build:
-	@docker build -t mcoot/crossword-game -f ./cmd/crossword-game/Dockerfile .
+	@docker build -t mcoot/crossword-game -f ./build/crossword-game.Dockerfile .
