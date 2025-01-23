@@ -6,16 +6,12 @@ import lobbytypes "github.com/mcoot/crosswordgame-go/internal/lobby/types"
 import gametypes "github.com/mcoot/crosswordgame-go/internal/game/types"
 import playertypes "github.com/mcoot/crosswordgame-go/internal/player/types"
 
-
-
-templ announcementFormContents() {
-    <label for="announced_letter">Letter to announce:</label>
-    <input type="text" name="announced_letter" placeholder="Letter to announce" />
-    <input type="submit" value="Announce" />
-}
-
 templ AnnouncementForm(lobbyId lobbytypes.LobbyId) {
-    @CommonForm("announcement-form", fmt.Sprintf("/lobby/%s/announce", lobbyId), announcementFormContents())
+    @commonForm("announcement-form", fmt.Sprintf("/lobby/%s/announce", lobbyId)) {
+        <label for="announced_letter">Letter to announce:</label>
+        <input type="text" name="announced_letter" placeholder="Letter to announce" />
+        <input type="submit" value="Announce" />
+    }
 }
 
 templ gameHeader(game *gametypes.Game) {

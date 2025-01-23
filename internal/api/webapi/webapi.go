@@ -78,15 +78,30 @@ func (c *CrosswordGameWebAPI) Index(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	var formComponent templ.Component
+	var indexContents []templ.Component
 	if sessionIsLoggedIn {
-		formComponent = templ.Join(template.LoggedInPlayerDetails(p), template.HostForm(), template.JoinForm())
+		indexContents = append(indexContents, template.LoggedInPlayerDetails(p))
+		currentLobby, err := c.playerManager.GetLobbyForPlayer(p.Username)
+		if err != nil {
+			if errors.IsNotFoundError(err) {
+				// Player not in a lobby
+				indexContents = append(indexContents, template.NotInLobbyDetails())
+			} else {
+				utils.SendError(logging.GetLogger(r.Context()), r, w, err)
+				return
+			}
+		} else {
+			// Player in a lobby
+			indexContents = append(indexContents, template.InLobbyDetails(currentLobby))
+		}
+
 	} else {
-		formComponent = template.LoginForm()
+		indexContents = append(indexContents, template.LoginForm())
 	}
 
+	indexComponent := template.Index(templ.Join(indexContents...))
 	utils.PushUrl(w, "/index")
-	utils.SendResponse(logging.GetLogger(r.Context()), r, w, template.Index(formComponent), 200)
+	utils.SendResponse(logging.GetLogger(r.Context()), r, w, indexComponent, 200)
 }
 
 func (c *CrosswordGameWebAPI) Login(w http.ResponseWriter, r *http.Request) {

@@ -1,23 +1,23 @@
 package template
 
+import "fmt"
 import playertypes "github.com/mcoot/crosswordgame-go/internal/player/types"
+import lobbytypes "github.com/mcoot/crosswordgame-go/internal/lobby/types"
 
-templ Index(formComponent templ.Component) {
+templ Index(contents templ.Component) {
     <h1>Crossword Game</h1>
     <p>Welcome to the Crossword Game!</p>
     <div>
-        @formComponent
+        @contents
     </div>
 }
 
-templ loginFormContents() {
-    <label for="display_name">Display name:</label>
-    <input type="text" name="display_name" placeholder="name" />
-    <input type="submit" value="Login" />
-}
-
 templ LoginForm() {
-    @CommonForm("login-form", "/login", loginFormContents())
+    @commonForm("login-form", "/login") {
+        <label for="display_name">Display name:</label>
+        <input type="text" name="display_name" placeholder="name" />
+        <input type="submit" value="Login" />
+    }
 }
 
 templ LoggedInPlayerDetails(player *playertypes.Player) {
@@ -27,22 +27,23 @@ templ LoggedInPlayerDetails(player *playertypes.Player) {
     </div>
 }
 
-templ hostFormContents() {
-    <label for="lobby_name">Lobby name:</label>
-    <input type="text" name="lobby_name" placeholder="lobby name" />
-    <input type="submit" value="Host new lobby" />
+templ NotInLobbyDetails() {
+    <h3>Host a lobby</h3>
+    @commonForm("host-form", "/host") {
+        <label for="lobby_name">Lobby name:</label>
+        <input type="text" name="lobby_name" placeholder="lobby name" />
+        <input type="submit" value="Host new lobby" />
+    }
+    <h3>Join an existing lobby</h3>
+    @commonForm("join-form", "/join") {
+        <label for="lobby_id">Lobby ID:</label>
+        <input type="text" name="lobby_id" placeholder="lobby id" />
+        <input type="submit" value="Join lobby" />
+    }
 }
 
-templ HostForm() {
-    @CommonForm("host-form", "/host", hostFormContents())
-}
-
-templ joinFormContents() {
-    <label for="lobby_id">Lobby ID:</label>
-    <input type="text" name="lobby_id" placeholder="lobby id" />
-    <input type="submit" value="Join lobby" />
-}
-
-templ JoinForm() {
-    @CommonForm("join-form", "/join", joinFormContents())
+templ InLobbyDetails(lobby *lobbytypes.Lobby) {
+    <h3>Re-join lobby</h3>
+    <p>You are currently in { lobby.Name } ({ string(lobby.Id) })</p>
+    <a href={templ.URL(fmt.Sprintf("/lobby/%s", lobby.Id))}>Return to lobby</a>
 }

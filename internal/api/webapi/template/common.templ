@@ -1,5 +1,6 @@
 package template
 
+import "fmt"
 import playertypes "github.com/mcoot/crosswordgame-go/internal/player/types"
 
 templ playerList(players []*playertypes.Player, viewingPlayer *playertypes.Player) {
@@ -12,4 +13,15 @@ templ playerList(players []*playertypes.Player, viewingPlayer *playertypes.Playe
             }
         }
     </ul>
+}
+
+templ commonForm(formId string, postUrl string) {
+    <form
+        id={ formId }
+        action={ templ.URL(postUrl) } method="post"
+        hx-post={ postUrl } hx-target="#page-content" hx-target-error={ fmt.Sprintf("#%s-error-div", formId) }
+    >
+    { children... }
+    </form>
+    <div id={ fmt.Sprintf("%s-error-div", formId) }></div>
 }
