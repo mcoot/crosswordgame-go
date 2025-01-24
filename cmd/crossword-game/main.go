@@ -7,9 +7,18 @@ import (
 	"github.com/mcoot/crosswordgame-go/internal/store"
 	"log"
 	"net/http"
+	"os"
+
+	_ "net/http/pprof"
 )
 
 func main() {
+	if os.Getenv("PROFILE") == "true" {
+		go func() {
+			log.Print(http.ListenAndServe(":1234", nil))
+		}()
+	}
+
 	logger, err := logging.NewLogger(true)
 	if err != nil {
 		log.Fatalf("error creating logger: %v", err)
