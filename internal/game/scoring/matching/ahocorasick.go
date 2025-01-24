@@ -8,7 +8,7 @@ type AhoCorasickMatcher struct {
 }
 
 func NewAhoCorasickMatcher(filename string) (*AhoCorasickMatcher, error) {
-	wordList, err := loadDictionary(50000, filename)
+	wordList, err := LoadDictionary(50000, filename)
 	if err != nil {
 		return nil, err
 	}

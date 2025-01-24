@@ -10,7 +10,7 @@ type Matcher interface {
 	Match(line string) []string
 }
 
-func loadDictionary(preallocatedCapacity int, filename string) ([]string, error) {
+func LoadDictionary(preallocatedCapacity int, filename string) ([]string, error) {
 	wordList := make([]string, 0, preallocatedCapacity)
 
 	f, err := os.Open(filename)
