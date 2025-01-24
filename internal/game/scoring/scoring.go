@@ -10,17 +10,13 @@ type Scorer interface {
 }
 
 type TxtDictScorer struct {
-	matcher *dictMatcher
+	matcher Matcher
 }
 
-func NewTxtDictScorer(dictFilename string) (*TxtDictScorer, error) {
-	matcher, err := newDictMatcher(dictFilename)
-	if err != nil {
-		return nil, err
-	}
+func NewTxtDictScorer(matcher Matcher) *TxtDictScorer {
 	return &TxtDictScorer{
 		matcher: matcher,
-	}, nil
+	}
 }
 
 func (s *TxtDictScorer) Score(board [][]string) *types.ScoreResult {

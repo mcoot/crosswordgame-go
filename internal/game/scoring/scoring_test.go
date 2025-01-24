@@ -17,17 +17,17 @@ func TestScoringSuite(t *testing.T) {
 	suite.Run(t, new(ScoringSuite))
 }
 
-func (s *ScoringSuite) Test_scoreWordsForLine() {
-	type testCase struct {
-		name       string
-		dictionary []string
-		line       string
-		direction  types.ScoringDirection
-		row        int
-		column     int
-		expect     ScoredWordsExpectation
-	}
+type testCase struct {
+	name       string
+	dictionary []string
+	line       string
+	direction  types.ScoringDirection
+	row        int
+	column     int
+	expect     ScoredWordsExpectation
+}
 
+func (s *ScoringSuite) Test_AhoCorasickMatcher_scoreWordsForLine() {
 	cases := []testCase{
 		{
 			name:       "when empty dict, no matches",
@@ -281,7 +281,7 @@ func (s *ScoringSuite) Test_scoreWordsForLine() {
 
 	for _, c := range cases {
 		s.T().Run(c.name, func(t *testing.T) {
-			scorer := setupScorer(c.dictionary)
+			scorer := setupAhoCorasickScorer(c.dictionary)
 			got := scorer.scoreWordsForLine(lineScoreInput{
 				Line:      c.line,
 				Direction: c.direction,
@@ -316,7 +316,7 @@ func expectExactly(expected []*types.ScoredWord) ScoredWordsExpectation {
 	}
 }
 
-func setupScorer(words []string) *TxtDictScorer {
+func setupAhoCorasickScorer(words []string) *TxtDictScorer {
 	tmpFile, err := os.CreateTemp("", "cwg-test-dict")
 	if err != nil {
 		panic(err)
@@ -328,10 +328,11 @@ func setupScorer(words []string) *TxtDictScorer {
 	}
 	_ = tmpFile.Close()
 
-	scorer, err := NewTxtDictScorer(tmpFileName)
+	matcher, err := NewAhoCorasickMatcher(tmpFileName)
 	if err != nil {
 		panic(err)
 	}
 
+	scorer := NewTxtDictScorer(matcher)
 	return scorer
 }

@@ -30,10 +30,12 @@ func SetupAPI(
 	sessionManager := utils.NewSessionManager(sessionStore)
 
 	logger.Infow("Loading dictionary")
-	gameScorer, err := scoring.NewTxtDictScorer(dictPath)
+	scoringMatcher, err := scoring.NewAhoCorasickMatcher(dictPath)
 	if err != nil {
-		return nil, errors.Wrap(err, "error creating building dictionary scorer")
+		return nil, errors.Wrap(err, "error creating building dictionary matcher")
 	}
+	gameScorer := scoring.NewTxtDictScorer(scoringMatcher)
+
 	gameManager := game.NewGameManager(db, gameScorer)
 	lobbyManager := lobby.NewLobbyManager(db)
 	playerManager := player.NewPlayerManager(db)
