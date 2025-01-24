@@ -19,9 +19,13 @@ templ:
 	@go run github.com/a-h/templ/cmd/templ generate
 
 
+.PHONY: docker-build-local
+docker-build-local:
+	@docker build -t mcoot/crossword-game -f ./build/crossword-game.Dockerfile .
+
 .PHONY: docker-build
 docker-build:
-	@docker build -t mcoot/crossword-game -f ./build/crossword-game.Dockerfile .
+	@docker buildx build --load --platform linux/amd64,linux/arm64 -t mcoot/crossword-game -f ./build/crossword-game.Dockerfile .
 
 .PHONY: docker-push
 docker-push:
