@@ -191,11 +191,32 @@ func (s *CrosswordGameE2ESuite) Test_FullGame2x2() {
 			StartRow:    0,
 			StartColumn: 0,
 		},
+		{
+			Word:        "TE",
+			Score:       4,
+			Direction:   types.ScoringDirectionVertical,
+			StartRow:    0,
+			StartColumn: 1,
+		},
 	}, playerScore0.Words)
-	s.Equal(8, playerScore0.TotalScore)
+	s.Equal(12, playerScore0.TotalScore)
 
 	playerScore1 := getPlayerScore(s.T(), s.client, gameId, playerIds[1])
 	s.Equal([]*types.ScoredWord{
+		{
+			Word:        "ET",
+			Score:       4,
+			Direction:   types.ScoringDirectionHorizontal,
+			StartRow:    0,
+			StartColumn: 0,
+		},
+		{
+			Word:        "ES",
+			Score:       4,
+			Direction:   types.ScoringDirectionVertical,
+			StartRow:    0,
+			StartColumn: 0,
+		},
 		{
 			Word:        "TA",
 			Score:       4,
@@ -204,7 +225,7 @@ func (s *CrosswordGameE2ESuite) Test_FullGame2x2() {
 			StartColumn: 1,
 		},
 	}, playerScore1.Words)
-	s.Equal(4, playerScore1.TotalScore)
+	s.Equal(12, playerScore1.TotalScore)
 
 }
 
