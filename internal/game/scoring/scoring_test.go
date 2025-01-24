@@ -1,6 +1,7 @@
 package scoring
 
 import (
+	"github.com/mcoot/crosswordgame-go/internal/game/scoring/matching"
 	"github.com/mcoot/crosswordgame-go/internal/game/types"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
@@ -328,7 +329,7 @@ func setupAhoCorasickScorer(words []string) *TxtDictScorer {
 	}
 	_ = tmpFile.Close()
 
-	matcher, err := NewAhoCorasickMatcher(tmpFileName)
+	matcher, err := matching.NewAhoCorasickMatcher(tmpFileName)
 	if err != nil {
 		panic(err)
 	}

@@ -8,6 +8,7 @@ import (
 	"github.com/mcoot/crosswordgame-go/internal/api/webapi"
 	"github.com/mcoot/crosswordgame-go/internal/game"
 	"github.com/mcoot/crosswordgame-go/internal/game/scoring"
+	"github.com/mcoot/crosswordgame-go/internal/game/scoring/matching"
 	"github.com/mcoot/crosswordgame-go/internal/lobby"
 	"github.com/mcoot/crosswordgame-go/internal/player"
 	"github.com/mcoot/crosswordgame-go/internal/store"
@@ -30,7 +31,7 @@ func SetupAPI(
 	sessionManager := utils.NewSessionManager(sessionStore)
 
 	logger.Infow("Loading dictionary")
-	scoringMatcher, err := scoring.NewAhoCorasickMatcher(dictPath)
+	scoringMatcher, err := matching.NewAhoCorasickMatcher(dictPath)
 	if err != nil {
 		return nil, errors.Wrap(err, "error creating building dictionary matcher")
 	}

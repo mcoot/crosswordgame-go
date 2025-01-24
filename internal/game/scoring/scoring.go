@@ -1,6 +1,7 @@
 package scoring
 
 import (
+	"github.com/mcoot/crosswordgame-go/internal/game/scoring/matching"
 	"github.com/mcoot/crosswordgame-go/internal/game/types"
 	"strings"
 )
@@ -10,10 +11,10 @@ type Scorer interface {
 }
 
 type TxtDictScorer struct {
-	matcher Matcher
+	matcher matching.Matcher
 }
 
-func NewTxtDictScorer(matcher Matcher) *TxtDictScorer {
+func NewTxtDictScorer(matcher matching.Matcher) *TxtDictScorer {
 	return &TxtDictScorer{
 		matcher: matcher,
 	}
