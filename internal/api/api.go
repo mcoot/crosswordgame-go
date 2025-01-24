@@ -37,7 +37,7 @@ func SetupAPI(
 	}
 
 	logger.Infow("Building word matcher")
-	scoringMatcher := matching.NewAhoCorasickMatcher(wordList)
+	scoringMatcher := matching.NewSuffixArrayMatcher(wordList)
 
 	logger.Infow("Building game logic components")
 	gameScorer := scoring.NewTxtDictScorer(scoringMatcher)
