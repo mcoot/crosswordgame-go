@@ -14,8 +14,12 @@ func main() {
 	if err != nil {
 		log.Fatalf("error creating logger: %v", err)
 	}
+
+	logger.Infow("Initialising crossword-game")
+
 	// TODO: Replace the key
 	sessionStore := sessions.NewCookieStore([]byte("replace-me-key"))
+	logger.Infow("Initialising datastore connection")
 	db := store.NewInMemoryStore()
 	handler, err := api.SetupAPI(
 		logger,
