@@ -31,18 +31,21 @@ func SetupAPI(
 	sessionManager := utils.NewSessionManager(sessionStore)
 
 	logger.Infow("Loading dictionary")
-	scoringMatcher, err := matching.NewAhoCorasickMatcher(dictPath)
+	wordList, err := matching.LoadDictionary(50000, dictPath)
 	if err != nil {
 		return nil, errors.Wrap(err, "error creating building dictionary matcher")
 	}
-	gameScorer := scoring.NewTxtDictScorer(scoringMatcher)
 
+	logger.Infow("Building word matcher")
+	scoringMatcher := matching.NewAhoCorasickMatcher(wordList)
+
+	logger.Infow("Building game logic components")
+	gameScorer := scoring.NewTxtDictScorer(scoringMatcher)
 	gameManager := game.NewGameManager(db, gameScorer)
 	lobbyManager := lobby.NewLobbyManager(db)
 	playerManager := player.NewPlayerManager(db)
 
 	logger.Infow("Initialising APIs")
-
 	jsonApi := jsonapi.NewCrosswordGameAPI(gameManager, lobbyManager, playerManager)
 	err = jsonApi.AttachToRouter(apiRouter, logger, schemaPath)
 	if err != nil {

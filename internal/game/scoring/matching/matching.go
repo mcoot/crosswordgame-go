@@ -23,10 +23,7 @@ func LoadDictionary(preallocatedCapacity int, filename string) ([]string, error)
 	for scanner.Scan() {
 		// Trim space and convert all words to uppercase as that's how we store boards
 		word := strings.ToUpper(strings.TrimSpace(scanner.Text()))
-		// Skip empty lines and one-letter words, since they don't score
-		if len(word) > 1 {
-			wordList = append(wordList, word)
-		}
+		wordList = append(wordList, word)
 	}
 
 	if err := scanner.Err(); err != nil {
@@ -34,4 +31,15 @@ func LoadDictionary(preallocatedCapacity int, filename string) ([]string, error)
 	}
 
 	return wordList, nil
+}
+
+func getFilteredDictionary(rawWordList []string) []string {
+	filteredWordList := make([]string, 0, len(rawWordList))
+	for _, word := range rawWordList {
+		// Skip empty lines and one-letter words, since they don't score
+		if len(word) > 1 {
+			filteredWordList = append(filteredWordList, word)
+		}
+	}
+	return filteredWordList
 }

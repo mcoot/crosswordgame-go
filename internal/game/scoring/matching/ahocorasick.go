@@ -7,17 +7,12 @@ type AhoCorasickMatcher struct {
 	matcher  *ahocorasick.Matcher
 }
 
-func NewAhoCorasickMatcher(filename string) (*AhoCorasickMatcher, error) {
-	wordList, err := LoadDictionary(50000, filename)
-	if err != nil {
-		return nil, err
-	}
-	matcher := ahocorasick.NewStringMatcher(wordList)
+func NewAhoCorasickMatcher(wordList []string) *AhoCorasickMatcher {
+	result := &AhoCorasickMatcher{}
+	result.wordList = getFilteredDictionary(wordList)
 
-	return &AhoCorasickMatcher{
-		wordList: wordList,
-		matcher:  matcher,
-	}, nil
+	result.matcher = ahocorasick.NewStringMatcher(result.wordList)
+	return result
 }
 
 func (d *AhoCorasickMatcher) Match(line string) []string {

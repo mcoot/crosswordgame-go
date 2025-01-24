@@ -5,7 +5,6 @@ import (
 	"github.com/mcoot/crosswordgame-go/internal/game/types"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
-	"os"
 	"strings"
 	"testing"
 )
@@ -282,7 +281,12 @@ func (s *ScoringSuite) Test_AhoCorasickMatcher_scoreWordsForLine() {
 
 	for _, c := range cases {
 		s.T().Run(c.name, func(t *testing.T) {
-			scorer := setupAhoCorasickScorer(c.dictionary)
+			words := make([]string, 0, len(c.dictionary))
+			for _, word := range c.dictionary {
+				words = append(words, strings.ToUpper(word))
+			}
+			matcher := matching.NewAhoCorasickMatcher(words)
+			scorer := NewTxtDictScorer(matcher)
 			got := scorer.scoreWordsForLine(lineScoreInput{
 				Line:      c.line,
 				Direction: c.direction,
@@ -315,25 +319,4 @@ func expectExactly(expected []*types.ScoredWord) ScoredWordsExpectation {
 			require.Equal(t, word, sw[i])
 		}
 	}
-}
-
-func setupAhoCorasickScorer(words []string) *TxtDictScorer {
-	tmpFile, err := os.CreateTemp("", "cwg-test-dict")
-	if err != nil {
-		panic(err)
-	}
-	tmpFileName := tmpFile.Name()
-
-	for _, word := range words {
-		_, _ = tmpFile.WriteString(word + "\n")
-	}
-	_ = tmpFile.Close()
-
-	matcher, err := matching.NewAhoCorasickMatcher(tmpFileName)
-	if err != nil {
-		panic(err)
-	}
-
-	scorer := NewTxtDictScorer(matcher)
-	return scorer
 }
