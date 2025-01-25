@@ -64,7 +64,6 @@ templ GameScores(players []*playertypes.Player, viewingPlayer *playertypes.Playe
         }
         </td>
         <td>{ strconv.Itoa(scores[player.Username].TotalScore) }</td>
-        <td>{ strconv.Itoa(scores[player.Username].TotalScore) }</td>
         <td>
         <ul>
         for _, word := range scores[player.Username].Words {
