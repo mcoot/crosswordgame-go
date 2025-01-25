@@ -26,6 +26,7 @@ type CrosswordGameWebAPI struct {
 	gameManager    *game.Manager
 	lobbyManager   *lobby.Manager
 	playerManager  *player.Manager
+	sseServer      *sseServer
 }
 
 func NewCrosswordGameWebAPI(
@@ -39,6 +40,7 @@ func NewCrosswordGameWebAPI(
 		gameManager:    gameManager,
 		lobbyManager:   lobbyManager,
 		playerManager:  playerManager,
+		sseServer:      newSSEServer(),
 	}
 }
 
@@ -58,6 +60,10 @@ func (c *CrosswordGameWebAPI) AttachToRouter(router *mux.Router) error {
 	router.HandleFunc("/lobby/{lobbyId}/abandon", c.withLoggedInPlayer(c.AbandonGame)).Methods("POST")
 	router.HandleFunc("/lobby/{lobbyId}/announce", c.withLoggedInPlayer(c.AnnounceLetter)).Methods("POST")
 	router.HandleFunc("/lobby/{lobbyId}/place", c.withLoggedInPlayer(c.PlaceLetter)).Methods("POST")
+
+	c.sseServer.Start()
+	router.HandleFunc("/lobby/{lobbyId}/sse/refresh", c.withLoggedInPlayer(c.sseServer.HandleRequest)).
+		Methods("GET")
 
 	return nil
 }
@@ -178,18 +184,21 @@ func (c *CrosswordGameWebAPI) JoinLobby(w http.ResponseWriter, r *http.Request, 
 		return
 	}
 
-	lobbyId := r.PostForm.Get("lobby_id")
-	if lobbyId == "" {
+	rawLobbyId := r.PostForm.Get("lobby_id")
+	if rawLobbyId == "" {
 		utils.SendError(logging.GetLogger(r.Context()), r, w, fmt.Errorf("lobby_id is required"))
 		return
 	}
 
-	err = c.lobbyManager.JoinPlayerToLobby(lobbytypes.LobbyId(lobbyId), player.Username)
+	lobbyId := lobbytypes.LobbyId(rawLobbyId)
+
+	err = c.lobbyManager.JoinPlayerToLobby(lobbyId, player.Username)
 	if err != nil {
 		utils.SendError(logging.GetLogger(r.Context()), r, w, err)
 		return
 	}
 
+	c.sseServer.SendRefresh(lobbyId, player.Username)
 	utils.Redirect(w, r, fmt.Sprintf("/lobby/%s", lobbyId), 303)
 }
 
@@ -201,6 +210,7 @@ func (c *CrosswordGameWebAPI) LeaveLobby(w http.ResponseWriter, r *http.Request,
 		return
 	}
 
+	c.sseServer.SendRefresh(lobbyId, player.Username)
 	utils.Redirect(w, r, "/index", 303)
 }
 
@@ -412,6 +422,7 @@ func (c *CrosswordGameWebAPI) StartNewGame(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
+	c.sseServer.SendRefresh(lobbyId, player.Username)
 	utils.Redirect(w, r, fmt.Sprintf("/lobby/%s", lobbyId), 303)
 }
 
@@ -437,6 +448,7 @@ func (c *CrosswordGameWebAPI) AbandonGame(w http.ResponseWriter, r *http.Request
 		return
 	}
 
+	c.sseServer.SendRefresh(lobbyId, player.Username)
 	utils.Redirect(w, r, fmt.Sprintf("/lobby/%s", lobbyId), 303)
 }
 
@@ -474,6 +486,7 @@ func (c *CrosswordGameWebAPI) AnnounceLetter(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
+	c.sseServer.SendRefresh(lobbyId, player.Username)
 	utils.Redirect(w, r, fmt.Sprintf("/lobby/%s", lobbyId), 303)
 }
 
@@ -527,6 +540,7 @@ func (c *CrosswordGameWebAPI) PlaceLetter(w http.ResponseWriter, r *http.Request
 		return
 	}
 
+	c.sseServer.SendRefresh(lobbyId, player.Username)
 	utils.Redirect(w, r, fmt.Sprintf("/lobby/%s", lobbyId), 303)
 }
 
