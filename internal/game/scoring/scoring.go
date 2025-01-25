@@ -85,7 +85,7 @@ func (s *TxtDictScorer) scoreWordsForLine(
 type wordWithRange struct {
 	Word     string
 	StartIdx int
-	// Ultimately we're checking for overlap, and with the board size limited to 7,
+	// Ultimately we're checking for overlap, and with the board size limited to 10,
 	// we may as well just keep a bit mask of used indices
 	IncludedIndices uint32
 }
@@ -125,7 +125,7 @@ func matchedWordsToLineIndices(line string, matchedWords []string) []wordWithRan
 // The possible word combinations are, essentially, the powerset of our matched words
 // But restricted to subsets which do not overlap in index
 // We only care about the best scoring one
-// Doing it recursively; with the line/board size limited to 7, this should be fine
+// Doing it recursively; with the line/board size limited to 10, this should be fine
 func getBestScoringWordCombination(input lineScoreInput, words []wordWithRange) []*types.ScoredWord {
 	var bestScoringSubset []*types.ScoredWord
 	bestScore := 0

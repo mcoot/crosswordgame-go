@@ -439,7 +439,7 @@ components:
         board_dimension:
           type: integer
           minimum: 1
-          maximum: 7
+          maximum: 10
           default: 5
       required:
         - players

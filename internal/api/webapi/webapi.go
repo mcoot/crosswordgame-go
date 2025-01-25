@@ -409,6 +409,11 @@ func (c *CrosswordGameWebAPI) StartNewGame(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
+	if boardSize < 2 || boardSize > 10 {
+		utils.SendError(logging.GetLogger(r.Context()), r, w, fmt.Errorf("board_size must be between 2 and 10"))
+		return
+	}
+
 	gameId, err := c.gameManager.CreateGame(lobbyState.Players, boardSize)
 	if err != nil {
 		utils.SendError(logging.GetLogger(r.Context()), r, w, err)
