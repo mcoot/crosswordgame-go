@@ -286,10 +286,12 @@ func (c *CrosswordGameWebAPI) buildLobbyGameComponent(
 		}
 	}
 
+	isGameFinished := gameState.Status == gametypes.StatusFinished
+
 	gameStatusComponent := template.GameStatus(gameState, gamePlayers, currentAnnouncingPlayer, player, isPlayerInGame)
 
 	var ingameComponent templ.Component
-	if isPlayerInGame {
+	if isPlayerInGame && !isGameFinished {
 		ingameComponent, err = c.buildLobbyGamePlayerComponent(player, lobbyState, gameState, gamePlayers)
 		if err != nil {
 			return nil, err
@@ -300,8 +302,6 @@ func (c *CrosswordGameWebAPI) buildLobbyGameComponent(
 			return nil, err
 		}
 	}
-
-	isGameFinished := gameState.Status == gametypes.StatusFinished
 
 	var components []templ.Component
 	components = append(components, ingameComponent)
@@ -409,7 +409,6 @@ func (c *CrosswordGameWebAPI) StartNewGame(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	// TODO: Have some UX to handle players joining a lobby mid-game (who can't be in the game)
 	gameId, err := c.gameManager.CreateGame(lobbyState.Players, boardSize)
 	if err != nil {
 		utils.SendError(logging.GetLogger(r.Context()), r, w, err)
