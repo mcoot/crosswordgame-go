@@ -2,7 +2,7 @@ package utils
 
 import (
 	"github.com/a-h/templ"
-	"github.com/mcoot/crosswordgame-go/internal/api/webapi/template"
+	"github.com/mcoot/crosswordgame-go/internal/api/webapi/rendering"
 	"github.com/mcoot/crosswordgame-go/internal/api/webapi/template/common"
 	"github.com/mcoot/crosswordgame-go/internal/api/webapi/template/pages"
 	"github.com/mcoot/crosswordgame-go/internal/apitypes"
@@ -23,10 +23,10 @@ func SendResponse(
 	code int,
 ) {
 	htmx := GetHTMXProperties(r)
-	renderCtx := template.WithRenderContext(r.Context(), &template.RenderContext{
-		Target: template.RenderTarget{
-			IsFullRefresh:  !htmx.IsTargeted(),
-			SpecificTarget: "",
+	renderCtx := rendering.WithRenderContext(r.Context(), &rendering.RenderContext{
+		Target: rendering.RenderTarget{
+			RefreshLevel:  htmx.DetermineRefreshLevel(),
+			RefreshTarget: htmx.HTMXTarget,
 		},
 	})
 
@@ -61,7 +61,8 @@ func SendError(
 	)
 
 	component := pages.Error(resp)
-	if htmx.IsTargeted() {
+	// If the request is targeting a specific element that isn't the main page content, it should be displayed inline
+	if htmx.DetermineRefreshLevel() == rendering.TargetedRefresh {
 		component = common.ErrorInline(resp)
 	}
 
@@ -70,18 +71,39 @@ func SendError(
 
 type HTMXProperties struct {
 	IsHTMX     bool
-	IsBoosted  bool
 	HTMXTarget string
 }
+
+const (
+	htmxLayoutTargetMain        = "#main"
+	htmxLayoutTargetPageContent = "#page-content"
+)
 
 func GetHTMXProperties(r *http.Request) HTMXProperties {
 	return HTMXProperties{
 		IsHTMX:     r.Header.Get("HX-Request") == "true",
-		IsBoosted:  r.Header.Get("HX-Boosted") == "true",
 		HTMXTarget: r.Header.Get("HX-Target"),
 	}
 }
 
-func (p HTMXProperties) IsTargeted() bool {
-	return p.IsHTMX && p.HTMXTarget != ""
+func (p HTMXProperties) DetermineRefreshLevel() rendering.RenderRefreshLevel {
+	if !p.IsHTMX {
+		// The request isn't being made through ajax/htmx, so we need to send the whole document
+		return rendering.BrowserLevelRefresh
+	}
+	if p.HTMXTarget == "" {
+		// We aren't targeting anything, so we need to send the whole document
+		return rendering.BrowserLevelRefresh
+	}
+
+	if p.HTMXTarget == htmxLayoutTargetMain {
+		// A page change will target the whole main div
+		return rendering.PageChangeRefresh
+	} else if p.HTMXTarget == htmxLayoutTargetPageContent {
+		// A change within one page will target the page content div
+		return rendering.ContentRefresh
+	} else {
+		// Otherwise, some specific element is being targeted for change
+		return rendering.TargetedRefresh
+	}
 }

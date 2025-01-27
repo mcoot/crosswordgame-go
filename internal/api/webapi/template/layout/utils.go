@@ -2,13 +2,13 @@ package layout
 
 import (
 	"context"
-	"github.com/mcoot/crosswordgame-go/internal/api/webapi/template"
+	"github.com/mcoot/crosswordgame-go/internal/api/webapi/rendering"
 )
 
-func shouldFullRerender(ctx context.Context) bool {
-	renderCtx := template.GetRenderContext(ctx)
-	if renderCtx != nil && renderCtx.Target.IsFullRefresh {
-		return true
+func getRenderLevel(ctx context.Context) rendering.RenderRefreshLevel {
+	renderCtx := rendering.GetRenderContext(ctx)
+	if renderCtx != nil {
+		return renderCtx.Target.RefreshLevel
 	}
-	return false
+	return rendering.BrowserLevelRefresh
 }

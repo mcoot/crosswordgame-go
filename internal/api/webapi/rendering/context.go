@@ -1,13 +1,22 @@
-package template
+package rendering
 
 import (
 	"context"
 	"github.com/mcoot/crosswordgame-go/internal/utils"
 )
 
+type RenderRefreshLevel int
+
+const (
+	BrowserLevelRefresh RenderRefreshLevel = iota
+	PageChangeRefresh
+	ContentRefresh
+	TargetedRefresh
+)
+
 type RenderTarget struct {
-	IsFullRefresh  bool
-	SpecificTarget string
+	RefreshLevel  RenderRefreshLevel
+	RefreshTarget string
 }
 
 type RenderContext struct {
