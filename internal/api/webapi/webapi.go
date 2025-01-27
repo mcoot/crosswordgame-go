@@ -50,6 +50,7 @@ func (c *CrosswordGameWebAPI) AttachToRouter(router *mux.Router) error {
 	router.Handle("/", redirect.Handler("/index")).Methods("GET")
 	router.Handle("/index.html", redirect.Handler("/index")).Methods("GET")
 	router.HandleFunc("/index", c.Index).Methods("GET")
+	router.HandleFunc("/about", c.About).Methods("GET")
 	router.HandleFunc("/login", c.Login).Methods("POST")
 	router.HandleFunc("/host", c.withLoggedInPlayer(c.StartLobbyAsHost)).Methods("POST")
 	router.HandleFunc("/join", c.withLoggedInPlayer(c.JoinLobby)).Methods("POST")
@@ -110,6 +111,11 @@ func (c *CrosswordGameWebAPI) Index(w http.ResponseWriter, r *http.Request) {
 	indexComponent := template.Index(templ.Join(indexContents...))
 	utils.PushUrl(w, "/index")
 	utils.SendResponse(logging.GetLogger(r.Context()), r, w, indexComponent, 200)
+}
+
+func (c *CrosswordGameWebAPI) About(w http.ResponseWriter, r *http.Request) {
+	utils.PushUrl(w, "/about")
+	utils.SendResponse(logging.GetLogger(r.Context()), r, w, template.AboutPage(), 200)
 }
 
 func (c *CrosswordGameWebAPI) Login(w http.ResponseWriter, r *http.Request) {
