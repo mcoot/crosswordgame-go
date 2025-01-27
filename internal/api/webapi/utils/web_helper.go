@@ -22,7 +22,7 @@ func SendResponse(
 	component templ.Component,
 	code int,
 ) {
-	htmx := GetHTMXProperties(r)
+	htmx := rendering.GetHTMXProperties(r)
 	renderCtx := rendering.WithRenderContext(r.Context(), &rendering.RenderContext{
 		Target: rendering.RenderTarget{
 			RefreshLevel:  htmx.DetermineRefreshLevel(),
@@ -50,7 +50,7 @@ func SendError(
 	w http.ResponseWriter,
 	err error,
 ) {
-	htmx := GetHTMXProperties(r)
+	htmx := rendering.GetHTMXProperties(r)
 
 	resp := apitypes.ToErrorResponse(err)
 	logger.Warnw(
@@ -67,38 +67,4 @@ func SendError(
 	}
 
 	SendResponse(logger, r, w, component, resp.HTTPCode)
-}
-
-type HTMXProperties struct {
-	IsHTMX     bool
-	HTMXTarget string
-}
-
-func GetHTMXProperties(r *http.Request) HTMXProperties {
-	return HTMXProperties{
-		IsHTMX:     r.Header.Get("HX-Request") == "true",
-		HTMXTarget: r.Header.Get("HX-Target"),
-	}
-}
-
-func (p HTMXProperties) DetermineRefreshLevel() rendering.RenderRefreshLevel {
-	if !p.IsHTMX {
-		// The request isn't being made through ajax/htmx, so we need to send the whole document
-		return rendering.BrowserLevelRefresh
-	}
-	if p.HTMXTarget == "" {
-		// We aren't targeting anything, so we need to send the whole document
-		return rendering.BrowserLevelRefresh
-	}
-
-	if rendering.RenderRefreshTarget(p.HTMXTarget) == rendering.RefreshTargetMain {
-		// A page change will target the whole main div
-		return rendering.PageChangeRefresh
-	} else if rendering.RenderRefreshTarget(p.HTMXTarget) == rendering.RefreshTargetPageContent {
-		// A change within one page will target the page content div
-		return rendering.ContentRefresh
-	} else {
-		// Otherwise, some specific element is being targeted for change
-		return rendering.TargetedRefresh
-	}
 }
