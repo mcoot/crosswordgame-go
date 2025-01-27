@@ -6,6 +6,7 @@ import (
     playertypes "github.com/mcoot/crosswordgame-go/internal/player/types"
     lobbytypes "github.com/mcoot/crosswordgame-go/internal/lobby/types"
     "github.com/mcoot/crosswordgame-go/internal/api/webapi/template/common"
+    "github.com/mcoot/crosswordgame-go/internal/api/webapi/template/layout"
 )
 
 templ leaveLobbyForm(lobbyId lobbytypes.LobbyId) {
@@ -29,8 +30,10 @@ templ lobbyBase(lobby *lobbytypes.Lobby, players []*playertypes.Player, viewingP
 }
 
 templ Lobby(lobby *lobbytypes.Lobby, players []*playertypes.Player, viewingPlayer *playertypes.Player, gameComponent templ.Component) {
-    @lobbyBase(lobby, players, viewingPlayer) {
-        @gameComponent
+    @layout.Layout() {
+        @lobbyBase(lobby, players, viewingPlayer) {
+            @gameComponent
+        }
     }
 }
 

@@ -3,8 +3,11 @@ package pages
 import (
     "github.com/mcoot/crosswordgame-go/internal/apitypes"
     "github.com/mcoot/crosswordgame-go/internal/api/webapi/template/common"
+    "github.com/mcoot/crosswordgame-go/internal/api/webapi/template/layout"
 )
 
 templ Error(err apitypes.ErrorResponse) {
-    @common.ErrorBlock(err)
+    @layout.Layout() {
+        @common.ErrorBlock(err)
+    }
 }

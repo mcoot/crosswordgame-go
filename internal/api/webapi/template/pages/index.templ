@@ -6,14 +6,17 @@ import (
     playertypes "github.com/mcoot/crosswordgame-go/internal/player/types"
     lobbytypes "github.com/mcoot/crosswordgame-go/internal/lobby/types"
     "github.com/mcoot/crosswordgame-go/internal/api/webapi/template/common"
+    "github.com/mcoot/crosswordgame-go/internal/api/webapi/template/layout"
 )
 
 templ Index(contents templ.Component) {
-    <h1>Crossword Game</h1>
-    <p>Welcome to the Crossword Game!</p>
-    <div>
-        @contents
-    </div>
+    @layout.Layout() {
+        <h1>Crossword Game</h1>
+        <p>Welcome to the Crossword Game!</p>
+        <div>
+            @contents
+        </div>
+    }
 }
 
 templ LoginForm() {
