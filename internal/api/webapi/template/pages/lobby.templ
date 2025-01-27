@@ -1,11 +1,15 @@
-package template
+package pages
 
-import "fmt"
-import lobbytypes "github.com/mcoot/crosswordgame-go/internal/lobby/types"
-import playertypes "github.com/mcoot/crosswordgame-go/internal/player/types"
+import (
+    "fmt"
+
+    playertypes "github.com/mcoot/crosswordgame-go/internal/player/types"
+    lobbytypes "github.com/mcoot/crosswordgame-go/internal/lobby/types"
+    "github.com/mcoot/crosswordgame-go/internal/api/webapi/template/common"
+)
 
 templ leaveLobbyForm(lobbyId lobbytypes.LobbyId) {
-    @commonForm("leave-lobby-form", fmt.Sprintf("/lobby/%s/leave", lobbyId)) {
+    @common.BaseForm("leave-lobby-form", fmt.Sprintf("/lobby/%s/leave", lobbyId)) {
         <input type="submit" value="Leave lobby" />
     }
 }
@@ -18,7 +22,7 @@ templ lobbyBase(lobby *lobbytypes.Lobby, players []*playertypes.Player, viewingP
         @leaveLobbyForm(lobby.Id)
         <div id="lobby-playerlist">
             <h2>In lobby:</h2>
-            @playerList(players, viewingPlayer)
+            @common.PlayerList(players, viewingPlayer)
         </div>
         { children... }
     </div>
@@ -32,7 +36,7 @@ templ Lobby(lobby *lobbytypes.Lobby, players []*playertypes.Player, viewingPlaye
 
 templ GameStartForm(lobbyId lobbytypes.LobbyId) {
     <h2>Start a new game</h2>
-    @commonForm("game-start-form", fmt.Sprintf("/lobby/%s/start", lobbyId)) {
+    @common.BaseForm("game-start-form", fmt.Sprintf("/lobby/%s/start", lobbyId)) {
         <label for="board_size">Board size:</label>
         <input type="number" name="board_size" value=5 placeholder="Size" />
         <input type="submit" value="Start game" />
@@ -41,7 +45,7 @@ templ GameStartForm(lobbyId lobbytypes.LobbyId) {
 
 templ GameAbandonForm(lobbyId lobbytypes.LobbyId, isFinished bool) {
     <h2>Abandon game</h2>
-    @commonForm("game-abandon-form", fmt.Sprintf("/lobby/%s/abandon", lobbyId)) {
+    @common.BaseForm("game-abandon-form", fmt.Sprintf("/lobby/%s/abandon", lobbyId)) {
         if isFinished {
             <input type="submit" value="Clear game" />
         } else {

@@ -1,8 +1,12 @@
-package template
+package pages
 
-import "fmt"
-import playertypes "github.com/mcoot/crosswordgame-go/internal/player/types"
-import lobbytypes "github.com/mcoot/crosswordgame-go/internal/lobby/types"
+import (
+    "fmt"
+
+    playertypes "github.com/mcoot/crosswordgame-go/internal/player/types"
+    lobbytypes "github.com/mcoot/crosswordgame-go/internal/lobby/types"
+    "github.com/mcoot/crosswordgame-go/internal/api/webapi/template/common"
+)
 
 templ Index(contents templ.Component) {
     <h1>Crossword Game</h1>
@@ -13,7 +17,7 @@ templ Index(contents templ.Component) {
 }
 
 templ LoginForm() {
-    @commonForm("login-form", "/login") {
+    @common.BaseForm("login-form", "/login") {
         <label for="display_name">Display name:</label>
         <input type="text" name="display_name" placeholder="name" />
         <input type="submit" value="Login" />
@@ -29,13 +33,13 @@ templ LoggedInPlayerDetails(player *playertypes.Player) {
 
 templ NotInLobbyDetails() {
     <h3>Host a lobby</h3>
-    @commonForm("host-form", "/host") {
+    @common.BaseForm("host-form", "/host") {
         <label for="lobby_name">Lobby name:</label>
         <input type="text" name="lobby_name" placeholder="lobby name" />
         <input type="submit" value="Host new lobby" />
     }
     <h3>Join an existing lobby</h3>
-    @commonForm("join-form", "/join") {
+    @common.BaseForm("join-form", "/join") {
         <label for="lobby_id">Lobby ID:</label>
         <input type="text" name="lobby_id" placeholder="lobby id" />
         <input type="submit" value="Join lobby" />

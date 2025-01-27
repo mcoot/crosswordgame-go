@@ -6,6 +6,7 @@ import (
 	"github.com/gorilla/mux"
 	commonutils "github.com/mcoot/crosswordgame-go/internal/api/utils"
 	"github.com/mcoot/crosswordgame-go/internal/api/webapi/template"
+	"github.com/mcoot/crosswordgame-go/internal/api/webapi/template/pages"
 	"github.com/mcoot/crosswordgame-go/internal/api/webapi/utils"
 	"github.com/mcoot/crosswordgame-go/internal/apitypes"
 	"github.com/mcoot/crosswordgame-go/internal/errors"
@@ -89,33 +90,33 @@ func (c *CrosswordGameWebAPI) Index(w http.ResponseWriter, r *http.Request) {
 
 	var indexContents []templ.Component
 	if sessionIsLoggedIn {
-		indexContents = append(indexContents, template.LoggedInPlayerDetails(p))
+		indexContents = append(indexContents, pages.LoggedInPlayerDetails(p))
 		currentLobby, err := c.playerManager.GetLobbyForPlayer(p.Username)
 		if err != nil {
 			if errors.IsNotFoundError(err) {
 				// Player not in a lobby
-				indexContents = append(indexContents, template.NotInLobbyDetails())
+				indexContents = append(indexContents, pages.NotInLobbyDetails())
 			} else {
 				utils.SendError(logging.GetLogger(r.Context()), r, w, err)
 				return
 			}
 		} else {
 			// Player in a lobby
-			indexContents = append(indexContents, template.InLobbyDetails(currentLobby))
+			indexContents = append(indexContents, pages.InLobbyDetails(currentLobby))
 		}
 
 	} else {
-		indexContents = append(indexContents, template.LoginForm())
+		indexContents = append(indexContents, pages.LoginForm())
 	}
 
-	indexComponent := template.Index(templ.Join(indexContents...))
+	indexComponent := pages.Index(templ.Join(indexContents...))
 	utils.PushUrl(w, "/index")
 	utils.SendResponse(logging.GetLogger(r.Context()), r, w, indexComponent, 200)
 }
 
 func (c *CrosswordGameWebAPI) About(w http.ResponseWriter, r *http.Request) {
 	utils.PushUrl(w, "/about")
-	utils.SendResponse(logging.GetLogger(r.Context()), r, w, template.AboutPage(), 200)
+	utils.SendResponse(logging.GetLogger(r.Context()), r, w, pages.About(), 200)
 }
 
 func (c *CrosswordGameWebAPI) Login(w http.ResponseWriter, r *http.Request) {
@@ -247,10 +248,10 @@ func (c *CrosswordGameWebAPI) LobbyPage(w http.ResponseWriter, r *http.Request, 
 			return
 		}
 	} else {
-		gameComponent = template.GameStartForm(lobbyId)
+		gameComponent = pages.GameStartForm(lobbyId)
 	}
 
-	component := template.Lobby(lobbyState, lobbyPlayers, player, gameComponent)
+	component := pages.Lobby(lobbyState, lobbyPlayers, player, gameComponent)
 	utils.PushUrl(w, fmt.Sprintf("/lobby/%s", lobbyId))
 	utils.SendResponse(
 		logging.GetLogger(r.Context()),
@@ -315,10 +316,10 @@ func (c *CrosswordGameWebAPI) buildLobbyGameComponent(
 		components = append(
 			components,
 			template.GameScores(gamePlayers, player, gameState.PlayerScores),
-			template.GameStartForm(lobbyState.Id),
+			pages.GameStartForm(lobbyState.Id),
 		)
 	}
-	components = append(components, template.GameAbandonForm(lobbyState.Id, isGameFinished))
+	components = append(components, pages.GameAbandonForm(lobbyState.Id, isGameFinished))
 
 	return template.GameView(gameState, gamePlayers, player, gameStatusComponent, templ.Join(components...)), nil
 }

@@ -1,13 +1,17 @@
 package template
 
-import "fmt"
-import "strconv"
-import lobbytypes "github.com/mcoot/crosswordgame-go/internal/lobby/types"
-import gametypes "github.com/mcoot/crosswordgame-go/internal/game/types"
-import playertypes "github.com/mcoot/crosswordgame-go/internal/player/types"
+import (
+    "fmt"
+    "strconv"
+
+    lobbytypes "github.com/mcoot/crosswordgame-go/internal/lobby/types"
+    gametypes "github.com/mcoot/crosswordgame-go/internal/game/types"
+    playertypes "github.com/mcoot/crosswordgame-go/internal/player/types"
+    "github.com/mcoot/crosswordgame-go/internal/api/webapi/template/common"
+)
 
 templ AnnouncementForm(lobbyId lobbytypes.LobbyId) {
-    @commonForm("announcement-form", fmt.Sprintf("/lobby/%s/announce", lobbyId)) {
+    @common.BaseForm("announcement-form", fmt.Sprintf("/lobby/%s/announce", lobbyId)) {
         <label for="announced_letter">Letter to announce:</label>
         <input type="text" name="announced_letter" placeholder="Letter to announce" />
         <input type="submit" value="Announce" />
@@ -20,12 +24,12 @@ templ GameStatus(game *gametypes.Game, players []*playertypes.Player, currentAnn
         <p>You are spectating this game</p>
     }
     <h3>In game:</h3>
-    @playerList(players, viewingPlayer)
+    @common.PlayerList(players, viewingPlayer)
     switch game.Status {
     case gametypes.StatusAwaitingPlacement:
         <p>Status: waiting for all players to place letter <code>{ game.CurrentAnnouncedLetter }</code></p>
     case gametypes.StatusAwaitingAnnouncement:
-        <p>Status: waiting for <span>@playerName(currentAnnouncingPlayer, viewingPlayer)</span> to announce</p>
+        <p>Status: waiting for <span>@common.PlayerName(currentAnnouncingPlayer, viewingPlayer)</span> to announce</p>
     case gametypes.StatusFinished:
         <p>Status: game finished</p>
     default:

@@ -1,10 +1,12 @@
 package template
 
-import "fmt"
-import "strconv"
-import lobbytypes "github.com/mcoot/crosswordgame-go/internal/lobby/types"
-import gametypes "github.com/mcoot/crosswordgame-go/internal/game/types"
-import playertypes "github.com/mcoot/crosswordgame-go/internal/player/types"
+import (
+    "fmt"
+    "strconv"
+    lobbytypes "github.com/mcoot/crosswordgame-go/internal/lobby/types"
+    gametypes "github.com/mcoot/crosswordgame-go/internal/game/types"
+    playertypes "github.com/mcoot/crosswordgame-go/internal/player/types"
+)
 
 func cellLetter(letter string) string {
     if letter == "" {

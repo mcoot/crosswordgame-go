@@ -2,7 +2,6 @@ package utils
 
 import (
 	"github.com/a-h/templ"
-	"github.com/mcoot/crosswordgame-go/internal/api/webapi/template"
 	"github.com/mcoot/crosswordgame-go/internal/api/webapi/template/common"
 	"github.com/mcoot/crosswordgame-go/internal/api/webapi/template/pages"
 	"github.com/mcoot/crosswordgame-go/internal/apitypes"
@@ -38,7 +37,7 @@ func SendResponse(
 	if htmx.IsTargeted() {
 		err = component.Render(r.Context(), w)
 	} else {
-		c := template.Layout(component)
+		c := common.Layout(component)
 		err = c.Render(r.Context(), w)
 	}
 
