@@ -10,6 +10,7 @@ import templruntime "github.com/a-h/templ/runtime"
 
 import (
 	"fmt"
+	"github.com/mcoot/crosswordgame-go/internal/api/webapi/rendering"
 	gametypes "github.com/mcoot/crosswordgame-go/internal/game/types"
 	lobbytypes "github.com/mcoot/crosswordgame-go/internal/lobby/types"
 	playertypes "github.com/mcoot/crosswordgame-go/internal/player/types"
@@ -51,7 +52,7 @@ func cellFormContents(letter string, row int, column int, placementEnabled bool)
 		var templ_7745c5c3_Var2 string
 		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(row))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/api/webapi/template/game/board.templ`, Line: 19, Col: 71}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/api/webapi/template/game/board.templ`, Line: 20, Col: 71}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 		if templ_7745c5c3_Err != nil {
@@ -64,7 +65,7 @@ func cellFormContents(letter string, row int, column int, placementEnabled bool)
 		var templ_7745c5c3_Var3 string
 		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(strconv.Itoa(column))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/api/webapi/template/game/board.templ`, Line: 20, Col: 77}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/api/webapi/template/game/board.templ`, Line: 21, Col: 77}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 		if templ_7745c5c3_Err != nil {
@@ -77,7 +78,7 @@ func cellFormContents(letter string, row int, column int, placementEnabled bool)
 		var templ_7745c5c3_Var4 string
 		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(cellLetter(letter))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/api/webapi/template/game/board.templ`, Line: 21, Col: 51}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/api/webapi/template/game/board.templ`, Line: 22, Col: 51}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 		if templ_7745c5c3_Err != nil {
@@ -101,12 +102,7 @@ func cellFormContents(letter string, row int, column int, placementEnabled bool)
 	})
 }
 
-func Board(
-	lobbyId lobbytypes.LobbyId,
-	viewingPlayer *playertypes.Player,
-	board *gametypes.Board,
-	placementEnabled bool,
-) templ.Component {
+func Board(lobbyId lobbytypes.LobbyId, viewingPlayer *playertypes.Player, board *gametypes.Board, placementEnabled bool) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -134,7 +130,7 @@ func Board(
 		var templ_7745c5c3_Var6 string
 		templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(viewingPlayer.DisplayName)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/api/webapi/template/game/board.templ`, Line: 33, Col: 35}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/api/webapi/template/game/board.templ`, Line: 29, Col: 35}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 		if templ_7745c5c3_Err != nil {
@@ -157,7 +153,7 @@ func Board(
 				var templ_7745c5c3_Var7 string
 				templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("placement-%d-%d-form", r, c))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/api/webapi/template/game/board.templ`, Line: 42, Col: 66}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/api/webapi/template/game/board.templ`, Line: 38, Col: 66}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 				if templ_7745c5c3_Err != nil {
@@ -179,13 +175,26 @@ func Board(
 				var templ_7745c5c3_Var9 string
 				templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("/lobby/%s/place", lobbyId))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/api/webapi/template/game/board.templ`, Line: 44, Col: 69}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/api/webapi/template/game/board.templ`, Line: 40, Col: 69}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "\" hx-target=\"#page-content\" hx-target-error=\"#board-error-div\">")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "\" hx-target=\"")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				var templ_7745c5c3_Var10 string
+				templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(string(rendering.RefreshTargetPageContent))
+				if templ_7745c5c3_Err != nil {
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/api/webapi/template/game/board.templ`, Line: 41, Col: 74}
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "\" hx-target-error=\"#board-error-div\">")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -193,17 +202,17 @@ func Board(
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "</form></td>")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "</form></td>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 15, "</tr>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "</tr>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "</tbody></table><div id=\"board-error-div\"></div></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "</tbody></table><div id=\"board-error-div\"></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

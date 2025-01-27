@@ -18,7 +18,7 @@ templ leaveLobbyForm(lobbyId lobbytypes.LobbyId) {
 
 templ lobbyBase(lobby *lobbytypes.Lobby, players []*playertypes.Player, viewingPlayer *playertypes.Player) {
     <div id="lobby-div" hx-ext="sse" sse-connect={fmt.Sprintf("/lobby/%s/sse/refresh", lobby.Id)} >
-        <div hx-get={fmt.Sprintf("/lobby/%s", lobby.Id)} hx-trigger="sse:refresh" hx-target="#page-content"></div>
+        <div hx-get={fmt.Sprintf("/lobby/%s", lobby.Id)} hx-trigger="sse:refresh" hx-target={ string(rendering.RefreshTargetPageContent) }></div>
         <h1>Lobby: { lobby.Name }</h1>
         <p>Lobby ID for joining: <code>{ string(lobby.Id) }</code></p>
         @leaveLobbyForm(lobby.Id)
