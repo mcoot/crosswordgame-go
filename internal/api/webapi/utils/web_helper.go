@@ -2,6 +2,7 @@ package utils
 
 import (
 	"github.com/a-h/templ"
+	"github.com/mcoot/crosswordgame-go/internal/api/webapi/template"
 	"github.com/mcoot/crosswordgame-go/internal/api/webapi/template/common"
 	"github.com/mcoot/crosswordgame-go/internal/api/webapi/template/layout"
 	"github.com/mcoot/crosswordgame-go/internal/api/webapi/template/pages"
@@ -24,6 +25,13 @@ func SendResponse(
 ) {
 	htmx := GetHTMXProperties(r)
 
+	renderCtx := template.WithRenderContext(r.Context(), &template.RenderContext{
+		Target: template.RenderTarget{
+			IsFullRefresh:  !htmx.IsTargeted(),
+			SpecificTarget: "",
+		},
+	})
+
 	// If scripting is enabled and HTMX intends to swap out just the contents,
 	// we don't need to re-send the layout, just the page contents
 	// But for initial load and progressive enhancement,
@@ -36,10 +44,10 @@ func SendResponse(
 
 	// If HTMX is present (HX-Request) and has a target (HX-Target), just render the page component
 	if htmx.IsTargeted() {
-		err = component.Render(r.Context(), w)
+		err = component.Render(renderCtx, w)
 	} else {
 		c := layout.Layout(component)
-		err = c.Render(r.Context(), w)
+		err = c.Render(renderCtx, w)
 	}
 
 	if err != nil {
