@@ -5,7 +5,7 @@ import (
 	"github.com/a-h/templ"
 	"github.com/gorilla/mux"
 	commonutils "github.com/mcoot/crosswordgame-go/internal/api/utils"
-	"github.com/mcoot/crosswordgame-go/internal/api/webapi/template"
+	gametemplates "github.com/mcoot/crosswordgame-go/internal/api/webapi/template/game"
 	"github.com/mcoot/crosswordgame-go/internal/api/webapi/template/pages"
 	"github.com/mcoot/crosswordgame-go/internal/api/webapi/utils"
 	"github.com/mcoot/crosswordgame-go/internal/apitypes"
@@ -295,7 +295,7 @@ func (c *CrosswordGameWebAPI) buildLobbyGameComponent(
 
 	isGameFinished := gameState.Status == gametypes.StatusFinished
 
-	gameStatusComponent := template.GameStatus(gameState, gamePlayers, currentAnnouncingPlayer, player, isPlayerInGame)
+	gameStatusComponent := gametemplates.GameStatus(gameState, gamePlayers, currentAnnouncingPlayer, player, isPlayerInGame)
 
 	var ingameComponent templ.Component
 	if isPlayerInGame && !isGameFinished {
@@ -315,13 +315,13 @@ func (c *CrosswordGameWebAPI) buildLobbyGameComponent(
 	if isGameFinished {
 		components = append(
 			components,
-			template.GameScores(gamePlayers, player, gameState.PlayerScores),
+			gametemplates.GameScores(gamePlayers, player, gameState.PlayerScores),
 			pages.GameStartForm(lobbyState.Id),
 		)
 	}
 	components = append(components, pages.GameAbandonForm(lobbyState.Id, isGameFinished))
 
-	return template.GameView(gameState, gamePlayers, player, gameStatusComponent, templ.Join(components...)), nil
+	return gametemplates.GameView(gameState, gamePlayers, player, gameStatusComponent, templ.Join(components...)), nil
 }
 
 func (c *CrosswordGameWebAPI) buildLobbyGamePlayerComponent(
@@ -350,12 +350,12 @@ func (c *CrosswordGameWebAPI) buildLobbyGamePlayerComponent(
 
 	components = append(
 		components,
-		template.Board(lobbyState.Id, player, board, canPlayerPlace),
+		gametemplates.Board(lobbyState.Id, player, board, canPlayerPlace),
 	)
 
 	if gameState.Status == gametypes.StatusAwaitingAnnouncement &&
 		gameState.CurrentAnnouncingPlayer == player.Username {
-		components = append(components, template.AnnouncementForm(lobbyState.Id))
+		components = append(components, gametemplates.AnnouncementForm(lobbyState.Id))
 	}
 
 	return templ.Join(components...), nil
@@ -372,7 +372,7 @@ func (c *CrosswordGameWebAPI) buildLobbyGameSpectatorComponent(
 		if err != nil {
 			return nil, err
 		}
-		boardComponents = append(boardComponents, template.Board(lobbyState.Id, p, board, false))
+		boardComponents = append(boardComponents, gametemplates.Board(lobbyState.Id, p, board, false))
 	}
 
 	return templ.Join(boardComponents...), nil
