@@ -18,6 +18,9 @@ lint:
 templ:
 	@go run github.com/a-h/templ/cmd/templ generate
 
+.PHONY: templ-watch
+templ-watch:
+	@go run github.com/a-h/templ/cmd/templ generate --watch --cmd "make run-api"
 
 .PHONY: docker-build-local
 docker-build-local:

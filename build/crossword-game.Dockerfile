@@ -5,6 +5,7 @@ WORKDIR /opt/service
 COPY go.mod go.sum ./
 RUN go mod download
 
+COPY ./static ./static
 COPY ./cmd ./cmd
 COPY ./internal ./internal
 COPY ./data ./data
@@ -16,6 +17,7 @@ FROM golang:1.23 AS final
 
 WORKDIR /opt/service
 
+COPY --from=builder /opt/service/static ./static
 COPY --from=builder /opt/service/data ./data
 COPY --from=builder /opt/service/schema ./schema
 COPY --from=builder /opt/service/crossword-game .

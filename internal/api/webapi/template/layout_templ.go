@@ -29,7 +29,7 @@ func Layout(contents templ.Component) templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<!doctype html><html lang=\"en\"><head><title>Crossword Game</title></head><body><script src=\"https://unpkg.com/htmx.org@2.0.4\"></script><script src=\"https://unpkg.com/htmx-ext-response-targets@2.0.2/response-targets.js\"></script><script src=\"https://unpkg.com/htmx-ext-sse@2.2.2/sse.js\"></script><div hx-ext=\"response-targets,sse\" id=\"main\"><div id=\"page-content\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<!doctype html><html lang=\"en\"><head><title>Crossword Game</title><link rel=\"stylesheet\" href=\"/static/styles/main.css\"></head><body><script src=\"https://unpkg.com/htmx.org@2.0.4\"></script><script src=\"https://unpkg.com/htmx-ext-response-targets@2.0.2/response-targets.js\"></script><script src=\"https://unpkg.com/htmx-ext-sse@2.2.2/sse.js\"></script><div hx-ext=\"response-targets,sse\" id=\"main\"><div id=\"page-content\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

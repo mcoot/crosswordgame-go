@@ -46,6 +46,11 @@ func SetupAPI(
 	playerManager := player.NewPlayerManager(db)
 
 	logger.Infow("Initialising APIs")
+	staticAssetsHandler := webapi.NewStaticAssets()
+	err = staticAssetsHandler.AttachToRouter(router)
+	if err != nil {
+		return nil, errors.Wrap(err, "error attaching static assets to router")
+	}
 	jsonApi := jsonapi.NewCrosswordGameAPI(gameManager, lobbyManager, playerManager)
 	err = jsonApi.AttachToRouter(apiRouter, logger, schemaPath)
 	if err != nil {
