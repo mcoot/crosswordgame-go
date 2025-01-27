@@ -1,0 +1,10 @@
+package pages
+
+import (
+    "github.com/mcoot/crosswordgame-go/internal/apitypes"
+    "github.com/mcoot/crosswordgame-go/internal/api/webapi/template/common"
+)
+
+templ Error(err apitypes.ErrorResponse) {
+    @common.ErrorBlock(err)
+}

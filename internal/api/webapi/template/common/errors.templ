@@ -1,0 +1,18 @@
+package common
+
+import "fmt"
+import "github.com/mcoot/crosswordgame-go/internal/apitypes"
+
+templ ErrorBlock(err apitypes.ErrorResponse) {
+    <div class="cwg-error-block">
+        <h1>Error { fmt.Sprintf("%d", err.HTTPCode) }</h1>
+        <p>{ err.Kind } - { err.Message }</p>
+        <a href="/">Back to home</a>
+    </div>
+}
+
+templ ErrorInline(err apitypes.ErrorResponse) {
+    <span class="cwg-error-inline">
+        Error { fmt.Sprintf("%d", err.HTTPCode) } - { err.Kind } - { err.Message }
+    </span>
+}

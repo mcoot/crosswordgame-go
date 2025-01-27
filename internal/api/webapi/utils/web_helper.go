@@ -3,6 +3,8 @@ package utils
 import (
 	"github.com/a-h/templ"
 	"github.com/mcoot/crosswordgame-go/internal/api/webapi/template"
+	"github.com/mcoot/crosswordgame-go/internal/api/webapi/template/common"
+	"github.com/mcoot/crosswordgame-go/internal/api/webapi/template/pages"
 	"github.com/mcoot/crosswordgame-go/internal/apitypes"
 	"go.uber.org/zap"
 	"net/http"
@@ -66,9 +68,9 @@ func SendError(
 		"kind", resp.Kind,
 	)
 
-	component := template.ErrorPage(resp)
+	component := pages.Error(resp)
 	if htmx.IsTargeted() {
-		component = template.ErrorSpan(resp)
+		component = common.ErrorInline(resp)
 	}
 
 	SendResponse(logger, r, w, component, resp.HTTPCode)
