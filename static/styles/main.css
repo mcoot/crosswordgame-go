@@ -1,0 +1,24 @@
+html, body {
+    height: 100%;
+    margin: 0;
+}
+
+body {
+    background-color: lightblue;
+}
+
+#main {
+    background-color: white;
+    max-width: 75%;
+    margin: 0 auto;
+    padding: 0 1rem;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+@media (max-width: 768px) {
+    #main {
+        max-width: 100%;
+    }
+}
