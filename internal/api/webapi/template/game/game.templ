@@ -7,11 +7,12 @@ import (
     lobbytypes "github.com/mcoot/crosswordgame-go/internal/lobby/types"
     gametypes "github.com/mcoot/crosswordgame-go/internal/game/types"
     playertypes "github.com/mcoot/crosswordgame-go/internal/player/types"
+    "github.com/mcoot/crosswordgame-go/internal/api/webapi/rendering"
     "github.com/mcoot/crosswordgame-go/internal/api/webapi/template/common"
 )
 
 templ AnnouncementForm(lobbyId lobbytypes.LobbyId) {
-    @common.BaseForm("announcement-form", fmt.Sprintf("/lobby/%s/announce", lobbyId)) {
+    @common.BaseForm(rendering.RefreshTargetPageContent, "announcement-form", fmt.Sprintf("/lobby/%s/announce", lobbyId)) {
         <label for="announced_letter">Letter to announce:</label>
         <input type="text" name="announced_letter" placeholder="Letter to announce" />
         <input type="submit" value="Announce" />

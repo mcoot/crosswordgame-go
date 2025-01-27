@@ -74,11 +74,6 @@ type HTMXProperties struct {
 	HTMXTarget string
 }
 
-const (
-	htmxLayoutTargetMain        = "#main"
-	htmxLayoutTargetPageContent = "#page-content"
-)
-
 func GetHTMXProperties(r *http.Request) HTMXProperties {
 	return HTMXProperties{
 		IsHTMX:     r.Header.Get("HX-Request") == "true",
@@ -96,10 +91,10 @@ func (p HTMXProperties) DetermineRefreshLevel() rendering.RenderRefreshLevel {
 		return rendering.BrowserLevelRefresh
 	}
 
-	if p.HTMXTarget == htmxLayoutTargetMain {
+	if rendering.RenderRefreshTarget(p.HTMXTarget) == rendering.RefreshTargetMain {
 		// A page change will target the whole main div
 		return rendering.PageChangeRefresh
-	} else if p.HTMXTarget == htmxLayoutTargetPageContent {
+	} else if rendering.RenderRefreshTarget(p.HTMXTarget) == rendering.RefreshTargetPageContent {
 		// A change within one page will target the page content div
 		return rendering.ContentRefresh
 	} else {

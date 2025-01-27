@@ -11,6 +11,7 @@ import templruntime "github.com/a-h/templ/runtime"
 import (
 	"fmt"
 
+	"github.com/mcoot/crosswordgame-go/internal/api/webapi/rendering"
 	"github.com/mcoot/crosswordgame-go/internal/api/webapi/template/common"
 	"github.com/mcoot/crosswordgame-go/internal/api/webapi/template/layout"
 	lobbytypes "github.com/mcoot/crosswordgame-go/internal/lobby/types"
@@ -111,7 +112,7 @@ func LoginForm() templ.Component {
 			}
 			return nil
 		})
-		templ_7745c5c3_Err = common.BaseForm("login-form", "/login").Render(templ.WithChildren(ctx, templ_7745c5c3_Var4), templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = common.BaseForm(rendering.RefreshTargetPageContent, "login-form", "/login").Render(templ.WithChildren(ctx, templ_7745c5c3_Var4), templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -147,7 +148,7 @@ func LoggedInPlayerDetails(player *playertypes.Player) templ.Component {
 		var templ_7745c5c3_Var6 string
 		templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(player.DisplayName)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/api/webapi/template/pages/index.templ`, Line: 32, Col: 42}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/api/webapi/template/pages/index.templ`, Line: 33, Col: 42}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 		if templ_7745c5c3_Err != nil {
@@ -160,7 +161,7 @@ func LoggedInPlayerDetails(player *playertypes.Player) templ.Component {
 		var templ_7745c5c3_Var7 string
 		templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(string(player.Username))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/api/webapi/template/pages/index.templ`, Line: 33, Col: 43}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/api/webapi/template/pages/index.templ`, Line: 34, Col: 43}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 		if templ_7745c5c3_Err != nil {
@@ -217,7 +218,7 @@ func NotInLobbyDetails() templ.Component {
 			}
 			return nil
 		})
-		templ_7745c5c3_Err = common.BaseForm("host-form", "/host").Render(templ.WithChildren(ctx, templ_7745c5c3_Var9), templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = common.BaseForm(rendering.RefreshTargetPageContent, "host-form", "/host").Render(templ.WithChildren(ctx, templ_7745c5c3_Var9), templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -243,7 +244,7 @@ func NotInLobbyDetails() templ.Component {
 			}
 			return nil
 		})
-		templ_7745c5c3_Err = common.BaseForm("join-form", "/join").Render(templ.WithChildren(ctx, templ_7745c5c3_Var10), templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = common.BaseForm(rendering.RefreshTargetPageContent, "join-form", "/join").Render(templ.WithChildren(ctx, templ_7745c5c3_Var10), templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -279,7 +280,7 @@ func InLobbyDetails(lobby *lobbytypes.Lobby) templ.Component {
 		var templ_7745c5c3_Var12 string
 		templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(lobby.Name)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/api/webapi/template/pages/index.templ`, Line: 54, Col: 40}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/api/webapi/template/pages/index.templ`, Line: 55, Col: 40}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
 		if templ_7745c5c3_Err != nil {
@@ -292,7 +293,7 @@ func InLobbyDetails(lobby *lobbytypes.Lobby) templ.Component {
 		var templ_7745c5c3_Var13 string
 		templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs(string(lobby.Id))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/api/webapi/template/pages/index.templ`, Line: 54, Col: 62}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/api/webapi/template/pages/index.templ`, Line: 55, Col: 62}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
 		if templ_7745c5c3_Err != nil {

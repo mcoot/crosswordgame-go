@@ -5,6 +5,13 @@ import (
 	"github.com/mcoot/crosswordgame-go/internal/utils"
 )
 
+type RenderRefreshTarget string
+
+const (
+	RefreshTargetMain        RenderRefreshTarget = "#main"
+	RefreshTargetPageContent RenderRefreshTarget = "#page-content"
+)
+
 type RenderRefreshLevel int
 
 const (
@@ -30,4 +37,12 @@ func WithRenderContext(ctx context.Context, renderCtx *RenderContext) context.Co
 func GetRenderContext(ctx context.Context) *RenderContext {
 	renderCtx, _ := ctx.Value(utils.ContextKey("render_context")).(*RenderContext)
 	return renderCtx
+}
+
+func GetRenderRefreshLevel(ctx context.Context) RenderRefreshLevel {
+	renderCtx := GetRenderContext(ctx)
+	if renderCtx != nil {
+		return renderCtx.Target.RefreshLevel
+	}
+	return BrowserLevelRefresh
 }

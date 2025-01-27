@@ -37,7 +37,7 @@ templ fullDocument() {
 }
 
 templ Layout() {
-    switch getRenderLevel(ctx) {
+    switch rendering.GetRenderRefreshLevel(ctx) {
     case rendering.BrowserLevelRefresh:
         @fullDocument() {
             { children... }

@@ -2,13 +2,15 @@ package common
 
 import (
     "fmt"
+
+    "github.com/mcoot/crosswordgame-go/internal/api/webapi/rendering"
 )
 
-templ BaseForm(formId string, postUrl string) {
+templ BaseForm(submitRenderTarget rendering.RenderRefreshTarget, formId string, postUrl string) {
     <form
         id={ formId }
         action={ templ.URL(postUrl) } method="post"
-        hx-post={ postUrl } hx-target="#page-content" hx-target-error={ fmt.Sprintf("#%s-error-div", formId) }
+        hx-post={ postUrl } hx-target={ string(submitRenderTarget) } hx-target-error={ fmt.Sprintf("#%s-error-div", formId) }
     >
     { children... }
     </form>
