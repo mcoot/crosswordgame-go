@@ -613,6 +613,7 @@ func (c *CrosswordGameWebAPI) withLoggedInPlayerInLobby(
 	})
 }
 
+// TODO: Enrich player / lobby into it here, so we have it on all routes when present?????
 func renderContextMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		htmx := rendering.GetHTMXProperties(r)

@@ -29,6 +29,14 @@ func GetRenderRefreshLevel(ctx context.Context) RenderRefreshLevel {
 	return GetRenderContext(ctx).Target.RefreshLevel
 }
 
+func GetLoggedInPlayer(ctx context.Context) *playertypes.Player {
+	return GetRenderContext(ctx).LoggedInPlayer
+}
+
+func GetCurrentPlayerLobby(ctx context.Context) *lobbytypes.Lobby {
+	return GetRenderContext(ctx).CurrentPlayerLobby
+}
+
 func defaultRenderContext() *RenderContext {
 	return &RenderContext{
 		Target: RenderTarget{

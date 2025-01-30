@@ -1,17 +1,25 @@
 package layout
 
 import (
+    "fmt"
+
+    lobbytypes "github.com/mcoot/crosswordgame-go/internal/lobby/types"
     "github.com/mcoot/crosswordgame-go/internal/api/webapi/rendering"
 )
 
+templ nav(currentPlayerLobby *lobbytypes.Lobby) {
+    <nav>
+        <a href="/index">Home</a>
+        if currentPlayerLobby != nil {
+            <a href={templ.URL(fmt.Sprintf("/lobby/%s", currentPlayerLobby.Id))}>Lobby</a>
+        }
+        <a href="/about">About</a>
+    </nav>
+}
 
 templ mainDiv() {
     <div hx-ext="response-targets,sse" id="main">
-        <nav>
-            <a href="/index">Home</a>
-            <a href="/game">Lobby</a>
-            <a href="/about">About</a>
-        </nav>
+        @nav(rendering.GetCurrentPlayerLobby(ctx))
         <div id="page-content">
             { children... }
         </div>
