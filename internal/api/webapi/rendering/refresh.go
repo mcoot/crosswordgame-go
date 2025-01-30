@@ -3,6 +3,7 @@ package rendering
 type RenderRefreshTarget string
 
 const (
+	RefreshTargetNone        RenderRefreshTarget = ""
 	RefreshTargetMain        RenderRefreshTarget = "#main"
 	RefreshTargetPageContent RenderRefreshTarget = "#page-content"
 )
@@ -18,5 +19,5 @@ const (
 
 type RenderTarget struct {
 	RefreshLevel  RenderRefreshLevel
-	RefreshTarget string
+	RefreshTarget RenderRefreshTarget
 }

@@ -14,14 +14,22 @@ func WithRenderContext(ctx context.Context, renderCtx *RenderContext) context.Co
 }
 
 func GetRenderContext(ctx context.Context) *RenderContext {
-	renderCtx, _ := ctx.Value(utils.ContextKey("render_context")).(*RenderContext)
+	renderCtx, ok := ctx.Value(utils.ContextKey("render_context")).(*RenderContext)
+	if !ok {
+		return defaultRenderContext()
+	}
 	return renderCtx
 }
 
 func GetRenderRefreshLevel(ctx context.Context) RenderRefreshLevel {
-	renderCtx := GetRenderContext(ctx)
-	if renderCtx != nil {
-		return renderCtx.Target.RefreshLevel
+	return GetRenderContext(ctx).Target.RefreshLevel
+}
+
+func defaultRenderContext() *RenderContext {
+	return &RenderContext{
+		Target: RenderTarget{
+			RefreshLevel:  BrowserLevelRefresh,
+			RefreshTarget: RefreshTargetNone,
+		},
 	}
-	return BrowserLevelRefresh
 }

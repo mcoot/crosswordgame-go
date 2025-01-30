@@ -54,7 +54,7 @@ func SendError(
 
 	component := pages.Error(resp)
 	// If the request is targeting a specific element that isn't the main page content, it should be displayed inline
-	if rendering.GetRenderContext(r.Context()).Target.RefreshLevel == rendering.TargetedRefresh {
+	if rendering.GetRenderRefreshLevel(r.Context()) == rendering.TargetedRefresh {
 		component = common.ErrorInline(resp)
 	}
 

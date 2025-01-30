@@ -35,3 +35,11 @@ func (p HTMXProperties) DetermineRefreshLevel() RenderRefreshLevel {
 		return TargetedRefresh
 	}
 }
+
+func (p HTMXProperties) DetermineRefreshTarget() RenderRefreshTarget {
+	if !p.IsHTMX {
+		// The request isn't being made through ajax/htmx, so we need to send the whole document
+		return RefreshTargetNone
+	}
+	return RenderRefreshTarget(p.HTMXTarget)
+}

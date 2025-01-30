@@ -611,7 +611,7 @@ func renderContextMiddleware(next http.Handler) http.Handler {
 		renderCtx := &rendering.RenderContext{
 			Target: rendering.RenderTarget{
 				RefreshLevel:  htmx.DetermineRefreshLevel(),
-				RefreshTarget: htmx.HTMXTarget,
+				RefreshTarget: htmx.DetermineRefreshTarget(),
 			},
 		}
 
