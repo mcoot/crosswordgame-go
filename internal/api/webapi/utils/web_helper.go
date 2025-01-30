@@ -6,7 +6,7 @@ import (
 	"github.com/mcoot/crosswordgame-go/internal/api/webapi/template/common"
 	"github.com/mcoot/crosswordgame-go/internal/api/webapi/template/pages"
 	"github.com/mcoot/crosswordgame-go/internal/apitypes"
-	"go.uber.org/zap"
+	"github.com/mcoot/crosswordgame-go/internal/logging"
 	"net/http"
 )
 
@@ -16,24 +16,17 @@ func PushUrl(w http.ResponseWriter, url string) {
 }
 
 func SendResponse(
-	logger *zap.SugaredLogger,
 	r *http.Request,
 	w http.ResponseWriter,
 	component templ.Component,
 	code int,
 ) {
-	htmx := rendering.GetHTMXProperties(r)
-	renderCtx := rendering.WithRenderContext(r.Context(), &rendering.RenderContext{
-		Target: rendering.RenderTarget{
-			RefreshLevel:  htmx.DetermineRefreshLevel(),
-			RefreshTarget: htmx.HTMXTarget,
-		},
-	})
+	logger := logging.GetLogger(r.Context())
 
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	w.WriteHeader(code)
 
-	err := component.Render(renderCtx, w)
+	err := component.Render(r.Context(), w)
 	if err != nil {
 		logger.Errorw("error rendering web response", "error", err)
 		return
@@ -45,12 +38,11 @@ func Redirect(w http.ResponseWriter, r *http.Request, url string, code int) {
 }
 
 func SendError(
-	logger *zap.SugaredLogger,
 	r *http.Request,
 	w http.ResponseWriter,
 	err error,
 ) {
-	htmx := rendering.GetHTMXProperties(r)
+	logger := logging.GetLogger(r.Context())
 
 	resp := apitypes.ToErrorResponse(err)
 	logger.Warnw(
@@ -62,9 +54,9 @@ func SendError(
 
 	component := pages.Error(resp)
 	// If the request is targeting a specific element that isn't the main page content, it should be displayed inline
-	if htmx.DetermineRefreshLevel() == rendering.TargetedRefresh {
+	if rendering.GetRenderContext(r.Context()).Target.RefreshLevel == rendering.TargetedRefresh {
 		component = common.ErrorInline(resp)
 	}
 
-	SendResponse(logger, r, w, component, resp.HTTPCode)
+	SendResponse(r, w, component, resp.HTTPCode)
 }

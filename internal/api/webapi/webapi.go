@@ -5,6 +5,7 @@ import (
 	"github.com/a-h/templ"
 	"github.com/gorilla/mux"
 	commonutils "github.com/mcoot/crosswordgame-go/internal/api/utils"
+	"github.com/mcoot/crosswordgame-go/internal/api/webapi/rendering"
 	gametemplates "github.com/mcoot/crosswordgame-go/internal/api/webapi/template/game"
 	"github.com/mcoot/crosswordgame-go/internal/api/webapi/template/pages"
 	"github.com/mcoot/crosswordgame-go/internal/api/webapi/utils"
@@ -48,6 +49,8 @@ func NewCrosswordGameWebAPI(
 func (c *CrosswordGameWebAPI) AttachToRouter(router *mux.Router) error {
 	router.NotFoundHandler = router.NewRoute().BuildOnly().Handler(NotFoundHandler()).GetHandler()
 
+	router.Use(renderContextMiddleware)
+
 	router.Handle("/", redirect.Handler("/index")).Methods("GET")
 	router.Handle("/index.html", redirect.Handler("/index")).Methods("GET")
 	router.HandleFunc("/index", c.Index).Methods("GET")
@@ -73,7 +76,7 @@ func (c *CrosswordGameWebAPI) AttachToRouter(router *mux.Router) error {
 func (c *CrosswordGameWebAPI) Index(w http.ResponseWriter, r *http.Request) {
 	session, err := c.sessionManager.GetSession(r)
 	if err != nil {
-		utils.SendError(logging.GetLogger(r.Context()), r, w, err)
+		utils.SendError(r, w, err)
 		return
 	}
 
@@ -83,7 +86,7 @@ func (c *CrosswordGameWebAPI) Index(w http.ResponseWriter, r *http.Request) {
 		if errors.IsNotFoundError(err) {
 			sessionIsLoggedIn = false
 		} else {
-			utils.SendError(logging.GetLogger(r.Context()), r, w, err)
+			utils.SendError(r, w, err)
 			return
 		}
 	}
@@ -97,7 +100,7 @@ func (c *CrosswordGameWebAPI) Index(w http.ResponseWriter, r *http.Request) {
 				// Player not in a lobby
 				indexContents = append(indexContents, pages.NotInLobbyDetails())
 			} else {
-				utils.SendError(logging.GetLogger(r.Context()), r, w, err)
+				utils.SendError(r, w, err)
 				return
 			}
 		} else {
@@ -111,12 +114,12 @@ func (c *CrosswordGameWebAPI) Index(w http.ResponseWriter, r *http.Request) {
 
 	indexComponent := pages.Index(templ.Join(indexContents...))
 	utils.PushUrl(w, "/index")
-	utils.SendResponse(logging.GetLogger(r.Context()), r, w, indexComponent, 200)
+	utils.SendResponse(r, w, indexComponent, 200)
 }
 
 func (c *CrosswordGameWebAPI) About(w http.ResponseWriter, r *http.Request) {
 	utils.PushUrl(w, "/about")
-	utils.SendResponse(logging.GetLogger(r.Context()), r, w, pages.About(), 200)
+	utils.SendResponse(r, w, pages.About(), 200)
 }
 
 func (c *CrosswordGameWebAPI) Login(w http.ResponseWriter, r *http.Request) {
@@ -124,26 +127,26 @@ func (c *CrosswordGameWebAPI) Login(w http.ResponseWriter, r *http.Request) {
 
 	err := r.ParseForm()
 	if err != nil {
-		utils.SendError(logger, r, w, err)
+		utils.SendError(r, w, err)
 		return
 	}
 
 	displayName := r.PostForm.Get("display_name")
 	if displayName == "" {
-		utils.SendError(logger, r, w, fmt.Errorf("display_name is required"))
+		utils.SendError(r, w, fmt.Errorf("display_name is required"))
 		return
 	}
 
 	playerId, err := c.playerManager.LoginAsEphemeral(displayName)
 	if err != nil {
-		utils.SendError(logger, r, w, err)
+		utils.SendError(r, w, err)
 		return
 	}
 
 	session, err := c.sessionManager.GetSession(r)
 	if err != nil {
-		utils.SendError(logger, r, w, err)
-		utils.SendError(logger, r, w, err)
+		utils.SendError(r, w, err)
+		utils.SendError(r, w, err)
 		return
 	}
 
@@ -151,7 +154,7 @@ func (c *CrosswordGameWebAPI) Login(w http.ResponseWriter, r *http.Request) {
 
 	err = c.sessionManager.SetSession(session, w, r)
 	if err != nil {
-		utils.SendError(logger, r, w, err)
+		utils.SendError(r, w, err)
 		return
 	}
 
@@ -165,26 +168,26 @@ func (c *CrosswordGameWebAPI) StartLobbyAsHost(w http.ResponseWriter, r *http.Re
 
 	err := r.ParseForm()
 	if err != nil {
-		utils.SendError(logger, r, w, err)
+		utils.SendError(r, w, err)
 		return
 	}
 
 	lobbyName := r.PostForm.Get("lobby_name")
 	if lobbyName == "" {
-		utils.SendError(logger, r, w, fmt.Errorf("lobby_name is required"))
+		utils.SendError(r, w, fmt.Errorf("lobby_name is required"))
 		return
 	}
 
 	lobbyId, err := c.lobbyManager.CreateLobby(lobbyName)
 	if err != nil {
-		utils.SendError(logger, r, w, err)
+		utils.SendError(r, w, err)
 		return
 	}
 
 	err = c.lobbyManager.JoinPlayerToLobby(lobbyId, player.Username)
 	if err != nil {
 		// TODO: Scrap the lobby?
-		utils.SendError(logger, r, w, err)
+		utils.SendError(r, w, err)
 		return
 	}
 
@@ -198,13 +201,13 @@ func (c *CrosswordGameWebAPI) JoinLobby(w http.ResponseWriter, r *http.Request, 
 
 	err := r.ParseForm()
 	if err != nil {
-		utils.SendError(logger, r, w, err)
+		utils.SendError(r, w, err)
 		return
 	}
 
 	rawLobbyId := r.PostForm.Get("lobby_id")
 	if rawLobbyId == "" {
-		utils.SendError(logger, r, w, fmt.Errorf("lobby_id is required"))
+		utils.SendError(r, w, fmt.Errorf("lobby_id is required"))
 		return
 	}
 
@@ -212,7 +215,7 @@ func (c *CrosswordGameWebAPI) JoinLobby(w http.ResponseWriter, r *http.Request, 
 
 	err = c.lobbyManager.JoinPlayerToLobby(lobbyId, player.Username)
 	if err != nil {
-		utils.SendError(logger, r, w, err)
+		utils.SendError(r, w, err)
 		return
 	}
 
@@ -228,7 +231,7 @@ func (c *CrosswordGameWebAPI) LeaveLobby(w http.ResponseWriter, r *http.Request,
 	lobbyId := commonutils.GetLobbyIdPathParam(r)
 	err := c.lobbyManager.RemovePlayerFromLobby(lobbyId, player.Username)
 	if err != nil {
-		utils.SendError(logger, r, w, err)
+		utils.SendError(r, w, err)
 		return
 	}
 
@@ -242,7 +245,7 @@ func (c *CrosswordGameWebAPI) LobbyPage(w http.ResponseWriter, r *http.Request, 
 	lobbyId := commonutils.GetLobbyIdPathParam(r)
 	lobbyState, err := c.lobbyManager.GetLobbyState(lobbyId)
 	if err != nil {
-		utils.SendError(logging.GetLogger(r.Context()), r, w, err)
+		utils.SendError(r, w, err)
 		return
 	}
 
@@ -250,7 +253,7 @@ func (c *CrosswordGameWebAPI) LobbyPage(w http.ResponseWriter, r *http.Request, 
 	for i, playerId := range lobbyState.Players {
 		p, err := c.playerManager.LookupPlayer(playerId)
 		if err != nil {
-			utils.SendError(logging.GetLogger(r.Context()), r, w, err)
+			utils.SendError(r, w, err)
 			return
 		}
 
@@ -261,7 +264,7 @@ func (c *CrosswordGameWebAPI) LobbyPage(w http.ResponseWriter, r *http.Request, 
 	if lobbyState.HasRunningGame() {
 		gameComponent, err = c.buildLobbyGameComponent(player, lobbyState)
 		if err != nil {
-			utils.SendError(logging.GetLogger(r.Context()), r, w, err)
+			utils.SendError(r, w, err)
 			return
 		}
 	} else {
@@ -270,13 +273,7 @@ func (c *CrosswordGameWebAPI) LobbyPage(w http.ResponseWriter, r *http.Request, 
 
 	component := pages.Lobby(lobbyState, lobbyPlayers, player, gameComponent)
 	utils.PushUrl(w, fmt.Sprintf("/lobby/%s", lobbyId))
-	utils.SendResponse(
-		logging.GetLogger(r.Context()),
-		r,
-		w,
-		component,
-		200,
-	)
+	utils.SendResponse(r, w, component, 200)
 }
 
 func (c *CrosswordGameWebAPI) buildLobbyGameComponent(
@@ -401,7 +398,7 @@ func (c *CrosswordGameWebAPI) StartNewGame(w http.ResponseWriter, r *http.Reques
 	lobbyId := commonutils.GetLobbyIdPathParam(r)
 	lobbyState, err := c.lobbyManager.GetLobbyState(lobbyId)
 	if err != nil {
-		utils.SendError(logger, r, w, err)
+		utils.SendError(r, w, err)
 		return
 	}
 
@@ -411,7 +408,7 @@ func (c *CrosswordGameWebAPI) StartNewGame(w http.ResponseWriter, r *http.Reques
 			if errors.IsNotFoundError(err) {
 				// The game was already detached, so we can just continue
 			} else {
-				utils.SendError(logger, r, w, err)
+				utils.SendError(r, w, err)
 				return
 			}
 		}
@@ -419,36 +416,36 @@ func (c *CrosswordGameWebAPI) StartNewGame(w http.ResponseWriter, r *http.Reques
 
 	err = r.ParseForm()
 	if err != nil {
-		utils.SendError(logger, r, w, err)
+		utils.SendError(r, w, err)
 		return
 	}
 
 	boardSizeRaw := r.PostForm.Get("board_size")
 	if boardSizeRaw == "" {
-		utils.SendError(logger, r, w, fmt.Errorf("announced_letter is required"))
+		utils.SendError(r, w, fmt.Errorf("announced_letter is required"))
 		return
 	}
 
 	boardSize, err := strconv.Atoi(boardSizeRaw)
 	if err != nil {
-		utils.SendError(logger, r, w, err)
+		utils.SendError(r, w, err)
 		return
 	}
 
 	if boardSize < 2 || boardSize > 10 {
-		utils.SendError(logger, r, w, fmt.Errorf("board_size must be between 2 and 10"))
+		utils.SendError(r, w, fmt.Errorf("board_size must be between 2 and 10"))
 		return
 	}
 
 	gameId, err := c.gameManager.CreateGame(lobbyState.Players, boardSize)
 	if err != nil {
-		utils.SendError(logger, r, w, err)
+		utils.SendError(r, w, err)
 		return
 	}
 
 	err = c.lobbyManager.AttachGameToLobby(lobbyId, gameId)
 	if err != nil {
-		utils.SendError(logger, r, w, err)
+		utils.SendError(r, w, err)
 		return
 	}
 
@@ -464,12 +461,12 @@ func (c *CrosswordGameWebAPI) AbandonGame(w http.ResponseWriter, r *http.Request
 	lobbyId := commonutils.GetLobbyIdPathParam(r)
 	lobbyState, err := c.lobbyManager.GetLobbyState(lobbyId)
 	if err != nil {
-		utils.SendError(logger, r, w, err)
+		utils.SendError(r, w, err)
 		return
 	}
 
 	if !lobbyState.HasRunningGame() {
-		utils.SendError(logger, r, w, &errors.InvalidActionError{
+		utils.SendError(r, w, &errors.InvalidActionError{
 			Action: "abandon_game",
 			Reason: "the lobby has no running game",
 		})
@@ -478,7 +475,7 @@ func (c *CrosswordGameWebAPI) AbandonGame(w http.ResponseWriter, r *http.Request
 
 	err = c.lobbyManager.DetachGameFromLobby(lobbyId)
 	if err != nil {
-		utils.SendError(logger, r, w, err)
+		utils.SendError(r, w, err)
 		return
 	}
 
@@ -494,24 +491,24 @@ func (c *CrosswordGameWebAPI) AnnounceLetter(w http.ResponseWriter, r *http.Requ
 	lobbyId := commonutils.GetLobbyIdPathParam(r)
 	lobbyState, err := c.lobbyManager.GetLobbyState(lobbyId)
 	if err != nil {
-		utils.SendError(logger, r, w, err)
+		utils.SendError(r, w, err)
 		return
 	}
 
 	err = r.ParseForm()
 	if err != nil {
-		utils.SendError(logger, r, w, err)
+		utils.SendError(r, w, err)
 		return
 	}
 
 	letter := r.PostForm.Get("announced_letter")
 	if letter == "" {
-		utils.SendError(logger, r, w, fmt.Errorf("announced_letter is required"))
+		utils.SendError(r, w, fmt.Errorf("announced_letter is required"))
 		return
 	}
 
 	if !lobbyState.HasRunningGame() {
-		utils.SendError(logger, r, w, &errors.InvalidActionError{
+		utils.SendError(r, w, &errors.InvalidActionError{
 			Action: "place_letter",
 			Reason: "the lobby has no running game",
 		})
@@ -520,7 +517,7 @@ func (c *CrosswordGameWebAPI) AnnounceLetter(w http.ResponseWriter, r *http.Requ
 
 	err = c.gameManager.SubmitAnnouncement(lobbyState.RunningGame.GameId, player.Username, letter)
 	if err != nil {
-		utils.SendError(logger, r, w, err)
+		utils.SendError(r, w, err)
 		return
 	}
 
@@ -536,40 +533,40 @@ func (c *CrosswordGameWebAPI) PlaceLetter(w http.ResponseWriter, r *http.Request
 	lobbyId := commonutils.GetLobbyIdPathParam(r)
 	lobbyState, err := c.lobbyManager.GetLobbyState(lobbyId)
 	if err != nil {
-		utils.SendError(logger, r, w, err)
+		utils.SendError(r, w, err)
 		return
 	}
 
 	err = r.ParseForm()
 	if err != nil {
-		utils.SendError(logger, r, w, err)
+		utils.SendError(r, w, err)
 		return
 	}
 
 	rawRow := r.PostForm.Get("placement_row")
 	if rawRow == "" {
-		utils.SendError(logger, r, w, fmt.Errorf("placement_row is required"))
+		utils.SendError(r, w, fmt.Errorf("placement_row is required"))
 		return
 	}
 	row, err := strconv.Atoi(rawRow)
 	if err != nil {
-		utils.SendError(logger, r, w, err)
+		utils.SendError(r, w, err)
 		return
 	}
 
 	rawColumn := r.PostForm.Get("placement_column")
 	if rawColumn == "" {
-		utils.SendError(logger, r, w, fmt.Errorf("placement_column is required"))
+		utils.SendError(r, w, fmt.Errorf("placement_column is required"))
 		return
 	}
 	column, err := strconv.Atoi(rawColumn)
 	if err != nil {
-		utils.SendError(logger, r, w, err)
+		utils.SendError(r, w, err)
 		return
 	}
 
 	if !lobbyState.HasRunningGame() {
-		utils.SendError(logger, r, w, &errors.InvalidActionError{
+		utils.SendError(r, w, &errors.InvalidActionError{
 			Action: "place_letter",
 			Reason: "the lobby has no running game",
 		})
@@ -578,7 +575,7 @@ func (c *CrosswordGameWebAPI) PlaceLetter(w http.ResponseWriter, r *http.Request
 
 	err = c.gameManager.SubmitPlacement(lobbyState.RunningGame.GameId, player.Username, row, column)
 	if err != nil {
-		utils.SendError(logger, r, w, err)
+		utils.SendError(r, w, err)
 		return
 	}
 
@@ -590,7 +587,7 @@ func (c *CrosswordGameWebAPI) PlaceLetter(w http.ResponseWriter, r *http.Request
 
 func NotFoundHandler() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		utils.SendError(logging.GetLogger(r.Context()), r, w, apitypes.ErrorResponse{
+		utils.SendError(r, w, apitypes.ErrorResponse{
 			HTTPCode: 404,
 			Kind:     "not_found",
 			Message:  "page not found",
@@ -604,12 +601,12 @@ func (c *CrosswordGameWebAPI) withLoggedInPlayer(
 	return func(w http.ResponseWriter, r *http.Request) {
 		session, err := c.sessionManager.GetSession(r)
 		if err != nil {
-			utils.SendError(logging.GetLogger(r.Context()), r, w, err)
+			utils.SendError(r, w, err)
 			return
 		}
 
 		if !session.IsLoggedIn() {
-			utils.SendError(logging.GetLogger(r.Context()), r, w, apitypes.ErrorResponse{
+			utils.SendError(r, w, apitypes.ErrorResponse{
 				HTTPCode: 401,
 				Kind:     "unauthorized",
 				Message:  "not logged in",
@@ -619,10 +616,25 @@ func (c *CrosswordGameWebAPI) withLoggedInPlayer(
 
 		p, err := c.playerManager.LookupPlayer(session.PlayerId)
 		if err != nil {
-			utils.SendError(logging.GetLogger(r.Context()), r, w, err)
+			utils.SendError(r, w, err)
 			return
 		}
 
 		f(w, r, p)
 	}
+}
+
+func renderContextMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		htmx := rendering.GetHTMXProperties(r)
+		renderCtx := &rendering.RenderContext{
+			Target: rendering.RenderTarget{
+				RefreshLevel:  htmx.DetermineRefreshLevel(),
+				RefreshTarget: htmx.HTMXTarget,
+			},
+		}
+
+		ctx := rendering.WithRenderContext(r.Context(), renderCtx)
+		next.ServeHTTP(w, r.WithContext(ctx))
+	})
 }
