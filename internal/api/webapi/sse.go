@@ -3,7 +3,6 @@ package webapi
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/mcoot/crosswordgame-go/internal/api/utils"
 	lobbytypes "github.com/mcoot/crosswordgame-go/internal/lobby/types"
 	playertypes "github.com/mcoot/crosswordgame-go/internal/player/types"
 	"net/http"
@@ -50,9 +49,7 @@ func newSSEServer() *sseServer {
 	}
 }
 
-func (s *sseServer) HandleRequest(w http.ResponseWriter, r *http.Request, player *playertypes.Player) {
-	lobbyId := utils.GetLobbyIdPathParam(r)
-
+func (s *sseServer) HandleRequest(w http.ResponseWriter, r *http.Request, player *playertypes.Player, lobby *lobbytypes.Lobby) {
 	// Set http headers required for SSE
 	w.Header().Set("Content-Type", "text/event-stream")
 	w.Header().Set("Cache-Control", "no-cache")
@@ -61,13 +58,13 @@ func (s *sseServer) HandleRequest(w http.ResponseWriter, r *http.Request, player
 	// You may need this locally for CORS requests
 	//w.Header().Set("Access-Control-Allow-Origin", "*")
 
-	eventChan := s.newConnection(lobbyId, player.Username)
+	eventChan := s.newConnection(lobby.Id, player.Username)
 
 	rc := http.NewResponseController(w)
 	for {
 		select {
 		case <-r.Context().Done():
-			s.dropConnection(lobbyId, player.Username, eventChan)
+			s.dropConnection(lobby.Id, player.Username, eventChan)
 			return
 		case <-eventChan:
 			evt, err := refreshEvent{}.ToSSE().Build()
