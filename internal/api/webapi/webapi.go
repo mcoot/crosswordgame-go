@@ -586,7 +586,11 @@ func (c *CrosswordGameWebAPI) withLoggedInPlayer(
 			return
 		}
 
-		f(w, r, p)
+		baseRenderCtx := rendering.GetRenderContext(r.Context())
+		baseRenderCtx.LoggedInPlayer = p
+		newCtx := rendering.WithRenderContext(r.Context(), baseRenderCtx)
+
+		f(w, r.WithContext(newCtx), p)
 	}
 }
 
@@ -601,7 +605,11 @@ func (c *CrosswordGameWebAPI) withLoggedInPlayerInLobby(
 			return
 		}
 
-		f(w, r, player, lobbyState)
+		baseRenderCtx := rendering.GetRenderContext(r.Context())
+		baseRenderCtx.CurrentPlayerLobby = lobbyState
+		newCtx := rendering.WithRenderContext(r.Context(), baseRenderCtx)
+
+		f(w, r.WithContext(newCtx), player, lobbyState)
 	})
 }
 

@@ -2,11 +2,15 @@ package rendering
 
 import (
 	"context"
+	lobbytypes "github.com/mcoot/crosswordgame-go/internal/lobby/types"
+	playertypes "github.com/mcoot/crosswordgame-go/internal/player/types"
 	"github.com/mcoot/crosswordgame-go/internal/utils"
 )
 
 type RenderContext struct {
-	Target RenderTarget
+	Target             RenderTarget
+	LoggedInPlayer     *playertypes.Player
+	CurrentPlayerLobby *lobbytypes.Lobby
 }
 
 func WithRenderContext(ctx context.Context, renderCtx *RenderContext) context.Context {
@@ -31,5 +35,7 @@ func defaultRenderContext() *RenderContext {
 			RefreshLevel:  BrowserLevelRefresh,
 			RefreshTarget: RefreshTargetNone,
 		},
+		LoggedInPlayer:     nil,
+		CurrentPlayerLobby: nil,
 	}
 }
