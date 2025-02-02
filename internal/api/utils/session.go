@@ -1,15 +1,26 @@
 package utils
 
 import (
+	"context"
 	"fmt"
 	"github.com/gorilla/sessions"
+	"github.com/mcoot/crosswordgame-go/internal/errors"
+	lobbytypes "github.com/mcoot/crosswordgame-go/internal/lobby/types"
+	"github.com/mcoot/crosswordgame-go/internal/player"
 	playertypes "github.com/mcoot/crosswordgame-go/internal/player/types"
+	"github.com/mcoot/crosswordgame-go/internal/utils"
 	"net/http"
 )
 
+const (
+	ContextKeySession utils.ContextKey = "session"
+)
+
+// Session is the baseSession enriched with lookups from the database
 type Session struct {
 	*sessions.Session
-	PlayerId playertypes.PlayerId
+	Player *playertypes.Player
+	Lobby  *lobbytypes.Lobby
 }
 
 type SessionManager struct {
@@ -17,7 +28,11 @@ type SessionManager struct {
 }
 
 func (s *Session) IsLoggedIn() bool {
-	return s.PlayerId != ""
+	return s.Player != nil
+}
+
+func (s *Session) IsInLobby() bool {
+	return s.Lobby != nil
 }
 
 func NewSessionManager(sessionStore sessions.Store) *SessionManager {
@@ -26,7 +41,7 @@ func NewSessionManager(sessionStore sessions.Store) *SessionManager {
 	}
 }
 
-func (sm *SessionManager) GetSession(r *http.Request) (*Session, error) {
+func (sm *SessionManager) GetSession(r *http.Request, playerManager *player.Manager) (*Session, error) {
 	session, err := sm.sessionStore.Get(r, "session")
 	if err != nil {
 		return nil, err
@@ -37,6 +52,8 @@ func (sm *SessionManager) GetSession(r *http.Request) (*Session, error) {
 		// If session is missing player_id, we just aren't logged in
 		return &Session{
 			Session: session,
+			Player:  nil,
+			Lobby:   nil,
 		}, nil
 	}
 	strPlayerId, ok := rawPlayerId.(string)
@@ -45,18 +62,62 @@ func (sm *SessionManager) GetSession(r *http.Request) (*Session, error) {
 	}
 	playerId := playertypes.PlayerId(strPlayerId)
 
+	p, err := playerManager.LookupPlayer(playerId)
+	if err != nil {
+		// If the session has an invalid player_id, treat it as just not being logged in
+		if errors.IsNotFoundError(err) {
+			return &Session{
+				Session: session,
+				Player:  nil,
+				Lobby:   nil,
+			}, nil
+		} else {
+			return nil, err
+		}
+	}
+
+	lobby, err := playerManager.GetLobbyForPlayer(playerId)
+	if err != nil {
+		if errors.IsNotFoundError(err) {
+			return &Session{
+				Session: session,
+				Player:  p,
+				Lobby:   nil,
+			}, nil
+		} else {
+			return nil, err
+		}
+	}
+
 	return &Session{
-		Session:  session,
-		PlayerId: playerId,
+		Session: session,
+		Player:  p,
+		Lobby:   lobby,
 	}, nil
 }
 
-func (sm *SessionManager) SetSession(session *Session, w http.ResponseWriter, r *http.Request) error {
-	session.Session.Values["player_id"] = string(session.PlayerId)
-
-	err := sm.sessionStore.Save(r, w, session.Session)
+func (sm *SessionManager) SaveLoggedInPlayer(
+	w http.ResponseWriter,
+	r *http.Request,
+	playerId playertypes.PlayerId,
+) error {
+	session, err := sm.sessionStore.Get(r, "session")
 	if err != nil {
 		return err
 	}
-	return nil
+	session.Values["player_id"] = string(playerId)
+
+	return sm.sessionStore.Save(r, w, session)
+}
+
+func AddSessionToContext(ctx context.Context, session *Session) context.Context {
+	return context.WithValue(ctx, ContextKeySession, session)
+}
+
+func GetSessionFromContext(ctx context.Context) (*Session, error) {
+	session, ok := ctx.Value(ContextKeySession).(*Session)
+	if !ok {
+		return nil, fmt.Errorf("session not found in context")
+	}
+	return session, nil
 }
