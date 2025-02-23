@@ -1,4 +1,4 @@
-FROM golang:1.23 AS builder
+FROM golang:1.24 AS builder
 
 WORKDIR /opt/service
 
@@ -13,7 +13,7 @@ COPY ./schema ./schema
 
 RUN CGO_ENABLED=0 GOOS=linux go build -a -o ./crossword-game ./cmd/crossword-game
 
-FROM golang:1.23 AS final
+FROM golang:1.24 AS final
 
 WORKDIR /opt/service
 

@@ -12,17 +12,17 @@ test:
 
 .PHONY: lint
 lint:
-	@go run github.com/golangci/golangci-lint/cmd/golangci-lint run
+	@go tool golangci-lint run
 
 # Templ
 
 .PHONY: templ
 templ:
-	@go run github.com/a-h/templ/cmd/templ generate
+	@go tool templ generate
 
 .PHONY: templ-watch
 templ-watch:
-	@go run github.com/a-h/templ/cmd/templ generate --watch --cmd "make run-api"
+	@go tool templ generate --watch --cmd "make run-api"
 
 # Tailwind
 
