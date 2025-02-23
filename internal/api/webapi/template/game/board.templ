@@ -38,7 +38,7 @@ templ Board(lobbyId lobbytypes.LobbyId, viewingPlayer *playertypes.Player, board
                     id={ fmt.Sprintf("placement-%d-%d-form", r, c) }
                     action={ templ.URL(fmt.Sprintf("/lobby/%s/place", lobbyId)) } method="post"
                     hx-post={ fmt.Sprintf("/lobby/%s/place", lobbyId) }
-                    hx-target={ string(rendering.RefreshTargetPageContent) } hx-target-error="#board-error-div"
+                    hx-target={ rendering.RefreshTargetSelector(rendering.RefreshTargetPageContent) } hx-target-error="#board-error-div"
                 >
                 @cellFormContents(cell, r, c, placementEnabled)
                 </form>

@@ -6,9 +6,16 @@ type RenderRefreshTarget string
 
 const (
 	RefreshTargetNone        RenderRefreshTarget = ""
-	RefreshTargetMain        RenderRefreshTarget = "#main"
-	RefreshTargetPageContent RenderRefreshTarget = "#page-content"
+	RefreshTargetMain        RenderRefreshTarget = "main"
+	RefreshTargetPageContent RenderRefreshTarget = "page-content"
 )
+
+func RefreshTargetSelector(targetId RenderRefreshTarget) string {
+	if targetId == RefreshTargetNone {
+		return ""
+	}
+	return "#" + string(targetId)
+}
 
 var pageOrContentTargets = []RenderRefreshTarget{
 	RefreshTargetNone,

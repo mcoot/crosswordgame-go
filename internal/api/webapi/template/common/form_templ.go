@@ -75,9 +75,9 @@ func BaseForm(submitRenderTarget rendering.RenderRefreshTarget, formId string, p
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var5 string
-		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(string(submitRenderTarget))
+		templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(rendering.RefreshTargetSelector(submitRenderTarget))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/api/webapi/template/common/form.templ`, Line: 13, Col: 66}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/api/webapi/template/common/form.templ`, Line: 13, Col: 91}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 		if templ_7745c5c3_Err != nil {
@@ -90,7 +90,7 @@ func BaseForm(submitRenderTarget rendering.RenderRefreshTarget, formId string, p
 		var templ_7745c5c3_Var6 string
 		templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("#%s-error-div", formId))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/api/webapi/template/common/form.templ`, Line: 13, Col: 123}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/api/webapi/template/common/form.templ`, Line: 13, Col: 148}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 		if templ_7745c5c3_Err != nil {

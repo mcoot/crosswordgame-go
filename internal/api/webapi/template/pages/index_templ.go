@@ -112,7 +112,7 @@ func LoginForm() templ.Component {
 			}
 			return nil
 		})
-		templ_7745c5c3_Err = common.BaseForm(rendering.RefreshTargetPageContent, "login-form", "/login").Render(templ.WithChildren(ctx, templ_7745c5c3_Var4), templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = common.BaseForm(rendering.RefreshTargetMain, "login-form", "/login").Render(templ.WithChildren(ctx, templ_7745c5c3_Var4), templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -218,7 +218,7 @@ func NotInLobbyDetails() templ.Component {
 			}
 			return nil
 		})
-		templ_7745c5c3_Err = common.BaseForm(rendering.RefreshTargetPageContent, "host-form", "/host").Render(templ.WithChildren(ctx, templ_7745c5c3_Var9), templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = common.BaseForm(rendering.RefreshTargetMain, "host-form", "/host").Render(templ.WithChildren(ctx, templ_7745c5c3_Var9), templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -244,7 +244,7 @@ func NotInLobbyDetails() templ.Component {
 			}
 			return nil
 		})
-		templ_7745c5c3_Err = common.BaseForm(rendering.RefreshTargetPageContent, "join-form", "/join").Render(templ.WithChildren(ctx, templ_7745c5c3_Var10), templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = common.BaseForm(rendering.RefreshTargetMain, "join-form", "/join").Render(templ.WithChildren(ctx, templ_7745c5c3_Var10), templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

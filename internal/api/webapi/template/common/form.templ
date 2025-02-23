@@ -10,7 +10,7 @@ templ BaseForm(submitRenderTarget rendering.RenderRefreshTarget, formId string, 
     <form
         id={ formId }
         action={ templ.URL(postUrl) } method="post"
-        hx-post={ postUrl } hx-target={ string(submitRenderTarget) } hx-target-error={ fmt.Sprintf("#%s-error-div", formId) }
+        hx-post={ postUrl } hx-target={ rendering.RefreshTargetSelector(submitRenderTarget) } hx-target-error={ fmt.Sprintf("#%s-error-div", formId) }
     >
     { children... }
     </form>

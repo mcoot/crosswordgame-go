@@ -57,7 +57,7 @@ func leaveLobbyForm(lobbyId lobbytypes.LobbyId) templ.Component {
 			}
 			return nil
 		})
-		templ_7745c5c3_Err = common.BaseForm(rendering.RefreshTargetPageContent, "leave-lobby-form", fmt.Sprintf("/lobby/%s/leave", lobbyId)).Render(templ.WithChildren(ctx, templ_7745c5c3_Var2), templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = common.BaseForm(rendering.RefreshTargetMain, "leave-lobby-form", fmt.Sprintf("/lobby/%s/leave", lobbyId)).Render(templ.WithChildren(ctx, templ_7745c5c3_Var2), templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -117,9 +117,9 @@ func lobbyBase(lobby *lobbytypes.Lobby, players []*playertypes.Player, viewingPl
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var6 string
-		templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(string(rendering.RefreshTargetPageContent))
+		templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(rendering.RefreshTargetSelector(rendering.RefreshTargetPageContent))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/api/webapi/template/pages/lobby.templ`, Line: 21, Col: 136}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/api/webapi/template/pages/lobby.templ`, Line: 21, Col: 161}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 		if templ_7745c5c3_Err != nil {

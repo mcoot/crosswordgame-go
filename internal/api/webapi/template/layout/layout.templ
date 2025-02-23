@@ -17,12 +17,10 @@ templ nav(currentPlayerLobby *lobbytypes.Lobby) {
     </nav>
 }
 
-templ mainDiv() {
-    <div hx-ext="response-targets,sse" id="main">
-        @nav(rendering.GetCurrentPlayerLobby(ctx))
-        <div id="page-content">
-            { children... }
-        </div>
+templ mainDivContents() {
+    @nav(rendering.GetCurrentPlayerLobby(ctx))
+    <div id="page-content">
+        { children... }
     </div>
 }
 
@@ -37,9 +35,12 @@ templ fullDocument() {
             <script src="/static/scripts/vendored/htmx.org-2.0.4.min.js"></script>
             <script src="/static/scripts/vendored/htmx-ext-response-targets-2.0.2.js"></script>
             <script src="/static/scripts/vendored/htmx-ext-sse-2.2.2.js"></script>
-            @mainDiv() {
-                { children... }
-            }
+            <div hx-ext="response-targets,sse" id="main">
+                @mainDivContents() {
+                    { children... }
+                }
+            </div>
+
         </body>
     </html>
 }
@@ -51,7 +52,7 @@ templ Layout() {
             { children... }
         }
     case rendering.RefreshTargetMain:
-        @mainDiv() {
+        @mainDivContents() {
             { children... }
         }
     default:
