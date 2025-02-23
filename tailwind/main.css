@@ -1,24 +1,62 @@
-html, body {
-    height: 100%;
-    margin: 0;
+@import "tailwindcss" source("..");
+@plugin "@tailwindcss/typography";
+
+@layer components {
+    .btn {
+        @apply inline-flex items-center px-4 py-2 bg-blue-600 text-white font-medium rounded-md
+        hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2
+        disabled:opacity-50 disabled:cursor-not-allowed transition-colors;
+    }
+    .btn-secondary {
+        @apply bg-gray-200 text-gray-700 hover:bg-gray-300 focus:ring-gray-500;
+    }
+
+    .cwg-board {
+        @apply inline-grid;
+        grid-template-columns: repeat(var(--board-size, 15), 1fr);
+        grid-template-rows: repeat(var(--board-size, 15), 1fr);
+        gap: 0;
+        aspect-ratio: 1 / 1;
+        border: 1px solid theme('colors.gray.300');
+    }
+
+    .cwg-board form {
+        @apply m-0 w-12 h-12;
+        aspect-ratio: 1 / 1;
+        border: 1px solid theme('colors.gray.200');
+    }
+
+    .cwg-board input[type="submit"] {
+        @apply w-full h-full p-0 m-0 rounded-none border-none
+        bg-white text-gray-800 text-xl font-medium
+        text-center
+        hover:bg-gray-100 hover:text-blue-600 focus:ring-inset
+        disabled:opacity-100 disabled:bg-white disabled:hover:bg-white disabled:hover:text-gray-800;
+        display: grid;
+        place-items: center;
+    }
 }
 
-body {
-    background-color: lightblue;
-}
+@layer base {
+    button,
+    input[type="submit"] {
+        @apply inline-flex items-center px-4 py-2 bg-blue-600 text-white font-medium rounded-md
+        hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2
+        disabled:opacity-50 disabled:cursor-not-allowed transition-colors;
+    }
 
-#main {
-    background-color: white;
-    max-width: 75%;
-    margin: 0 auto;
-    padding: 0 1rem;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-}
+    input[type="text"],
+    input[type="number"] {
+        @apply w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm
+        focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500
+        disabled:bg-gray-100 disabled:cursor-not-allowed;
+    }
 
-@media (max-width: 768px) {
-    #main {
-        max-width: 100%;
+    label {
+        @apply block text-sm font-medium text-gray-700 mb-1;
+    }
+
+    form {
+        @apply space-y-4;
     }
 }

@@ -25,29 +25,25 @@ templ cellFormContents(letter string, row int, column int, placementEnabled bool
         }/>
 }
 
+func cwgBoardStyle(board *gametypes.Board) string {
+    return fmt.Sprintf("--board-size: %d", board.Size())
+}
+
 templ Board(lobbyId lobbytypes.LobbyId, viewingPlayer *playertypes.Player, board *gametypes.Board, placementEnabled bool) {
     <h3>{ viewingPlayer.DisplayName }'s board</h3>
-    <div class="cwg-board">
-    <table>
-        <tbody>
-        for r, row := range board.Data {
-            <tr>
-            for c, cell := range row {
-                <td>
-                <form
-                    id={ fmt.Sprintf("placement-%d-%d-form", r, c) }
-                    action={ templ.URL(fmt.Sprintf("/lobby/%s/place", lobbyId)) } method="post"
-                    hx-post={ fmt.Sprintf("/lobby/%s/place", lobbyId) }
-                    hx-target={ rendering.RefreshTargetSelector(rendering.RefreshTargetPageContent) } hx-target-error="#board-error-div"
-                >
-                @cellFormContents(cell, r, c, placementEnabled)
-                </form>
-                </td>
-            }
-            </tr>
+    <div class="cwg-board" style={ cwgBoardStyle(board) }>
+    for r, row := range board.Data {
+        for c, cell := range row {
+            <form
+               id={ fmt.Sprintf("placement-%d-%d-form", r, c) }
+               action={ templ.URL(fmt.Sprintf("/lobby/%s/place", lobbyId)) } method="post"
+               hx-post={ fmt.Sprintf("/lobby/%s/place", lobbyId) }
+               hx-target={ rendering.RefreshTargetSelector(rendering.RefreshTargetPageContent) } hx-target-error="#board-error-div"
+           >
+           @cellFormContents(cell, r, c, placementEnabled)
+           </form>
         }
-        </tbody>
-    </table>
+    }
     <div id="board-error-div"></div>
     </div>
 }

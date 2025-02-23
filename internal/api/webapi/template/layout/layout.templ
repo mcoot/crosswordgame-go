@@ -8,12 +8,12 @@ import (
 )
 
 templ nav(currentPlayerLobby *lobbytypes.Lobby) {
-    <nav>
-        <a href="/index">Home</a>
+    <nav class="flex gap-4 mb-4 p-2 border-b border-gray-200">
+        <a href="/index" class="text-blue-600 hover:text-blue-800 font-medium">Home</a>
         if currentPlayerLobby != nil {
             <a href={templ.URL(fmt.Sprintf("/lobby/%s", currentPlayerLobby.Id))}>Lobby</a>
         }
-        <a href="/about">About</a>
+        <a href="/about" class="text-blue-600 hover:text-blue-800 font-medium">About</a>
     </nav>
 }
 
@@ -41,13 +41,18 @@ templ fullDocument() {
     <html lang="en">
         <head>
             <title>Crossword Game</title>
+            <meta name="viewport" content="width=device-width, initial-scale=1.0" />
             <link rel="stylesheet" href="/static/styles/main.css"/>
         </head>
-        <body>
+        <body class="bg-gray-100 min-h-screen">
             <script src="/static/scripts/vendored/htmx.org-2.0.4.min.js"></script>
             <script src="/static/scripts/vendored/htmx-ext-response-targets-2.0.2.js"></script>
             <script src="/static/scripts/vendored/htmx-ext-sse-2.2.2.js"></script>
-            <div hx-ext="response-targets,sse" id="main">
+            <div
+                hx-ext="response-targets,sse"
+                id="main"
+                class="bg-white mx-auto w-full md:max-w-3xl p-6 min-h-screen prose prose-slate max-w-none shadow-lg"
+            >
                 @mainDivContents() {
                     { children... }
                 }
