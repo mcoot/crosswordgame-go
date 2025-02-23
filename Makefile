@@ -14,6 +14,8 @@ test:
 lint:
 	@go run github.com/golangci/golangci-lint/cmd/golangci-lint run
 
+# Templ
+
 .PHONY: templ
 templ:
 	@go run github.com/a-h/templ/cmd/templ generate
@@ -21,6 +23,22 @@ templ:
 .PHONY: templ-watch
 templ-watch:
 	@go run github.com/a-h/templ/cmd/templ generate --watch --cmd "make run-api"
+
+# Tailwind
+
+.PHONY: tailwind-get-cli
+tailwind-get-cli:
+	./scripts/get-tailwind-cli.sh
+
+.PHONY: tailwind
+tailwind:
+	./bin/tailwindcss -i ./tailwind/main.css -o ./static/styles/main.css
+
+.PHONY: tailwind-watch
+tailwind-watch:
+	./bin/tailwindcss -i ./tailwind/main.css -o ./static/styles/main.css --watch
+
+# Docker
 
 .PHONY: docker-build-local
 docker-build-local:
