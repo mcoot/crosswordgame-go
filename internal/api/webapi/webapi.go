@@ -57,6 +57,7 @@ func (c *CrosswordGameWebAPI) AttachToRouter(router *mux.Router) error {
 	router.HandleFunc("/index", c.Index).Methods("GET")
 	router.HandleFunc("/about", c.About).Methods("GET")
 	router.HandleFunc("/login", c.Login).Methods("POST")
+	router.HandleFunc("/logout", c.Logout).Methods("POST")
 	router.HandleFunc("/host", c.StartLobbyAsHost).Methods("POST")
 	router.HandleFunc("/join", c.JoinLobby).Methods("POST")
 
@@ -75,25 +76,25 @@ func (c *CrosswordGameWebAPI) AttachToRouter(router *mux.Router) error {
 }
 
 func (c *CrosswordGameWebAPI) Index(w http.ResponseWriter, r *http.Request) {
-	session, err := commonutils.GetSessionFromContext(r.Context())
-	if err != nil {
-		utils.SendError(r, w, err)
-		return
-	}
+	//session, err := commonutils.GetSessionFromContext(r.Context())
+	//if err != nil {
+	//	utils.SendError(r, w, err)
+	//	return
+	//}
 
-	var indexContents []templ.Component
-	if session.IsLoggedIn() {
-		indexContents = append(indexContents, pages.LoggedInPlayerDetails(session.Player))
-		if session.IsInLobby() {
-			indexContents = append(indexContents, pages.InLobbyDetails(session.Lobby))
-		} else {
-			indexContents = append(indexContents, pages.NotInLobbyDetails())
-		}
-	} else {
-		indexContents = append(indexContents, pages.LoginForm())
-	}
+	//var indexContents []templ.Component
+	//if session.IsLoggedIn() {
+	//	indexContents = append(indexContents, pages.LoggedInPlayerDetails(session.Player))
+	//	if session.IsInLobby() {
+	//		indexContents = append(indexContents, pages.InLobbyDetails(session.Lobby))
+	//	} else {
+	//		indexContents = append(indexContents, pages.NotInLobbyDetails())
+	//	}
+	//} else {
+	//	indexContents = append(indexContents, pages.LoginForm())
+	//}
 
-	indexComponent := pages.Index(templ.Join(indexContents...))
+	indexComponent := pages.Index()
 	utils.PushUrl(w, "/index")
 	utils.SendResponse(r, w, indexComponent, 200)
 }
@@ -143,6 +144,33 @@ func (c *CrosswordGameWebAPI) Login(w http.ResponseWriter, r *http.Request) {
 	}
 
 	logger.Infow("player logged in", "player_id", playerId, "display_name", displayName)
+
+	utils.Redirect(w, r, "/index", 303)
+}
+
+func (c *CrosswordGameWebAPI) Logout(w http.ResponseWriter, r *http.Request) {
+	logger := logging.GetLogger(r.Context())
+	session, err := getLoggedInSession(r)
+	if err != nil {
+		utils.SendError(r, w, err)
+		return
+	}
+
+	if !session.IsLoggedIn() {
+		utils.SendError(r, w, &errors.InvalidActionError{
+			Action: "logout",
+			Reason: "not currently logged in",
+		})
+		return
+	}
+
+	err = c.sessionManager.ClearLoggedInPlayer(w, r)
+	if err != nil {
+		utils.SendError(r, w, err)
+		return
+	}
+
+	logger.Infow("player logged out", "player_id", session.Player.Username)
 
 	utils.Redirect(w, r, "/index", 303)
 }

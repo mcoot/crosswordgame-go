@@ -10,17 +10,30 @@ import (
     "github.com/mcoot/crosswordgame-go/internal/api/webapi/template/layout"
 )
 
-templ Index(contents templ.Component) {
+templ Index() {
     @layout.Layout() {
         <h1>Crossword Game</h1>
         <p>Welcome to the Crossword Game!</p>
         <div>
-            @contents
+            @indexContents()
         </div>
     }
 }
 
-templ LoginForm() {
+templ indexContents() {
+    if rendering.GetLoggedInPlayer(ctx) != nil {
+        @loggedInPlayerDetails(rendering.GetLoggedInPlayer(ctx))
+        if rendering.GetCurrentPlayerLobby(ctx) != nil {
+            @inLobbyDetails(rendering.GetCurrentPlayerLobby(ctx))
+        } else {
+            @notInLobbyDetails()
+        }
+    } else {
+        @loginForm()
+    }
+}
+
+templ loginForm() {
     @common.BaseForm(rendering.RefreshTargetMain, "login-form", "/login") {
         <label for="display_name">Display name:</label>
         <input type="text" name="display_name" placeholder="name" />
@@ -28,14 +41,17 @@ templ LoginForm() {
     }
 }
 
-templ LoggedInPlayerDetails(player *playertypes.Player) {
+templ loggedInPlayerDetails(player *playertypes.Player) {
     <div>
     <h2>Logged in as: { player.DisplayName }</h2>
     <p>Player ID: { string(player.Username) }</p>
+    @common.BaseForm(rendering.RefreshTargetMain, "logout-form", "/logout") {
+        <input type="submit" value="Logout" />
+    }
     </div>
 }
 
-templ NotInLobbyDetails() {
+templ notInLobbyDetails() {
     <h3>Host a lobby</h3>
     @common.BaseForm(rendering.RefreshTargetMain, "host-form", "/host") {
         <label for="lobby_name">Lobby name:</label>
@@ -50,7 +66,7 @@ templ NotInLobbyDetails() {
     }
 }
 
-templ InLobbyDetails(lobby *lobbytypes.Lobby) {
+templ inLobbyDetails(lobby *lobbytypes.Lobby) {
     <h3>Re-join lobby</h3>
     <p>You are currently in { lobby.Name } ({ string(lobby.Id) })</p>
     <a href={templ.URL(fmt.Sprintf("/lobby/%s", lobby.Id))}>Return to lobby</a>

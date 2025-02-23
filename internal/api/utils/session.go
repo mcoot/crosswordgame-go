@@ -110,6 +110,16 @@ func (sm *SessionManager) SaveLoggedInPlayer(
 	return sm.sessionStore.Save(r, w, session)
 }
 
+func (sm *SessionManager) ClearLoggedInPlayer(w http.ResponseWriter, r *http.Request) error {
+	session, err := sm.sessionStore.Get(r, "session")
+	if err != nil {
+		return err
+	}
+	delete(session.Values, "player_id")
+
+	return sm.sessionStore.Save(r, w, session)
+}
+
 func AddSessionToContext(ctx context.Context, session *Session) context.Context {
 	return context.WithValue(ctx, ContextKeySession, session)
 }
