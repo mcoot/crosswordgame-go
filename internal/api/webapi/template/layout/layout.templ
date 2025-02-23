@@ -17,11 +17,23 @@ templ nav(currentPlayerLobby *lobbytypes.Lobby) {
     </nav>
 }
 
+templ pageContent(currentPlayerLobby *lobbytypes.Lobby) {
+    if currentPlayerLobby != nil {
+        <div id="page-content" hx-ext="sse" sse-connect={fmt.Sprintf("/lobby/%s/sse/refresh", currentPlayerLobby.Id)}>
+            { children... }
+        </div>
+    } else {
+        <div id="page-content">
+            { children... }
+        </div>
+    }
+}
+
 templ mainDivContents() {
     @nav(rendering.GetCurrentPlayerLobby(ctx))
-    <div id="page-content">
+    @pageContent(rendering.GetCurrentPlayerLobby(ctx)) {
         { children... }
-    </div>
+    }
 }
 
 templ fullDocument() {
