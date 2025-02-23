@@ -45,12 +45,12 @@ templ fullDocument() {
 }
 
 templ Layout() {
-    switch rendering.GetRenderRefreshLevel(ctx) {
-    case rendering.BrowserLevelRefresh:
+    switch rendering.GetRenderContext(ctx).Target.RefreshTarget {
+    case rendering.RefreshTargetNone:
         @fullDocument() {
             { children... }
         }
-    case rendering.PageChangeRefresh:
+    case rendering.RefreshTargetMain:
         @mainDiv() {
             { children... }
         }

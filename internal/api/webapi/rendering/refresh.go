@@ -1,5 +1,7 @@
 package rendering
 
+import "slices"
+
 type RenderRefreshTarget string
 
 const (
@@ -8,16 +10,16 @@ const (
 	RefreshTargetPageContent RenderRefreshTarget = "#page-content"
 )
 
-type RenderRefreshLevel int
-
-const (
-	BrowserLevelRefresh RenderRefreshLevel = iota
-	PageChangeRefresh
-	ContentRefresh
-	TargetedRefresh
-)
+var pageOrContentTargets = []RenderRefreshTarget{
+	RefreshTargetNone,
+	RefreshTargetMain,
+	RefreshTargetPageContent,
+}
 
 type RenderTarget struct {
-	RefreshLevel  RenderRefreshLevel
 	RefreshTarget RenderRefreshTarget
+}
+
+func (r RenderTarget) IsPageOrContentRefresh() bool {
+	return slices.Contains(pageOrContentTargets, r.RefreshTarget)
 }

@@ -680,7 +680,6 @@ func renderContextMiddleware(next http.Handler) http.Handler {
 		htmx := rendering.GetHTMXProperties(r)
 		renderCtx := &rendering.RenderContext{
 			Target: rendering.RenderTarget{
-				RefreshLevel:  htmx.DetermineRefreshLevel(),
 				RefreshTarget: htmx.DetermineRefreshTarget(),
 			},
 			LoggedInPlayer:     session.Player,
