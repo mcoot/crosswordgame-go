@@ -76,25 +76,16 @@ func (c *CrosswordGameWebAPI) AttachToRouter(router *mux.Router) error {
 }
 
 func (c *CrosswordGameWebAPI) Index(w http.ResponseWriter, r *http.Request) {
-	//session, err := commonutils.GetSessionFromContext(r.Context())
-	//if err != nil {
-	//	utils.SendError(r, w, err)
-	//	return
-	//}
+	lobbyToJoin := lobbytypes.LobbyId(r.URL.Query().Get("join_lobby"))
+	if lobbyToJoin != "" {
+		_, err := c.lobbyManager.GetLobbyState(lobbyToJoin)
+		if err != nil {
+			utils.SendError(r, w, err)
+			return
+		}
+	}
 
-	//var indexContents []templ.Component
-	//if session.IsLoggedIn() {
-	//	indexContents = append(indexContents, pages.LoggedInPlayerDetails(session.Player))
-	//	if session.IsInLobby() {
-	//		indexContents = append(indexContents, pages.InLobbyDetails(session.Lobby))
-	//	} else {
-	//		indexContents = append(indexContents, pages.NotInLobbyDetails())
-	//	}
-	//} else {
-	//	indexContents = append(indexContents, pages.LoginForm())
-	//}
-
-	indexComponent := pages.Index()
+	indexComponent := pages.Index(lobbyToJoin)
 	utils.PushUrl(w, "/index")
 	utils.SendResponse(r, w, indexComponent, 200)
 }
@@ -117,6 +108,15 @@ func (c *CrosswordGameWebAPI) Login(w http.ResponseWriter, r *http.Request) {
 			Reason: "already logged in",
 		})
 		return
+	}
+
+	lobbyToJoin := lobbytypes.LobbyId(r.URL.Query().Get("join_lobby"))
+	if lobbyToJoin != "" {
+		_, err := c.lobbyManager.GetLobbyState(lobbyToJoin)
+		if err != nil {
+			utils.SendError(r, w, err)
+			return
+		}
 	}
 
 	err = r.ParseForm()
@@ -144,6 +144,18 @@ func (c *CrosswordGameWebAPI) Login(w http.ResponseWriter, r *http.Request) {
 	}
 
 	logger.Infow("player logged in", "player_id", playerId, "display_name", displayName)
+
+	if lobbyToJoin != "" {
+		err = c.lobbyManager.JoinPlayerToLobby(lobbyToJoin, playerId)
+		if err != nil {
+			utils.SendError(r, w, err)
+			return
+		}
+		logger.Infow("player joined lobby", "lobby_id", lobbyToJoin, "player", playerId)
+		c.sseServer.SendRefresh(lobbyToJoin, playerId)
+		utils.Redirect(w, r, fmt.Sprintf("/lobby/%s", lobbyToJoin), 303)
+		return
+	}
 
 	utils.Redirect(w, r, "/index", 303)
 }

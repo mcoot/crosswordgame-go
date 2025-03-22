@@ -18,7 +18,7 @@ import (
 	playertypes "github.com/mcoot/crosswordgame-go/internal/player/types"
 )
 
-func Index() templ.Component {
+func Index(lobbyToJoin lobbytypes.LobbyId) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -55,7 +55,7 @@ func Index() templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = indexContents().Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = indexContents(lobbyToJoin).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -73,7 +73,7 @@ func Index() templ.Component {
 	})
 }
 
-func indexContents() templ.Component {
+func indexContents(lobbyToJoin lobbytypes.LobbyId) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -115,7 +115,7 @@ func indexContents() templ.Component {
 				}
 			}
 		} else {
-			templ_7745c5c3_Err = loginForm().Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = loginForm(lobbyToJoin).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -124,7 +124,7 @@ func indexContents() templ.Component {
 	})
 }
 
-func loginForm() templ.Component {
+func loginForm(lobbyToJoin lobbytypes.LobbyId) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -145,6 +145,10 @@ func loginForm() templ.Component {
 			templ_7745c5c3_Var4 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
+		loginUri := "/login"
+		if lobbyToJoin != "" {
+			loginUri = fmt.Sprintf("/login?join_lobby=%s", lobbyToJoin)
+		}
 		templ_7745c5c3_Var5 := templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 			templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 			templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
@@ -163,7 +167,7 @@ func loginForm() templ.Component {
 			}
 			return nil
 		})
-		templ_7745c5c3_Err = common.BaseForm(rendering.RefreshTargetMain, "login-form", "/login").Render(templ.WithChildren(ctx, templ_7745c5c3_Var5), templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = common.BaseForm(rendering.RefreshTargetMain, "login-form", loginUri).Render(templ.WithChildren(ctx, templ_7745c5c3_Var5), templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -199,7 +203,7 @@ func loggedInPlayerDetails(player *playertypes.Player) templ.Component {
 		var templ_7745c5c3_Var7 string
 		templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(player.DisplayName)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/api/webapi/template/pages/index.templ`, Line: 46, Col: 42}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/api/webapi/template/pages/index.templ`, Line: 50, Col: 42}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 		if templ_7745c5c3_Err != nil {
@@ -212,7 +216,7 @@ func loggedInPlayerDetails(player *playertypes.Player) templ.Component {
 		var templ_7745c5c3_Var8 string
 		templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(string(player.Username))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/api/webapi/template/pages/index.templ`, Line: 47, Col: 43}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/api/webapi/template/pages/index.templ`, Line: 51, Col: 43}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 		if templ_7745c5c3_Err != nil {
@@ -357,7 +361,7 @@ func inLobbyDetails(lobby *lobbytypes.Lobby) templ.Component {
 		var templ_7745c5c3_Var14 string
 		templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs(lobby.Name)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/api/webapi/template/pages/index.templ`, Line: 71, Col: 40}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/api/webapi/template/pages/index.templ`, Line: 75, Col: 40}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
 		if templ_7745c5c3_Err != nil {
@@ -370,7 +374,7 @@ func inLobbyDetails(lobby *lobbytypes.Lobby) templ.Component {
 		var templ_7745c5c3_Var15 string
 		templ_7745c5c3_Var15, templ_7745c5c3_Err = templ.JoinStringErrs(string(lobby.Id))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/api/webapi/template/pages/index.templ`, Line: 71, Col: 62}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/api/webapi/template/pages/index.templ`, Line: 75, Col: 62}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var15))
 		if templ_7745c5c3_Err != nil {

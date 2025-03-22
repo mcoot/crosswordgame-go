@@ -10,17 +10,17 @@ import (
     "github.com/mcoot/crosswordgame-go/internal/api/webapi/template/layout"
 )
 
-templ Index() {
+templ Index(lobbyToJoin lobbytypes.LobbyId) {
     @layout.Layout() {
         <h1>Crossword Game</h1>
         <p>Welcome to the Crossword Game!</p>
         <div>
-            @indexContents()
+            @indexContents(lobbyToJoin)
         </div>
     }
 }
 
-templ indexContents() {
+templ indexContents(lobbyToJoin lobbytypes.LobbyId) {
     if rendering.GetLoggedInPlayer(ctx) != nil {
         @loggedInPlayerDetails(rendering.GetLoggedInPlayer(ctx))
         if rendering.GetCurrentPlayerLobby(ctx) != nil {
@@ -29,12 +29,16 @@ templ indexContents() {
             @notInLobbyDetails()
         }
     } else {
-        @loginForm()
+        @loginForm(lobbyToJoin)
     }
 }
 
-templ loginForm() {
-    @common.BaseForm(rendering.RefreshTargetMain, "login-form", "/login") {
+templ loginForm(lobbyToJoin lobbytypes.LobbyId) {
+    {{ loginUri := "/login" }}
+    if lobbyToJoin != "" {
+        {{ loginUri = fmt.Sprintf("/login?join_lobby=%s", lobbyToJoin) }}
+    }
+    @common.BaseForm(rendering.RefreshTargetMain, "login-form", loginUri) {
         <label for="display_name">Display name:</label>
         <input type="text" name="display_name" placeholder="name" />
         <input type="submit" value="Login" />
